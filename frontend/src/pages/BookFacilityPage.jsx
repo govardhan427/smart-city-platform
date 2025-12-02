@@ -4,6 +4,7 @@ import facilityService from '../services/facilityService';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import styles from './BookFacilityPage.module.css';
+import { toast } from 'react-toastify';
 
 const BookFacilityPage = () => {
   const { id } = useParams(); // Get facility ID from URL
@@ -56,14 +57,14 @@ const BookFacilityPage = () => {
       });
       // Redirect to a "My Bookings" page (we'll make this next)
       // For now, redirect to Home or alert
-      alert("Booking Successful!");
+      toast.success("Booking Successful!,Check your email");
       navigate('/facilities'); 
     } catch (err) {
       // Backend returns 400 if slot is taken
       if (err.response && err.response.data && err.response.data.error) {
         setBookingError(err.response.data.error);
       } else {
-        setBookingError("Booking failed. Please try again.");
+        toast.error("Booking failed. Please try again.");
       }
     }
   };

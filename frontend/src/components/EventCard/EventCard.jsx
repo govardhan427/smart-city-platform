@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import api from '../../services/api';
 import styles from './EventCard.module.css';
+import { toast } from 'react-toastify';
 
 const EventCard = ({ event, onDelete }) => {
   const { user } = useAuth();
@@ -65,13 +66,13 @@ const EventCard = ({ event, onDelete }) => {
       setIsRegistering(true);
       try {
         await api.post(`/events/${event.id}/register/`, { tickets: ticketCount });
-        alert("Registered Successfully!");
+        toast.success("🎫 Registration Successful! Check your email.");
         // You might want to refresh the page or disable the button here
       } catch (err) {
         if (err.response && err.response.status === 400) {
-          alert("You are already registered for this event.");
+          toast.error("You are already registered for this event.");
         } else {
-          alert("Registration failed. Please try again.");
+          toast.error("❌ Registration failed. Please try again.");
         }
       } finally {
         setIsRegistering(false);

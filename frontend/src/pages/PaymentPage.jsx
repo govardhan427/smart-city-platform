@@ -4,6 +4,7 @@ import api from '../services/api';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import styles from './PaymentPage.module.css';
+import { toast } from 'react-toastify';
 
 const PaymentPage = () => {
   const { state } = useLocation();
@@ -43,11 +44,11 @@ const PaymentPage = () => {
         }
         
         // Success! Redirect to Unified Bookings
-        alert("Payment Successful! Booking Confirmed.");
+        toast.success("💳 Payment Successful! Booking Confirmed.");
         navigate('/my-bookings'); 
         
       } catch (err) {
-        alert("Booking failed after payment. Please contact support.");
+        toast.error("Booking failed after payment. Please contact support.");
         console.error(err);
       } finally {
         setLoading(false);

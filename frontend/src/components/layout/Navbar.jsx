@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import styles from './Navbar.module.css';
+import { toast } from 'react-toastify';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -9,6 +10,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
+    toast.info("Logged out. See you soon!");
     navigate('/login'); // Redirect to login after logout
   };
 

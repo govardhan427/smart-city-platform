@@ -4,6 +4,7 @@ import transportService from '../services/transportService';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import styles from './BookFacilityPage.module.css'; // Reuse form styles
+import { toast } from 'react-toastify';
 
 const BookParkingPage = () => {
   const { id } = useParams();
@@ -24,13 +25,13 @@ const BookParkingPage = () => {
         vehicle_number: vehicle,
         start_time: startTime
       });
-      alert("Parking Spot Reserved!");
+      toast.success("Parking Spot Reserved!,Check your email");
       navigate('/parking');
     } catch (err) {
       if (err.response && err.response.data && err.response.data.error) {
         setError(err.response.data.error); // Show "Lot is Full" error
       } else {
-        setError("Booking failed.");
+        toast.error("Booking failed.");
       }
     } finally {
       setLoading(false);

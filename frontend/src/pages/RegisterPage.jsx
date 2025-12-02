@@ -6,6 +6,7 @@ import styles from './LoginPage.module.css'; // Reusing the login page styles
 // Import our new reusable components
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { toast } from 'react-toastify';
 
 const RegisterPage = () => {
   const [email, setEmail] = useState('');
@@ -38,7 +39,7 @@ const RegisterPage = () => {
     try {
       // 3. Call the register function from our AuthContext
       await register(email, password);
-      
+      toast.success("Registration successful! Welcome to the community.");
       // 4. On success, redirect to the homepage
       navigate('/');
     } catch (err) {
@@ -46,7 +47,7 @@ const RegisterPage = () => {
         // Handle specific backend email validation errors
         setError(err.response.data.email[0]); 
       } else {
-        setError('Registration failed. Please try again.');
+        toast.error('Registration failed. Please try again.');
       }
       setLoading(false);
     }

@@ -24,6 +24,9 @@ import HeroIntro from './components/layout/HeroIntro';
 import  EventsPage from './pages/EventsPage';
 import PaymentPage from './pages/PaymentPage';
 import { Analytics } from "@vercel/analytics/react"
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './assets/styles/toast.css';
 
 function App() {
   const [introFinished, setIntroFinished] = useState(false);
@@ -115,6 +118,22 @@ function App() {
           </Routes>
         </main>
         <Analytics />
+        <ToastContainer
+  position="top-right"
+  autoClose={3000}
+  hideProgressBar={false}
+  newestOnTop={true}
+  closeOnClick
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  theme="dark"
+  style={{
+    marginTop: "90px" // adjust depending on navbar height
+  }}
+/>
+
       </div>
     </AuthProvider>
   );

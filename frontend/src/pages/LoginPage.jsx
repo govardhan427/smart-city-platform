@@ -6,6 +6,7 @@ import styles from './LoginPage.module.css'; // For the container and form layou
 // Import our new reusable components
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import { toast } from 'react-toastify';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -20,7 +21,8 @@ const LoginPage = () => {
     e.preventDefault(); // Prevent default form browser submission
     
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      // setError('Please enter both email and password.');
+      toast.warn("Please enter both email and password.");
       return;
     }
 
@@ -30,14 +32,16 @@ const LoginPage = () => {
     try {
       // Call the login function from our AuthContext
       await login(email, password);
-      
+      toast.success("Login successful! Welcome back.");
       // On success, redirect to the homepage
       navigate('/');
     } catch (err) { // This block is now syntactically correct
       if (err.response && err.response.status === 401) {
-        setError('Invalid email or password.');
+        // setError('Invalid email or password.');
+        toast.error("Invalid credentials. Please try again.");
       } else {
-        setError('Login failed. Please try again.');
+        // setError('Login failed. Please try again.');
+        toast.error("Server error. Please try again later.");
       }
       setLoading(false);
     }

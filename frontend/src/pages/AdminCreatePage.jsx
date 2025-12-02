@@ -4,6 +4,7 @@ import api from '../services/api';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import styles from './AdminCreateEventPage.module.css'; // Reusing styles
+import { toast } from 'react-toastify';
 
 const AdminCreatePage = () => {
   const navigate = useNavigate();
@@ -70,7 +71,7 @@ const AdminCreatePage = () => {
         });
       }
       
-      alert(`${resourceType.toUpperCase()} Created Successfully!`);
+      toast.success(`${resourceType.toUpperCase()} Created Successfully!`);
       navigate('/');
     } catch (err) {
       console.error(err);

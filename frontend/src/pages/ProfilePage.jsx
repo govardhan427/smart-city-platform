@@ -4,6 +4,7 @@ import authService from '../services/authService';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import styles from './ProfilePage.module.css'; // We'll create this next
+import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
   const { user, logout } = useAuth(); // We can get basic info from context
@@ -23,8 +24,10 @@ const ProfilePage = () => {
     try {
       await authService.updateProfile({ first_name: firstName, last_name: lastName });
       setProfileMsg({ type: 'success', text: 'Profile updated!' });
+      toast.success('Profile updated!');
     } catch (err) {
       setProfileMsg({ type: 'error', text: 'Update failed.' });
+      toast.error('Update failed.');
     }
   };
 
@@ -33,10 +36,12 @@ const ProfilePage = () => {
     try {
       await authService.changePassword({ old_password: oldPassword, new_password: newPassword });
       setPassMsg({ type: 'success', text: 'Password changed!' });
+      toast.success('Password changed!');
       setOldPassword('');
       setNewPassword('');
     } catch (err) {
       setPassMsg({ type: 'error', text: 'Failed. Check old password.' });
+      toast.error('Failed. Check old password.');
     }
   };
 
