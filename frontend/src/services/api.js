@@ -1,31 +1,27 @@
 import axios from 'axios';
 
-// Create a new Axios instance with a custom config
+// --- CHANGE THIS BLOCK ---
+// If VITE_API_URL is set (like in Vercel), use it.
+// Otherwise, default to your LIVE Render Backend.
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-city-platform-rbv6.onrender.com/api';
+
 const api = axios.create({
-  // Point to our Django backend
-  baseURL: 'http://127.0.0.1:8000/api', 
+  baseURL: BASE_URL,
 });
 
-/*
-  This is a request interceptor. It's a function that
-  runs BEFORE each request is sent.
-*/
+// 2. AUTH INTERCEPTOR (Keeps you logged in)
 api.interceptors.request.use(
   (config) => {
-    // 1. Get the token from local storage
     const authData = localStorage.getItem('auth');
     if (authData) {
       const { access_token } = JSON.parse(authData);
-      
-      // 2. If the token exists, add it to the Authorization header
       if (access_token) {
         config.headers['Authorization'] = `Bearer ${access_token}`;
       }
     }
-    return config; // Continue with the request
+    return config;
   },
   (error) => {
-    // Handle any request errors
     return Promise.reject(error);
   }
 );
