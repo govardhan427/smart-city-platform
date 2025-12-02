@@ -13,7 +13,6 @@
 .paymentWrapper {
   display: grid;
   grid-template-columns: 1fr 1.5fr;
-  /* Glassmorphism */
   background: rgba(15, 15, 20, 0.7);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -23,8 +22,11 @@
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
 }
 
-@media (max-width: 768px) {
-  .paymentWrapper { grid-template-columns: 1fr; }
+/* Tablets & down */
+@media (max-width: 992px) {
+  .paymentWrapper {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Left Side: Order Summary --- */
@@ -44,9 +46,7 @@
   letter-spacing: 1px;
 }
 
-.itemDetails {
-  flex-grow: 1;
-}
+.itemDetails { flex-grow: 1; }
 
 .itemLabel {
   font-size: 0.9rem;
@@ -87,11 +87,10 @@
   width: 100%;
   max-width: 350px;
   height: 200px;
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 2rem;
   border-radius: 16px;
   background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
   border: 1px solid rgba(255,255,255,0.1);
-  position: relative;
   padding: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.5);
   display: flex;
@@ -99,9 +98,9 @@
   justify-content: space-between;
 }
 
-/* Simulating the Chip */
 .chip {
-  width: 50px; height: 35px;
+  width: 50px;
+  height: 35px;
   background: linear-gradient(135deg, #d4af37, #f7ef8a);
   border-radius: 6px;
   margin-bottom: 20px;
@@ -124,7 +123,7 @@
   text-transform: uppercase;
 }
 
-/* Form Styling */
+/* Form */
 .form {
   display: flex;
   flex-direction: column;
@@ -147,19 +146,43 @@
   margin-top: 1rem;
   justify-content: center;
 }
+
+/* --- MOBILE SUPER OPTIMIZATION --- */
 @media (max-width: 768px) {
-  .paymentWrapper {
-    grid-template-columns: 1fr;
+  .summarySection,
+  .formSection {
+    padding: 1.5rem; /* better for mobile hands */
   }
 
   .visualCard {
     width: 100%;
+    aspect-ratio: 16/9;
     height: auto;
-    aspect-ratio: 16/9; /* Keep ratio */
     padding: 15px;
   }
 
   .cardNumDisplay {
-    font-size: 1.1rem; /* Smaller text */
+    font-size: 1.1rem;
   }
+
+  .row {
+    grid-template-columns: 1fr; /* stack fields */
+  }
+
+  .totalPrice {
+    font-size: 2rem;
+  }
+
+  .pageTitle {
+    font-size: 1.3rem;
+  }
+}
+
+/* EXTRA SMALL DEVICES (below 480px) */
+@media (max-width: 480px) {
+  .visualCard { padding: 12px; }
+  .cardNumDisplay { font-size: 1rem; }
+  .pageTitle { font-size: 1.2rem; }
+  .summarySection { padding: 1.2rem; }
+  .formSection { padding: 1.2rem; }
 }

@@ -186,40 +186,59 @@
     margin-bottom: 2rem;
   }
 
-  /* Scrollable Tabs on Mobile */
+  /* --- Full Width Scrollable Tabs --- */
   .tabs {
-    justify-content: flex-start;
-    gap: 1rem;
-    padding-bottom: 1rem;
+    display: flex;
+    justify-content: flex-start; /* Align start for scrolling */
+    gap: 0.8rem;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+    
+    /* Ensure it takes full width */
+    width: 100vw; 
+    margin-left: -1rem; /* Counteract container padding */
+    padding-left: 1rem; /* Add left padding back */
+    padding-right: 1rem; /* Add right padding */
+    
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
 
   .tab {
-    padding: 0.6rem 1.2rem;
+    flex: 0 0 auto; /* Don't shrink, don't grow */
+    padding: 0.7rem 1.5rem;
     font-size: 0.95rem;
-    background: rgba(255, 255, 255, 0.05); /* Touch target background */
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 30px; /* Pill shape */
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .activeTab {
-    background: rgba(0, 255, 224, 0.1) !important;
-    border-radius: 20px;
+    background: rgba(0, 255, 224, 0.15) !important;
+    border-color: var(--primary-neon);
+    color: var(--primary-neon) !important;
+    text-shadow: none; /* Cleaner on mobile */
   }
   
   .activeTab::after {
-    display: none; /* Hide underline on mobile, use background */
+    display: none; /* Remove underline on mobile */
   }
 
-  /* Stack Card Content */
+  /* --- Stacked Cards --- */
   .card {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1.2rem;
   }
 
   .cardImageWrapper {
     width: 100%;
-    height: 150px; /* Big banner image on mobile */
+    height: 160px; /* Bigger banner image */
     margin-right: 0;
+    border-radius: var(--radius-sm);
   }
 
   .cardContent {
@@ -227,7 +246,9 @@
   }
 
   .statusBadge {
-    align-self: flex-start; /* Move badge to bottom-left */
+    align-self: flex-start;
     margin-top: 0.5rem;
+    font-size: 0.75rem;
+    padding: 4px 10px;
   }
 }
