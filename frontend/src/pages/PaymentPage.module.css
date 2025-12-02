@@ -1,0 +1,165 @@
+.container {
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.paymentWrapper {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  /* Glassmorphism */
+  background: rgba(15, 15, 20, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .paymentWrapper { grid-template-columns: 1fr; }
+}
+
+/* --- Left Side: Order Summary --- */
+.summarySection {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 2.5rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.pageTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+}
+
+.itemDetails {
+  flex-grow: 1;
+}
+
+.itemLabel {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.5rem;
+}
+
+.itemValue {
+  font-size: 1.2rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.totalLabel {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.totalPrice {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  color: var(--primary-neon);
+  font-weight: 700;
+  text-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
+}
+
+/* --- Right Side: Payment Form --- */
+.formSection {
+  padding: 2.5rem;
+}
+
+/* Visual Credit Card */
+.visualCard {
+  width: 100%;
+  max-width: 350px;
+  height: 200px;
+  margin: 0 auto 2rem auto;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Simulating the Chip */
+.chip {
+  width: 50px; height: 35px;
+  background: linear-gradient(135deg, #d4af37, #f7ef8a);
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.cardNumDisplay {
+  font-family: 'Courier New', monospace;
+  font-size: 1.4rem;
+  color: white;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 2px rgba(0,0,0,0.5);
+}
+
+.cardBottom {
+  display: flex;
+  justify-content: space-between;
+  color: rgba(255,255,255,0.7);
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+/* Form Styling */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+/* Secure Icon */
+.secureBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--success-neon);
+  margin-top: 1rem;
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  .paymentWrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .visualCard {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16/9; /* Keep ratio */
+    padding: 15px;
+  }
+
+  .cardNumDisplay {
+    font-size: 1.1rem; /* Smaller text */
+  }
+}

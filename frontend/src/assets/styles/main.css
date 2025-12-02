@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap');
+
+:root {
+  /* --- 🌌 NEO-CITY PALETTE --- */
+  --bg-dark: #050505;       /* Deepest Black */
+  --bg-panel: #0F0F12;      /* Card Background */
+  
+  /* Neon Accents */
+  --primary-neon: #00FFE0;  /* Cyan Glow */
+  --secondary-neon: #9B5CFF; /* Electric Purple */
+  --error-neon: #FF2E63;    /* Cyber Red */
+  --success-neon: #00FF9D;  /* Matrix Green */
+
+  /* Text */
+  --text-main: #FFFFFF;
+  --text-muted: #A0A0B0;
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --blur-amt: 12px;
+
+  /* Spacing & Radius */
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+html, body, * {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+/* --- RESET & BASE --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+  /* Subtle Grid Background for that "Tech" feel */
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* --- TYPOGRAPHY --- */
+h1, h2, h3 {
+  font-family: 'Orbitron', sans-serif; /* Futuristic Headers */
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #fff, var(--primary-neon));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+
+/* --- UTILITIES (Apply these classes anywhere) --- */
+
+/* 1. The Glass Card Effect */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--blur-amt));
+  -webkit-backdrop-filter: blur(var(--blur-amt));
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: var(--radius-lg);
+}
+
+/* 2. Neon Glow Hover */
+.neon-hover:hover {
+  box-shadow: 0 0 15px var(--primary-neon), inset 0 0 5px var(--primary-neon);
+  border-color: var(--primary-neon);
+}
+
+/* 3. Page Transition Animation */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-page {
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hidden { display: none; }
+.fade-in-content { animation: fadeIn 1s; }

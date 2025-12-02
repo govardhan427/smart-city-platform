@@ -1,0 +1,72 @@
+/* Container centers everything on the screen */
+.container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto; /* Centers horizontally */
+  padding: 2rem 1rem 4rem 1rem;
+  min-height: 80vh;
+  animation: fadeIn 0.8s ease-out;
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* The Neon Heading */
+.title {
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-top: 2rem; /* Ensure space from navbar */
+  margin-bottom: 0.5rem;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  
+  /* Neon Text Glow Effect */
+  text-shadow: 0 0 10px rgba(0, 255, 224, 0.4), 
+               0 0 20px rgba(0, 255, 224, 0.2);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 3.5rem; /* Space between subtitle and cards */
+  font-family: 'Inter', sans-serif;
+}
+
+/* The Responsive Grid */
+.grid {
+  display: grid;
+  /* Auto-fit columns: at least 320px wide */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem; /* Space between cards */
+  width: 100%;
+}
+
+/* State Messages */
+.loading, .empty, .error {
+  text-align: center;
+  margin-top: 5rem;
+  font-size: 1.2rem;
+  font-family: 'Inter', sans-serif;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+/* Mobile Adjustment */
+@media (max-width: 768px) {
+  .title {
+    font-size: 1.8rem;
+    margin-top: 1rem;
+  }
+  
+  .grid {
+    gap: 1.5rem;
+  }
+}

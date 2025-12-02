@@ -1,0 +1,103 @@
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.loading, .emptyState {
+  text-align: center;
+  color: var(--text-color-light);
+  margin-top: 3rem;
+  font-size: 1.2rem;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* --- Booking Card --- */
+.bookingCard {
+  display: flex;
+  align-items: center;
+  background: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-sm);
+  padding: 1rem;
+  transition: transform 0.2s;
+}
+
+.bookingCard:hover {
+  transform: translateX(5px);
+  box-shadow: var(--shadow-md);
+}
+
+.imageWrapper {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  margin-right: 1.5rem;
+  flex-shrink: 0;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  flex-grow: 1;
+}
+
+.facilityName {
+  font-size: 1.2rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-color);
+}
+
+.location {
+  font-size: 0.9rem;
+  color: var(--text-color-light);
+  margin-bottom: 0.75rem;
+}
+
+.dateTime {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.dateTag, .timeTag {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.dateTag {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+
+.timeTag {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.confirmedBadge {
+  background-color: var(--success-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}

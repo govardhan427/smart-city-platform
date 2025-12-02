@@ -1,0 +1,148 @@
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  animation: slideUpFade 0.6s ease-out;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: white;
+  text-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
+}
+
+/* --- Identity Card (Top Section) --- */
+.identityCard {
+  /* Glassmorphism */
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  
+  padding: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add a subtle glow bar on the left */
+.identityCard::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0; width: 4px;
+  background: var(--primary-neon);
+  box-shadow: 0 0 15px var(--primary-neon);
+}
+
+.avatar {
+  width: 80px; height: 80px;
+  background: var(--primary-neon);
+  color: #000;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; 
+  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  box-shadow: 0 0 20px rgba(0, 255, 224, 0.5);
+}
+
+.email { 
+  margin: 0 0 0.5rem 0; 
+  font-size: 1.5rem; 
+  color: white;
+  font-weight: 600;
+}
+
+/* Role Tags (Hollow Neon Style) */
+.tagAdmin { 
+  background: rgba(255, 46, 99, 0.1); 
+  color: var(--error-neon); 
+  border: 1px solid var(--error-neon);
+  padding: 6px 12px; 
+  border-radius: 4px; 
+  font-size: 0.8rem; 
+  font-weight: 700; 
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(255, 46, 99, 0.2);
+}
+
+.tagUser { 
+  background: rgba(0, 255, 157, 0.1); 
+  color: var(--success-neon); 
+  border: 1px solid var(--success-neon);
+  padding: 6px 12px; 
+  border-radius: 4px; 
+  font-size: 0.8rem; 
+  font-weight: 700; 
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+}
+
+/* --- Forms Grid --- */
+.grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 2rem; 
+}
+
+@media(max-width: 768px) { 
+  .grid { grid-template-columns: 1fr; }
+  .identityCard { flex-direction: column; text-align: center; }
+  .identityCard::before { width: 100%; height: 4px; bottom: auto; }
+}
+
+/* --- Form Cards --- */
+.card { 
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem; 
+  border-radius: var(--radius-lg); 
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.card h3 { 
+  margin-top: 0; 
+  margin-bottom: 1.5rem; 
+  color: white; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+  padding-bottom: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 1px;
+}
+
+.success { 
+  color: var(--success-neon); 
+  font-weight: bold; 
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+}
+
+.error { 
+  color: var(--error-neon); 
+  font-weight: bold; 
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(255, 46, 99, 0.3);
+}

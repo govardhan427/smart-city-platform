@@ -1,0 +1,154 @@
+.navbar {
+  width: 100%;
+  height: 80px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  
+  /* Glassmorphism */
+  background: rgba(5, 5, 5, 0.6); /* Semi-transparent black */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  
+  display: flex;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.navContainer {
+  width: 100%; max-width: 1400px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+.navBrand {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+  text-shadow: 0 0 10px rgba(0, 255, 224, 0.3);
+  display: flex; align-items: center; gap: 10px;
+}
+
+.navbarNav { display: flex; gap: 2rem; list-style: none; align-items: center; }
+
+.navLink {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navLink:hover {
+  color: var(--primary-neon);
+  text-shadow: 0 0 8px var(--primary-neon);
+}
+
+/* The active indicator line */
+.navLink::after {
+  content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 2px;
+  background: var(--primary-neon); transition: 0.3s;
+}
+.navLink:hover::after { width: 100%; }
+
+/* Special Admin Link */
+.navLinkAdmin {
+  color: var(--secondary-neon);
+  font-weight: 600;
+}
+.navLinkAdmin:hover { color: #b98aff; text-shadow: 0 0 8px #b98aff; }
+
+/* Logout Button */
+.navButton {
+  background: transparent;
+  border: 1px solid var(--error-neon);
+  color: var(--error-neon);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.navButton:hover {
+  background: var(--error-neon); color: white;
+  box-shadow: 0 0 15px var(--error-neon);
+}
+/* ... existing code ... */
+
+/* LOGO ANIMATION */
+.logoSvg {
+  height: 40px;
+  width: 40px;
+  /* Neon Cyan Color */
+  color: var(--primary-neon); 
+  /* Push text slightly to the right */
+  margin-right: 12px;
+  /* The Pulse Animation */
+  animation: logoGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes logoGlow {
+  0% { 
+    filter: drop-shadow(0 0 2px rgba(0, 255, 224, 0.5));
+    transform: scale(1);
+  }
+  100% { 
+    filter: drop-shadow(0 0 15px rgba(0, 255, 224, 1));
+    transform: scale(1.05); /* Subtle breathing effect */
+  }
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 768px) {
+    body {
+    overflow-x: hidden;
+  }
+
+  .navbar {
+    height: auto; /* Allow height to expand */
+    padding: 1rem 1rem;
+    position: relative; /* Stick to top but allow flow */
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  .navContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+    margin: 0;
+  }
+
+  .navBrand {
+    width: 100%;
+    justify-content: center; /* Center logo on mobile */
+    font-size: 1.2rem;
+  }
+
+  .navbarNav {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 1rem;
+    max-width: 100%;
+    overflow-x: auto; /* Enable horizontal scroll */
+    padding-bottom: 5px; /* Space for scrollbar (hidden) */
+    white-space: nowrap; /* Keep links on one line */
+    
+    /* Hide scrollbar visually but allow scrolling */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .navbarNav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .navLink, .navButton {
+    font-size: 0.9rem;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05); /* Add pill background for touch targets */
+    border-radius: 20px;
+  }
+}

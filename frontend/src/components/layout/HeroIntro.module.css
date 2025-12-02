@@ -1,0 +1,38 @@
+.container {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background-color: #000;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.content { text-align: center; position: relative; }
+
+.title {
+  font-size: 3rem; color: white; letter-spacing: 4px;
+  animation: textGlow 2s infinite alternate;
+}
+
+.subtitle {
+  color: #00FFE0; font-family: 'Inter', sans-serif; font-size: 0.9rem;
+  letter-spacing: 2px; margin-top: 10px;
+}
+
+/* The Glowing Scanner Line */
+.scanLine {
+  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+  background: #00FFE0;
+  box-shadow: 0 0 20px #00FFE0, 0 0 40px #00FFE0;
+  animation: scan 2s ease-in-out infinite;
+}
+
+@keyframes scan {
+  0% { top: -20%; opacity: 0; }
+  50% { opacity: 1; }
+  100% { top: 120%; opacity: 0; }
+}
+
+@keyframes textGlow {
+  from { text-shadow: 0 0 10px rgba(0, 255, 224, 0.2); }
+  to { text-shadow: 0 0 20px rgba(0, 255, 224, 0.8), 0 0 40px #00FFE0; }
+}

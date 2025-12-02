@@ -1,0 +1,35 @@
+.container {
+  max-width: 900px; /* A bit narrower than the homepage */
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  color: var(--text-color);
+  text-align: center;
+}
+
+.registrationList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* Space between each card */
+}
+
+/* --- Helper States --- */
+
+.loading,
+.error,
+.empty {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--text-color-light);
+  padding: 3rem 0;
+}
+
+.error {
+  color: var(--error-color);
+  font-weight: 500;
+}

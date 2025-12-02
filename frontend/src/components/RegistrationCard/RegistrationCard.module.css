@@ -1,0 +1,125 @@
+.card {
+  display: flex;
+  /* Glassmorphism */
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-lg);
+  
+  box-shadow: var(--glass-shadow);
+  overflow: hidden; /* Important for the badge */
+  transition: all 0.3s ease;
+  min-height: 160px;
+}
+
+.card:hover {
+  transform: translateX(5px);
+  border-color: var(--primary-neon);
+  box-shadow: 0 5px 25px -5px rgba(0, 255, 224, 0.15);
+}
+
+.cardBody {
+  padding: 1.5rem;
+  flex-grow: 1; /* Takes up most of the space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cardTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.cardLocation {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cardLocation::before {
+  content: "📍";
+  filter: grayscale(1);
+}
+
+.cardDateTime {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-neon);
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 10px rgba(0, 255, 224, 0.2);
+}
+
+/* --- QR ID Info --- */
+.qrInfo {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: inline-block; /* Makes it fit the content */
+}
+
+.qrLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-right: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.qrId {
+  font-family: 'Courier New', Courier, monospace; /* Tech font for ID */
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1px;
+}
+
+/* --- Status Badge (Vertical Strip on Right) --- */
+.statusBadge {
+  flex-shrink: 0; /* Prevents badge from shrinking */
+  writing-mode: vertical-rl; /* Writes text top-to-bottom */
+  transform: rotate(180deg); /* Flips it to read top-to-bottom */
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 1rem;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #000; /* Black text on neon background looks cool */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.statusTime {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: none;
+  display: block;
+  margin-top: 8px; /* Appears below text because of rotation */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Pending State (Grey/Orange) */
+.statusPending {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Checked In State (Neon Green) */
+.statusCheckedIn {
+  background: var(--success-neon);
+  color: black;
+  box-shadow: -10px 0 30px -5px rgba(0, 255, 157, 0.4);
+}
