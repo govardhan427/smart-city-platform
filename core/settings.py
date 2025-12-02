@@ -101,6 +101,7 @@ TEMPLATES = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://smart-city-platform-six.vercel.app",
 ]
 
 WSGI_APPLICATION = 'core.wsgi.application'
