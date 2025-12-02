@@ -9,6 +9,7 @@ import Button from '../components/common/Button';
 import { toast } from 'react-toastify';
 
 const RegisterPage = () => {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,17 +39,19 @@ const RegisterPage = () => {
 
     try {
       // 3. Call the register function from our AuthContext
-      await register(email, password);
+      await register(username,email, password);
       toast.success("Registration successful! Welcome to the community.");
       // 4. On success, redirect to the homepage
       navigate('/');
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.email) {
-        // Handle specific backend email validation errors
-        setError(err.response.data.email[0]); 
+      if (err.response?.data?.username) {
+        toast.error(`❌ ${err.response.data.username[0]}`);
+      } else if (err.response?.data?.email) {
+        toast.error(`❌ ${err.response.data.email[0]}`);
       } else {
-        toast.error('Registration failed. Please try again.');
+        toast.error("Registration failed.");
       }
+    }finally {
       setLoading(false);
     }
   };
@@ -61,6 +64,14 @@ const RegisterPage = () => {
         {/* Error Message */}
         {error && <div className={styles.errorBox}>{error}</div>}
 
+        <Input 
+          label="USERNAME"
+          id="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          placeholder="e.g. NeoUser2077"
+        />
         {/* Email Input (Using reusable component) */}
         <Input 
           label="Email Address"

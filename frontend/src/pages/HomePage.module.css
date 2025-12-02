@@ -16,7 +16,7 @@
 }
 
 .username {
-  font-size: 1.6rem;
+  font-size: 3rem;
   color: var(--primary-neon);
   text-transform: uppercase;
   text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
@@ -72,4 +72,7 @@
   .greeting {
     font-size: 2rem;
   }
+  .username {
+  font-size: 1.6rem;
+}
 }

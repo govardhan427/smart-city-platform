@@ -11,7 +11,7 @@ const HomePage = () => {
       {/* 1. WELCOME SECTION */}
       <div className={styles.hero}>
         <h1 className={styles.greeting}>
-          WELCOME, <span className={styles.username}>{user ? user.email.split('@')[0] : 'CITIZEN'}</span>
+          WELCOME, <span className={styles.username}>{user ? user.username : 'CITIZEN'}</span>
         </h1>
         <p className={styles.subtitle}>Smart City Operations & Access Hub</p>
       </div>

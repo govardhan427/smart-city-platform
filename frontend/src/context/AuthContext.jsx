@@ -53,15 +53,16 @@ export const AuthProvider = ({ children }) => {
     setAuthState(access, { 
       id: userData.user_id, 
       email: email, 
+      username: userData.username,
       is_staff: userData.is_staff,
       groups: userData.groups || [] // <-- Add this
     });
     // We don't use the refresh token in this 20% scope, but you would store it here
   };
 
-  const register = async (email, password) => {
+  const register = async (username,email, password) => {
     // This endpoint doesn't return a token, so we just log the user in after
-    await api.post('/users/register/', { email, password });
+    await api.post('/users/register/', { username,email, password });
     
     // After successful registration, log them in
     await login(email, password);
