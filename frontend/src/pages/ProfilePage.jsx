@@ -17,17 +17,23 @@ const ProfilePage = () => {
   const [username, setUsername] = useState(user.username || '');
   const [firstName, setFirstName] = useState(user.first_name || '');
   const [lastName, setLastName] = useState(user.last_name || '');
-  const [email, setEmail] = useState(user.email || ''); // Usually email shouldn't be changed easily, but we can allow it
+  const [email, setEmail] = useState(user.email || '');
 
   // Password Data States
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
+  // --- SAFE AVATAR HELPER ---
+  const getAvatarChar = () => {
+    if (username && username.length > 0) return username[0].toUpperCase();
+    if (email && email.length > 0) return email[0].toUpperCase();
+    return "U"; // Default 'U' for User
+  };
+
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // Send updated data to backend
       await authService.updateProfile({ 
         username, 
         first_name: firstName, 
@@ -36,9 +42,7 @@ const ProfilePage = () => {
       });
       
       toast.success("Profile updated successfully!");
-      setIsEditing(false); // Exit edit mode
-      // Note: Ideally, you should update the global 'user' context here too.
-      // For now, the backend is updated.
+      setIsEditing(false); 
     } catch (err) {
       console.error(err);
       toast.error("Failed to update profile. Username might be taken.");
@@ -69,7 +73,8 @@ const ProfilePage = () => {
         <div className={styles.identitySection}>
           <div className={styles.avatarWrapper}>
             <div className={styles.avatar}>
-              {username[0].toUpperCase()}
+              {/* USE THE HELPER FUNCTION HERE */}
+              {getAvatarChar()}
             </div>
             <div className={styles.roleBadge}>
               {user.is_staff ? "ADMINISTRATOR" : "CITIZEN"}
@@ -80,7 +85,7 @@ const ProfilePage = () => {
           <h2 className={styles.displayName}>
             {firstName} {lastName}
           </h2>
-          <p className={styles.displayHandle}>@{username}</p>
+          <p className={styles.displayHandle}>@{username || 'unknown'}</p>
         </div>
 
         {/* --- RIGHT COL: DETAILS & SETTINGS --- */}
@@ -95,7 +100,7 @@ const ProfilePage = () => {
                   className={styles.editBtn} 
                   onClick={() => setIsEditing(true)}
                 >
-                   Edit
+                  Edit
                 </button>
               )}
             </div>
@@ -128,7 +133,7 @@ const ProfilePage = () => {
                 </div>
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Username</span>
-                  <span className={styles.value}>@{username}</span>
+                  <span className={styles.value}>@{username || 'not set'}</span>
                 </div>
                 <div className={styles.infoRow}>
                   <span className={styles.label}>Email</span>

@@ -5,13 +5,29 @@ import styles from './HomePage.module.css';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const getDisplayName = () => {
+    if (!user) return 'CITIZEN';
+    
+    // 1. Try Username
+    if (user.username && user.username.length > 0) {
+        return user.username;
+    }
+    
+    // 2. Try Email (everything before @)
+    if (user.email) {
+        return user.email.split('@')[0];
+    }
+    
+    // 3. Fallback
+    return 'CITIZEN';
+  };
 
   return (
     <div className={styles.container}>
       {/* 1. WELCOME SECTION */}
       <div className={styles.hero}>
         <h1 className={styles.greeting}>
-          WELCOME, <span className={styles.username}>{user ? user.username : 'CITIZEN'}</span>
+          WELCOME, <span className={styles.username}>{getDisplayName()}</span>
         </h1>
         <p className={styles.subtitle}>Smart City Operations & Access Hub</p>
       </div>
