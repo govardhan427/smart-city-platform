@@ -5,7 +5,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'is_staff'] # Only include safe fields
+        fields = ['id','username', 'email', 'is_staff'] # Only include safe fields
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -13,13 +13,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['username','email', 'password']
         extra_kwargs = {
-            'email': {'required': True}
+            'email': {'required': True},
+            'username': {'required': True}
         }
 
     def create(self, validated_data):
         user = User.objects.create_user(
+            username=validated_data['username'],
             email=validated_data['email'],
             password=validated_data['password']
         )
@@ -30,6 +32,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token['email'] = user.email
+        token['username'] = user.username
         token['is_staff'] = user.is_staff
         token['groups'] = [g.name for g in user.groups.all()]
         return token
