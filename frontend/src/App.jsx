@@ -23,6 +23,7 @@ import AdminCreatePage from './pages/AdminCreatePage';
 import HeroIntro from './components/layout/HeroIntro';
 import  EventsPage from './pages/EventsPage';
 import PaymentPage from './pages/PaymentPage';
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
   const [introFinished, setIntroFinished] = useState(false);
@@ -113,6 +114,7 @@ function App() {
             /> */}
           </Routes>
         </main>
+        <Analytics />
       </div>
     </AuthProvider>
   );

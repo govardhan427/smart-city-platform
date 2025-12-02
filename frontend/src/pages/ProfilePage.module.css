@@ -16,19 +16,20 @@
   font-family: 'Orbitron', sans-serif;
   font-size: 2.5rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 4px;
   color: white;
   text-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
 }
 
 /* --- Identity Card (Top Section) --- */
 .identityCard {
-  /* Glassmorphism */
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
+  /* Enhanced Glassmorphism with Gradient */
+  background: linear-gradient(135deg, rgba(20, 20, 25, 0.8), rgba(20, 20, 25, 0.4));
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   
   padding: 2.5rem;
   display: flex;
@@ -39,59 +40,79 @@
   overflow: hidden;
 }
 
-/* Add a subtle glow bar on the left */
+/* Glowing Neon Bar on Left */
 .identityCard::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0; width: 4px;
   background: var(--primary-neon);
-  box-shadow: 0 0 15px var(--primary-neon);
+  box-shadow: 0 0 25px var(--primary-neon);
 }
 
+/* Avatar with Glow */
 .avatar {
-  width: 80px; height: 80px;
+  flex-shrink: 0; /* Prevent squishing */
+  width: 90px; 
+  height: 90px;
   background: var(--primary-neon);
-  color: #000;
+  color: #050505;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.5rem; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  font-size: 3rem; 
   font-weight: 800;
   font-family: 'Orbitron', sans-serif;
-  box-shadow: 0 0 20px rgba(0, 255, 224, 0.5);
+  box-shadow: 0 0 30px rgba(0, 255, 224, 0.4);
+  border: 4px solid rgba(0, 0, 0, 0.5);
+}
+
+/* User Info Container */
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0; /* Critical for text overflow */
+  gap: 0.3rem; /* Small gap between Name and Tag */
 }
 
 .email { 
-  margin: 0 0 0.5rem 0; 
-  font-size: 1.5rem; 
+  margin: 0;
+  font-size: 1.6rem; 
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  line-height: 1.2;
+  
+  /* FIX: Handle long emails */
+  word-break: break-all; /* Forces wrapping if too long */
+  overflow-wrap: anywhere;
 }
 
-/* Role Tags (Hollow Neon Style) */
-.tagAdmin { 
-  background: rgba(255, 46, 99, 0.1); 
-  color: var(--error-neon); 
-  border: 1px solid var(--error-neon);
-  padding: 6px 12px; 
+/* Role Tags */
+.tagAdmin, .tagUser {
+  padding: 4px 10px; 
   border-radius: 4px; 
-  font-size: 0.8rem; 
-  font-weight: 700; 
+  font-size: 0.75rem; 
+  font-weight: 800; 
   letter-spacing: 2px;
   text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(255, 46, 99, 0.2);
+  display: inline-block;
+  margin-top: 0.2rem; /* Tiny margin for visual separation */
+}
+
+.tagAdmin { 
+  background: rgba(255, 46, 99, 0.15); 
+  color: var(--error-neon); 
+  border: 1px solid var(--error-neon);
+  box-shadow: 0 0 15px rgba(255, 46, 99, 0.2);
 }
 
 .tagUser { 
-  background: rgba(0, 255, 157, 0.1); 
+  background: rgba(0, 255, 157, 0.15); 
   color: var(--success-neon); 
   border: 1px solid var(--success-neon);
-  padding: 6px 12px; 
-  border-radius: 4px; 
-  font-size: 0.8rem; 
-  font-weight: 700; 
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
 }
 
 /* --- Forms Grid --- */
@@ -103,24 +124,33 @@
 
 @media(max-width: 768px) { 
   .grid { grid-template-columns: 1fr; }
-  .identityCard { flex-direction: column; text-align: center; }
+  .identityCard { 
+    flex-direction: column; 
+    text-align: center; 
+    padding: 2rem 1.5rem;
+  }
+  .userInfo { align-items: center; }
   .identityCard::before { width: 100%; height: 4px; bottom: auto; }
 }
 
 /* --- Form Cards --- */
 .card { 
-  background: var(--glass-bg);
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2rem; 
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2.5rem; 
   border-radius: var(--radius-lg); 
-  box-shadow: var(--glass-shadow);
-  transition: transform 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .card:hover {
   transform: translateY(-5px);
   border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .card h3 { 
@@ -131,18 +161,27 @@
   padding-bottom: 1rem;
   font-family: 'Orbitron', sans-serif;
   letter-spacing: 1px;
+  font-size: 1.2rem;
 }
 
 .success { 
   color: var(--success-neon); 
   font-weight: bold; 
   margin-bottom: 1rem;
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.3);
+  background: rgba(0, 255, 157, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid var(--success-neon);
 }
 
 .error { 
   color: var(--error-neon); 
   font-weight: bold; 
   margin-bottom: 1rem;
-  text-shadow: 0 0 10px rgba(255, 46, 99, 0.3);
+  background: rgba(255, 46, 99, 0.1);
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+  border: 1px solid var(--error-neon);
 }
