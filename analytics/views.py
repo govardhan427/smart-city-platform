@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.db.models import Count, Q, Sum
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, AllowAny
 from django.shortcuts import get_object_or_404
 from events.models import Registration
 from facilities.models import Booking
@@ -243,7 +243,7 @@ class CityBotAIView(APIView):
     Accepts { "message": "..." }
     Returns { "response": "AI generated answer based on DB stats" }
     """
-    permission_classes = [permissions.AllowAny] # Or IsAuthenticated if you prefer
+    permission_classes = [AllowAny] # Or IsAuthenticated if you prefer
 
     def post(self, request):
         user_message = request.data.get('message', '')
