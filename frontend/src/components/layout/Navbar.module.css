@@ -4,6 +4,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  position: sticky;
   
   /* Glassmorphism */
   background: rgba(5, 5, 5, 0.6); /* Semi-transparent black */
@@ -106,11 +107,16 @@
   }
 
   .navbar {
-    height: auto; /* Allow height to expand */
-    padding: 1rem 1rem;
-    position: relative; /* Stick to top but allow flow */
-    box-sizing: border-box;
-    width: 100%;
+    height: auto;
+    padding: 1rem;
+    
+    /* FIX: Change from relative to sticky so it stays at the top */
+    position: sticky; 
+    top: 0;
+    
+    /* Ensure background is solid enough to hide content behind it */
+    background: rgba(5, 5, 5, 0.95); 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .navContainer {

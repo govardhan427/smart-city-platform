@@ -1,29 +1,37 @@
 .tickerContainer {
   width: 100%;
-  background: rgba(255, 46, 99, 0.15); /* Red tint background */
+  height: 40px;
+  
+  /* Desktop Stickiness (Below 80px Nav) */
+  position: sticky;
+  top: 80px; 
+  z-index: 900;
+  
+  /* Styling */
+  background: rgba(10, 10, 15, 0.95);
   border-bottom: 1px solid var(--error-neon);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   display: flex;
   align-items: center;
-  height: 40px;
   overflow: hidden;
-  position: relative;
-  z-index: 90;
+  transition: top 0.3s ease; 
 }
 
 .label {
   background: var(--error-neon);
   color: white;
-  font-weight: bold;
-  padding: 0 15px;
+  font-weight: 800;
+  padding: 0 16px;
   height: 100%;
   display: flex;
   align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   letter-spacing: 1px;
   z-index: 2;
-  box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+  box-shadow: 5px 0 20px rgba(0,0,0,0.6);
   white-space: nowrap;
-  flex-shrink: 0; /* Prevent label from shrinking */
+  flex-shrink: 0;
+  font-family: 'Orbitron', sans-serif;
 }
 
 .scrollWrapper {
@@ -33,23 +41,25 @@
   height: 100%;
   display: flex;
   align-items: center;
-  /* Mask the edges so text fades in/out smoothly */
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  
+  /* Fade effect on the edges */
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
 }
 
 .scrollingText {
   display: inline-block;
   white-space: nowrap;
   color: white;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Inter', sans-serif; /* Cleaner font for reading */
+  font-weight: 500;
   font-size: 0.9rem;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-shadow: 0 0 5px rgba(255, 46, 99, 0.5);
   
   /* The Scrolling Animation */
   padding-left: 100%;
-  animation: scrollLeft 20s linear infinite;
+  animation: scrollLeft 25s linear infinite;
 }
 
 @keyframes scrollLeft {
@@ -58,23 +68,26 @@
 }
 
 /* --- MOBILE OPTIMIZATION --- */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .tickerContainer {
-    height: 36px; /* Slightly shorter on mobile */
+    height: 34px; 
+    
+    /* FIX: Adjust top position for Mobile
+       On mobile, the Navbar stacks (Logo + Scrollable Links), 
+       so it is taller (approx 120px). We set top to match that. */
+    top: 135px; 
+    
+    z-index: 899; /* Ensure it stays under the navbar if they overlap */
   }
 
   .label {
     padding: 0 10px;
-    font-size: 0.7rem; /* Smaller label text */
+    font-size: 0.55rem; 
     letter-spacing: 0.5px;
   }
 
   .scrollingText {
-    font-size: 0.8rem; /* Smaller scrolling text */
-    animation: scrollLeft 15s linear infinite; /* Faster scroll for smaller width */
+    font-size: 0.8rem;
+    animation: scrollLeft 15s linear infinite; 
   }
-  
-  /* Optional: If label is too long, replace text with Icon via CSS? 
-     Ideally, keep it short in JSX ("ALERT" instead of "CITY UPDATE") 
-  */
 }

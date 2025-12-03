@@ -29,6 +29,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './assets/styles/toast.css';
 import IdleMonitor from './components/common/IdleMonitor';
 import CityBot from './components/common/CityBot';
+import NewsTicker from './components/common/NewsTicker';
 
 function App() {
   const [introFinished, setIntroFinished] = useState(false);
@@ -38,6 +39,7 @@ function App() {
       <div className={`App ${introFinished ? 'fade-in-content' : 'hidden'}`}>
         <IdleMonitor />
         <Navbar />
+        <NewsTicker />
         <main style={{ padding: '2rem' }} className="animate-page">
           <Routes>
             <Route path="/" element={<HomePage />} />

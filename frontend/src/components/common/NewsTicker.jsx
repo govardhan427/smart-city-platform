@@ -23,7 +23,7 @@ const NewsTicker = () => {
 
   return (
     <div className={styles.tickerContainer}>
-      <div className={styles.label}>📢 CITY UPDATE</div>
+      <div className={styles.label}>💠 CITY UPDATES</div>
       <div className={styles.scrollWrapper}>
         <div className={styles.scrollingText}>
           {message} &nbsp; • &nbsp; {message} &nbsp; • &nbsp; {message}
