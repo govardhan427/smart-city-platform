@@ -325,6 +325,10 @@ class AnnouncementView(APIView):
     GET: Returns the latest active announcement.
     POST: Creates a new announcement (Admin only).
     """
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [IsAdminUser()] # Lock POST to Admins
+        return [AllowAny()]        # Open GET to Everyone
     def get(self, request):
         # Get the newest active message
         announcement = Announcement.objects.filter(is_active=True).order_by('-created_at').first()
@@ -333,9 +337,6 @@ class AnnouncementView(APIView):
         return Response({"message": None})
 
     def post(self, request):
-        if not request.user.is_staff:
-            return Response({"error": "Unauthorized"}, status=403)
-            
         serializer = AnnouncementSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
