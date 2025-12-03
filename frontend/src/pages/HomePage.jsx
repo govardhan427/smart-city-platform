@@ -2,6 +2,7 @@ import React from 'react';
 import useAuth from '../hooks/useAuth';
 import DashboardCard from '../components/DashboardCard/DashboardCard';
 import styles from './HomePage.module.css';
+import NewsTicker from '../components/common/NewsTicker';
 
 const HomePage = () => {
   const { user } = useAuth();
@@ -24,6 +25,9 @@ const HomePage = () => {
 
   return (
     <div className={styles.container}>
+      <div style={{ marginBottom: '2rem' }}>
+        <NewsTicker />
+      </div>
       {/* 1. WELCOME SECTION */}
       <div className={styles.hero}>
         <h1 className={styles.greeting}>

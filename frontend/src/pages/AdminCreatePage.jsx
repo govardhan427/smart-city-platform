@@ -8,13 +8,13 @@ import { toast } from 'react-toastify';
 
 const AdminCreatePage = () => {
   const navigate = useNavigate();
-  const [resourceType, setResourceType] = useState('event'); // 'event', 'facility', 'parking'
+  const [resourceType, setResourceType] = useState('event'); // event, facility, parking, announcement
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Unified Form State
   const [formData, setFormData] = useState({
-    // Shared Fields
+    // Shared / Misc
     location: '', image_url: '', google_maps_url: '', price: '',
     
     // Event Fields
@@ -65,9 +65,14 @@ const AdminCreatePage = () => {
           name: formData.name,
           location: formData.location,
           total_capacity: formData.capacity,
-          rate_per_hour: formData.rate_per_hour, // Used as price for parking
+          rate_per_hour: formData.rate_per_hour,
           image_url: formData.image_url,
           google_maps_url: formData.google_maps_url
+        });
+      }
+      else if (resourceType === 'announcement') {
+        await api.post('/analytics/announcement/', {
+          message: formData.description // Using description field for message
         });
       }
       
@@ -76,6 +81,7 @@ const AdminCreatePage = () => {
     } catch (err) {
       console.error(err);
       setError('Failed to create resource. Please check inputs.');
+      toast.error("Failed to create resource.");
     } finally {
       setLoading(false);
     }
@@ -85,9 +91,9 @@ const AdminCreatePage = () => {
     <div className={styles.container}>
       <h1 className={styles.title}>Create New Resource</h1>
       
-      {/* 1. Resource Type Selector (Updated with CSS Classes) */}
+      {/* 1. Resource Type Selector */}
       <div className={styles.toggleContainer}>
-        {['event', 'facility', 'parking'].map(type => (
+        {['event', 'facility', 'parking', 'announcement'].map(type => (
           <button
             key={type}
             type="button"
@@ -154,6 +160,26 @@ const AdminCreatePage = () => {
             </div>
             <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://..." />
             <Input label="Google Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} placeholder="https://maps.google.com/..." />
+          </>
+        )}
+
+        {/* 4. ANNOUNCEMENT FORM (NEW) */}
+        {resourceType === 'announcement' && (
+          <>
+            <div className={styles.inputGroup}>
+              <label className={styles.label}>Broadcast Message</label>
+              <textarea 
+                id="description" 
+                className={styles.textarea} 
+                value={formData.description} 
+                onChange={handleChange} 
+                rows="3"
+                placeholder="e.g. ⚠️ Heavy Rain Alert: Central Parking Closed today."
+                maxLength="100"
+                required
+              />
+              <span style={{fontSize: '0.8rem', color: '#888', marginTop: '5px'}}>Max 100 characters. Shows on Home Page ticker.</span>
+            </div>
           </>
         )}
 

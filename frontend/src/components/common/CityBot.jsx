@@ -1,65 +1,97 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sendChatToAI } from '../../services/chatService'; // 1. Import new service
-import useAuth from '../../hooks/useAuth'; // 2. Import Auth Hook
+import { sendChatToAI } from '../../services/chatService';
+import useAuth from '../../hooks/useAuth';
 import styles from './CityBot.module.css';
 
 const CityBot = () => {
-  const { user } = useAuth(); // Get user details
+  const { user } = useAuth();
   const navigate = useNavigate();
-  
-  // Determine the name to show
   const displayName = user?.username ? user.username : "Citizen";
 
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  
+  // --- NEW: LISTENING STATE ---
+  const [isListening, setIsListening] = useState(false);
+  
   const messagesEndRef = useRef(null);
 
-  // 3. Initialize with Personalized Greeting
+  // Initialize Speech Recognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
   const [messages, setMessages] = useState([
     { 
       id: 1, 
-      text: `Hello ${displayName}! I am CityBot. I have access to real-time city data. How can I help?`, 
+      text: `Hello ${displayName}! I am CityBot. How can I help?`, 
       sender: 'bot' 
     }
   ]);
 
-  // Reset greeting if user changes (e.g., login/logout)
+  // Reset greeting if user changes
   useEffect(() => {
     const newName = user?.username || "Citizen";
-    setMessages([
-      { 
-        id: Date.now(), 
-        text: `Hello ${newName}! I am CityBot. I have access to real-time city data. How can I help?`, 
-        sender: 'bot' 
-      }
-    ]);
-  }, [user]); // Runs whenever 'user' changes
+    setMessages([{ id: Date.now(), text: `Hello ${newName}! I am CityBot. How can I help?`, sender: 'bot' }]);
+  }, [user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isOpen]); // Also scroll when opened
+  }, [messages, isOpen]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  // --- NEW: VOICE HANDLER ---
+  const handleMicClick = () => {
+    if (!recognition) {
+      alert("Voice input not supported in this browser.");
+      return;
+    }
 
-    const userMsg = { id: Date.now(), text: input, sender: 'user' };
+    if (isListening) {
+      recognition.stop();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      recognition.start();
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        setIsListening(false);
+        // Optional: Auto-send after speaking
+        setTimeout(() => handleSend(null, transcript), 500); 
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech error", event.error);
+        setIsListening(false);
+      };
+      
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+    }
+  };
+
+  const handleSend = async (e, textOverride = null) => {
+    if (e) e.preventDefault();
+    const textToSend = textOverride || input;
+    
+    if (!textToSend.trim()) return;
+
+    const userMsg = { id: Date.now(), text: textToSend, sender: 'user' };
     setMessages(prev => [...prev, userMsg]);
     
-    const query = input;
+    const query = textToSend;
     setInput('');
     setIsTyping(true);
 
     try {
-      // 4. Use the new service function
       const response = await sendChatToAI(query);
       const aiText = response.data.response;
 
       setMessages(prev => [...prev, { id: Date.now() + 1, text: aiText, sender: 'bot' }]);
 
-      // Smart Navigation Logic
       const lowerText = aiText.toLowerCase();
       if (lowerText.includes('opening events') || lowerText.includes('events page')) {
          navigate('/events');
@@ -70,8 +102,7 @@ const CityBot = () => {
       }
 
     } catch (error) {
-      console.error(error);
-      setMessages(prev => [...prev, { id: Date.now() + 1, text: "My connection to the City Network is weak. Please try again.", sender: 'bot' }]);
+      setMessages(prev => [...prev, { id: Date.now() + 1, text: "Connection Weak. Try again.", sender: 'bot' }]);
     } finally {
       setIsTyping(false);
     }
@@ -95,14 +126,25 @@ const CityBot = () => {
                 {msg.text}
               </div>
             ))}
-            {isTyping && <div className={styles.typingIndicator}>Analysing data...</div>}
+            {isTyping && <div className={styles.typingIndicator}>Analysing...</div>}
             <div ref={messagesEndRef} />
           </div>
 
           <form onSubmit={handleSend} className={styles.footer}>
+            
+            {/* --- NEW: MIC BUTTON --- */}
+            <button 
+                type="button" 
+                className={`${styles.micBtn} ${isListening ? styles.micActive : ''}`}
+                onClick={handleMicClick}
+                title="Speak"
+            >
+                {isListening ? '🛑' : '🎙️'}
+            </button>
+
             <input 
               type="text" 
-              placeholder="Ask about events, parking..." 
+              placeholder="Type or Speak..." 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className={styles.input}
@@ -113,7 +155,8 @@ const CityBot = () => {
       )}
 
       <button className={`${styles.fab} ${isOpen ? styles.hidden : ''}`} onClick={() => setIsOpen(true)}>
-        A.I
+        <span className={styles.statusDot}></span>
+        A.I.
       </button>
     </div>
   );

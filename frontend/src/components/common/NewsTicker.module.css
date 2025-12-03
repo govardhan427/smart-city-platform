@@ -1,0 +1,80 @@
+.tickerContainer {
+  width: 100%;
+  background: rgba(255, 46, 99, 0.15); /* Red tint background */
+  border-bottom: 1px solid var(--error-neon);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  overflow: hidden;
+  position: relative;
+  z-index: 90;
+}
+
+.label {
+  background: var(--error-neon);
+  color: white;
+  font-weight: bold;
+  padding: 0 15px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  z-index: 2;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+  white-space: nowrap;
+  flex-shrink: 0; /* Prevent label from shrinking */
+}
+
+.scrollWrapper {
+  flex-grow: 1;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  /* Mask the edges so text fades in/out smoothly */
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.scrollingText {
+  display: inline-block;
+  white-space: nowrap;
+  color: white;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px rgba(255, 46, 99, 0.5);
+  
+  /* The Scrolling Animation */
+  padding-left: 100%;
+  animation: scrollLeft 20s linear infinite;
+}
+
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-100%); }
+}
+
+/* --- MOBILE OPTIMIZATION --- */
+@media (max-width: 600px) {
+  .tickerContainer {
+    height: 36px; /* Slightly shorter on mobile */
+  }
+
+  .label {
+    padding: 0 10px;
+    font-size: 0.7rem; /* Smaller label text */
+    letter-spacing: 0.5px;
+  }
+
+  .scrollingText {
+    font-size: 0.8rem; /* Smaller scrolling text */
+    animation: scrollLeft 15s linear infinite; /* Faster scroll for smaller width */
+  }
+  
+  /* Optional: If label is too long, replace text with Icon via CSS? 
+     Ideally, keep it short in JSX ("ALERT" instead of "CITY UPDATE") 
+  */
+}

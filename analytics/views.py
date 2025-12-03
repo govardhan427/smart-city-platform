@@ -15,6 +15,9 @@ from facilities.models import Booking
 from transport.models import ParkingBooking
 import csv
 from django.http import HttpResponse
+from .models import Announcement
+from .serializers import AnnouncementSerializer
+from rest_framework import generics
 
 # Import models
 from events.models import Event, Registration
@@ -316,3 +319,25 @@ class CityBotAIView(APIView):
                 print("-------------------------------\n")
 
             return Response({"response": "I am having trouble connecting to the City Network (AI Error). Please try again."}, status=500)
+        
+class AnnouncementView(APIView):
+    """
+    GET: Returns the latest active announcement.
+    POST: Creates a new announcement (Admin only).
+    """
+    def get(self, request):
+        # Get the newest active message
+        announcement = Announcement.objects.filter(is_active=True).order_by('-created_at').first()
+        if announcement:
+            return Response({"message": announcement.message})
+        return Response({"message": None})
+
+    def post(self, request):
+        if not request.user.is_staff:
+            return Response({"error": "Unauthorized"}, status=403)
+            
+        serializer = AnnouncementSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
