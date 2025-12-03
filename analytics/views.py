@@ -243,14 +243,12 @@ class CityBotAIView(APIView):
     Accepts { "message": "..." }
     Returns { "response": "AI generated answer based on DB stats" }
     """
-    permission_classes = [AllowAny] # Or IsAuthenticated if you prefer
+    permission_classes = [AllowAny] 
 
     def post(self, request):
         user_message = request.data.get('message', '')
         
-        # 1. GATHER REAL-TIME DATA (Reuse logic from DashboardStats)
-        # We need to give the AI context about the city status.
-        
+        # 1. GATHER REAL-TIME DATA 
         total_users = User.objects.count()
         
         # Get Busiest Parking
@@ -264,7 +262,7 @@ class CityBotAIView(APIView):
         # Get Facility Status
         total_facilities = Facility.objects.count()
 
-        # 2. CONSTRUCT SYSTEM PROMPT (The "Brain" Context)
+        # 2. CONSTRUCT SYSTEM PROMPT 
         system_context = f"""
         You are CityBot, the AI assistant for the 'Smart Access Hub' city platform.
         
@@ -283,17 +281,38 @@ class CityBotAIView(APIView):
 
         # 3. CALL GEMINI API
         try:
-            genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-            model = genai.GenerativeModel('gemini-pro')
+            api_key = os.environ.get('GEMINI_API_KEY')
+            if not api_key:
+                return Response({"response": "Configuration Error: GEMINI_API_KEY not found."}, status=500)
+
+            genai.configure(api_key=api_key)
+            
+            # --- FIX: Use 'gemini-1.5-flash' instead of 'gemini-pro' ---
+            model = genai.GenerativeModel('gemini-1.5-flash')
             
             # Combine context + user question
             full_prompt = f"{system_context}\n\nUser Question: {user_message}"
             
             response = model.generate_content(full_prompt)
-            ai_reply = response.text
             
-            return Response({"response": ai_reply})
+            if response.text:
+                return Response({"response": response.text})
+            else:
+                return Response({"response": "I'm thinking, but I have no words right now."})
 
         except Exception as e:
+            # Enhanced Error Logging
             print(f"AI Error: {e}")
-            return Response({"response": "I am having trouble connecting to the City Network. Please try again."}, status=500)
+            
+            # If the model is not found, list available ones in the terminal to help debug
+            if "404" in str(e) or "not found" in str(e):
+                print("\n--- DEBUG: Available Models ---")
+                try:
+                    for m in genai.list_models():
+                        if 'generateContent' in m.supported_generation_methods:
+                            print(m.name)
+                except Exception as list_err:
+                    print(f"Could not list models: {list_err}")
+                print("-------------------------------\n")
+
+            return Response({"response": "I am having trouble connecting to the City Network (AI Error). Please try again."}, status=500)
