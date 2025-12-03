@@ -20,6 +20,9 @@ from django.http import HttpResponse
 from events.models import Event, Registration
 from facilities.models import Facility, Booking
 from transport.models import ParkingLot, ParkingBooking
+import google.generativeai as genai
+import os
+from django.conf import settings
 
 User = get_user_model()
 
@@ -235,3 +238,62 @@ class ExportFinancialsCSV(APIView):
              writer.writerow(['Facility', f.facility.name, f.user.email, f.booking_date, f.facility.price])
 
         return response
+class CityBotAIView(APIView):
+    """
+    Accepts { "message": "..." }
+    Returns { "response": "AI generated answer based on DB stats" }
+    """
+    permission_classes = [permissions.AllowAny] # Or IsAuthenticated if you prefer
+
+    def post(self, request):
+        user_message = request.data.get('message', '')
+        
+        # 1. GATHER REAL-TIME DATA (Reuse logic from DashboardStats)
+        # We need to give the AI context about the city status.
+        
+        total_users = User.objects.count()
+        
+        # Get Busiest Parking
+        busy_parking = ParkingLot.objects.annotate(usage=Count('bookings')).order_by('-usage').first()
+        busy_parking_name = busy_parking.name if busy_parking else "None"
+        
+        # Get Most Popular Event
+        pop_event = Event.objects.annotate(attendees=Count('registrations')).order_by('-attendees').first()
+        pop_event_name = pop_event.title if pop_event else "None"
+        
+        # Get Facility Status
+        total_facilities = Facility.objects.count()
+
+        # 2. CONSTRUCT SYSTEM PROMPT (The "Brain" Context)
+        system_context = f"""
+        You are CityBot, the AI assistant for the 'Smart Access Hub' city platform.
+        
+        Here is the REAL-TIME Live Data from the database:
+        - Total Citizens Registered: {total_users}
+        - Most Popular Event: {pop_event_name}
+        - Busiest Parking Lot: {busy_parking_name}
+        - Total Facilities Available: {total_facilities}
+        
+        Your Goal: Answer the user's question simply and helpfully using this data.
+        - If they ask about "busiest" or "famous", use the data above.
+        - If they ask for navigation, tell them which page to go to (Events, Parking, Facilities).
+        - Keep answers short (under 2 sentences).
+        - Be friendly and futuristic.
+        """
+
+        # 3. CALL GEMINI API
+        try:
+            genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
+            model = genai.GenerativeModel('gemini-pro')
+            
+            # Combine context + user question
+            full_prompt = f"{system_context}\n\nUser Question: {user_message}"
+            
+            response = model.generate_content(full_prompt)
+            ai_reply = response.text
+            
+            return Response({"response": ai_reply})
+
+        except Exception as e:
+            print(f"AI Error: {e}")
+            return Response({"response": "I am having trouble connecting to the City Network. Please try again."}, status=500)
