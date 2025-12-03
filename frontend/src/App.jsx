@@ -27,6 +27,8 @@ import { Analytics } from "@vercel/analytics/react"
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './assets/styles/toast.css';
+import IdleMonitor from './components/common/IdleMonitor';
+import CityBot from './components/common/CityBot';
 
 function App() {
   const [introFinished, setIntroFinished] = useState(false);
@@ -34,6 +36,7 @@ function App() {
     <AuthProvider>
       {!introFinished && <HeroIntro onComplete={() => setIntroFinished(true)} />}
       <div className={`App ${introFinished ? 'fade-in-content' : 'hidden'}`}>
+        <IdleMonitor />
         <Navbar />
         <main style={{ padding: '2rem' }} className="animate-page">
           <Routes>
@@ -133,6 +136,7 @@ function App() {
     marginTop: "90px" // adjust depending on navbar height
   }}
 />
+<CityBot />
 
       </div>
     </AuthProvider>

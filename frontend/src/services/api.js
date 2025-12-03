@@ -8,7 +8,6 @@ const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-city-platform-rb
 const api = axios.create({
   baseURL: BASE_URL,
 });
-
 // 2. AUTH INTERCEPTOR (Keeps you logged in)
 api.interceptors.request.use(
   (config) => {
