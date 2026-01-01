@@ -3,7 +3,7 @@ import axios from 'axios';
 // --- CHANGE THIS BLOCK ---
 // If VITE_API_URL is set (like in Vercel), use it.
 // Otherwise, default to your LIVE Render Backend.
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-city-platform-rbv6.onrender.com/api';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-city-platform-iitb.vercel.app/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

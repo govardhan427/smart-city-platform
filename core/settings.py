@@ -101,6 +101,7 @@ TEMPLATES = [
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://smart-city-platform-iitb.vercel.app",
     "https://smart-city-platform-six.vercel.app",
 ]
 
