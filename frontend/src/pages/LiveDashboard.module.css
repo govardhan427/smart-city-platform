@@ -1,144 +1,128 @@
+/* src/pages/LiveDashboard.module.css */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 120px 20px 80px 20px;
   animation: fadeIn 0.8s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Header Section --- */
+/* --- HEADER --- */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 3rem;
-  flex-wrap: wrap; /* Allows wrapping on small screens */
-  gap: 1rem;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
 }
 
 .title {
   font-size: 2rem;
+  font-weight: 800;
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 15px rgba(255, 46, 99, 0.4);
+  color: white;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
-/* Pulse Badge */
+/* The Red Dot */
 .pulse {
-  background: rgba(255, 46, 99, 0.2);
-  color: #ff2e63;
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
   padding: 6px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-  border: 1px solid #ff2e63;
-  box-shadow: 0 0 15px rgba(255, 46, 99, 0.3);
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
   animation: pulse 2s infinite;
-  white-space: nowrap; /* Prevents text breaking */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pulse::before {
+  content: '●';
+  font-size: 1.2rem;
 }
 
-@keyframes pulse {
-  0% { opacity: 1; box-shadow: 0 0 10px rgba(255, 46, 99, 0.3); }
-  50% { opacity: 0.6; box-shadow: 0 0 20px rgba(255, 46, 99, 0.6); }
-  100% { opacity: 1; box-shadow: 0 0 10px rgba(255, 46, 99, 0.3); }
-}
-
-/* --- Tabs (Scrollable on Mobile) --- */
+/* --- TABS --- */
 .tabs {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 1rem;
-  
-  /* Mobile Scroll */
-  overflow-x: auto;
-  white-space: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Hide scrollbar Firefox */
-}
-
-.tabs::-webkit-scrollbar {
-  display: none; /* Hide scrollbar Chrome/Safari */
+  gap: 10px;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 6px;
+  border-radius: 12px;
+  width: fit-content;
 }
 
 .tabs button {
-  background: none;
+  background: transparent;
   border: none;
-  padding: 10px 20px;
-  font-size: 1.1rem;
+  padding: 10px 24px;
+  font-size: 0.95rem;
   cursor: pointer;
-  color: var(--text-muted);
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 1px;
-  transition: all 0.3s ease;
-  flex-shrink: 0; /* Prevents shrinking on mobile */
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .tabs button:hover {
   color: white;
-  text-shadow: 0 0 5px white;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tabs button.active {
-  color: var(--primary-neon);
-  border-bottom: 2px solid var(--primary-neon);
-  text-shadow: 0 0 10px var(--primary-neon);
+  background: white;
+  color: black;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* --- Grid Layout --- */
+/* --- GRID LAYOUT --- */
 .grid {
   display: grid;
-  /* Smart responsive columns: minimum 300px width */
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  gap: 20px;
 }
 
-/* --- Glass Card --- */
+/* --- LIVE MONITOR CARDS --- */
 .card {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid rgba(255, 255, 255, 0.2); /* Status Bar */
+  border-radius: 16px;
+  padding: 24px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--glass-shadow);
+  transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  border-color: var(--primary-neon);
-  box-shadow: 0 10px 30px -10px rgba(0, 255, 224, 0.15);
-}
-
-.clickable:active {
-  transform: scale(0.98); /* Tactile feel on tap */
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
 }
 
 .card h3 {
-  margin-top: 0;
-  font-size: 1.3rem;
+  margin: 0 0 15px 0;
+  font-size: 1.2rem;
   color: white;
-  margin-bottom: 1rem;
-  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
 }
 
 .statRow {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
-  color: var(--text-muted);
+  margin-bottom: 15px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .statRow strong {
@@ -147,76 +131,71 @@
 }
 
 .green {
-  color: var(--success-neon) !important;
-  text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
+  color: #34d399 !important;
 }
 
 /* Progress Bar */
 .progressContainer {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  border-radius: 100px;
   overflow: hidden;
   margin-top: auto;
 }
 
 .progressBar {
   height: 100%;
-  background: var(--primary-neon);
-  box-shadow: 0 0 10px var(--primary-neon);
-  transition: width 0.5s ease;
-  border-radius: 4px;
+  background: #3b82f6;
+  border-radius: 100px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 0 10px #3b82f6;
 }
 
 /* Parking Big Stat */
 .bigStat {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 1rem 0;
+  margin: 0 0 15px 0;
 }
 
 .small {
   font-size: 0.9rem;
   font-weight: 400;
-  color: var(--text-muted);
-  margin-left: 5px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-left: 8px;
 }
 
 /* Loading State */
 .loading {
-  text-align: center;
-  margin-top: 4rem;
-  font-size: 1.2rem;
-  color: var(--text-muted);
-  animation: pulse 1.5s infinite;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  gap: 10px;
 }
 
-/* --- MOBILE SPECIFIC ADJUSTMENTS --- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+/* Mobile */
 @media (max-width: 768px) {
   .header {
-    flex-direction: column; /* Stack Title and Pulse Badge */
+    flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 2rem;
+    gap: 15px;
   }
-
-  .title {
-    font-size: 1.5rem;
+  
+  .tabs {
+    width: 100%;
+    justify-content: space-between;
   }
-
-  .pulse {
-    align-self: flex-start;
-    font-size: 0.8rem;
-    padding: 4px 12px;
-  }
-
-  .grid {
-    grid-template-columns: 1fr; /* 1 column on mobile */
-    gap: 1.5rem;
-  }
-
-  .card {
-    padding: 1.25rem; /* Slightly less padding */
+  
+  .tabs button {
+      flex: 1;
+      padding: 10px;
   }
 }

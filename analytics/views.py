@@ -18,6 +18,8 @@ from django.http import HttpResponse
 from .models import Announcement
 from .serializers import AnnouncementSerializer
 from rest_framework import generics
+from itertools import chain
+from operator import attrgetter
 
 # Import models
 from events.models import Event, Registration
@@ -342,3 +344,97 @@ class AnnouncementView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+class RevenueListView(APIView):
+    """
+    Aggregates financial data from Events, Facilities, and Parking.
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        data = []
+
+        # 1. Event Revenue
+        paid_regs = Registration.objects.filter(event__price__gt=0).select_related('event')[:20]
+        for r in paid_regs:
+            data.append({
+                "id": f"evt_{r.id}",
+                "description": r.event.title,
+                "category": "Event Ticket",
+                "source": "Events",
+                "amount": r.tickets * r.event.price,
+                "date": r.registered_at
+            })
+
+        # 2. Facility Revenue
+        paid_bookings = Booking.objects.filter(facility__price__gt=0).select_related('facility')[:20]
+        for b in paid_bookings:
+            data.append({
+                "id": f"fac_{b.id}",
+                "description": b.facility.name,
+                "category": "Facility Booking",
+                "source": "Facilities",
+                "amount": b.facility.price,
+                "date": b.created_at
+            })
+
+        # 3. Parking Revenue
+        parking_bookings = ParkingBooking.objects.all().select_related('parking_lot')[:20]
+        for p in parking_bookings:
+            data.append({
+                "id": f"park_{p.id}",
+                "description": p.parking_lot.name,
+                "category": "Parking Fee",
+                "source": "Transport",
+                "amount": p.parking_lot.rate_per_hour, # Simplified logic
+                "date": p.created_at
+            })
+
+        # Sort by most recent
+        data.sort(key=lambda x: x['date'], reverse=True)
+        return Response(data[:50]) # Return top 50 transactions
+
+
+class ActivityListView(APIView):
+    """
+    Aggregates recent system actions into a single timeline.
+    """
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        data = []
+
+        # 1. New User Registrations
+        users = User.objects.all().order_by('-date_joined')[:10]
+        for u in users:
+            data.append({
+                "id": f"user_{u.id}",
+                "action": "New User Registration",
+                "username": u.username,
+                "timestamp": u.date_joined
+            })
+
+        # 2. Event Registrations
+        regs = Registration.objects.all().select_related('user', 'event').order_by('-registered_at')[:10]
+        for r in regs:
+            data.append({
+                "id": f"reg_{r.id}",
+                "action": f"Registered for {r.event.title[:20]}...",
+                "username": r.user.username,
+                "timestamp": r.registered_at
+            })
+
+        # 3. Parking Reservations
+        parks = ParkingBooking.objects.all().select_related('user', 'parking_lot').order_by('-created_at')[:10]
+        for p in parks:
+            data.append({
+                "id": f"park_{p.id}",
+                "action": f"Reserved {p.parking_lot.name}",
+                "username": p.user.username,
+                "timestamp": p.created_at
+            })
+
+        # Sort combined list by timestamp descending
+        data.sort(key=lambda x: x['timestamp'], reverse=True)
+        
+        return Response(data[:50])

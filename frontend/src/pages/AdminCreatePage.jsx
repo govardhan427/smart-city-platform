@@ -3,28 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import styles from './AdminCreateEventPage.module.css'; // Reusing styles
+import styles from './AdminCreateEventPage.module.css'; // Shared styles
 import { toast } from 'react-toastify';
 
 const AdminCreatePage = () => {
   const navigate = useNavigate();
-  const [resourceType, setResourceType] = useState('event'); // event, facility, parking, announcement
+  const [resourceType, setResourceType] = useState('event');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Unified Form State
   const [formData, setFormData] = useState({
-    // Shared / Misc
     location: '', image_url: '', google_maps_url: '', price: '',
-    
-    // Event Fields
     title: '', description: '', date: '', time: '',
-    
-    // Facility/Parking Fields
-    name: '', capacity: '', 
-    
-    // Parking Only
-    rate_per_hour: ''
+    name: '', capacity: '', rate_per_hour: ''
   });
 
   const handleChange = (e) => {
@@ -72,16 +64,16 @@ const AdminCreatePage = () => {
       }
       else if (resourceType === 'announcement') {
         await api.post('/analytics/announcement/', {
-          message: formData.description // Using description field for message
+          message: formData.description
         });
       }
       
-      toast.success(`${resourceType.toUpperCase()} Created Successfully!`);
+      toast.success(`${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)} Created Successfully!`);
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError('Failed to create resource. Please check inputs.');
-      toast.error("Failed to create resource.");
+      setError('Failed to create resource. Please check your inputs.');
+      toast.error("Operation failed.");
     } finally {
       setLoading(false);
     }
@@ -89,9 +81,9 @@ const AdminCreatePage = () => {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Create New Resource</h1>
+      <h1 className={styles.title}>Initialize Resource</h1>
       
-      {/* 1. Resource Type Selector */}
+      {/* 1. TYPE SELECTOR */}
       <div className={styles.toggleContainer}>
         {['event', 'facility', 'parking', 'announcement'].map(type => (
           <button
@@ -108,9 +100,7 @@ const AdminCreatePage = () => {
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.errorBox}>{error}</div>}
 
-        {/* --- DYNAMIC FIELDS BASED ON TYPE --- */}
-
-        {/* 1. EVENT FORM */}
+        {/* --- EVENT FIELDS --- */}
         {resourceType === 'event' && (
           <>
             <Input label="Event Title" id="title" value={formData.title} onChange={handleChange} required />
@@ -127,11 +117,11 @@ const AdminCreatePage = () => {
               <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
             </div>
             <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://..." />
-            <Input label="Google Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} placeholder="https://maps.google.com/..." />
+            <Input label="Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} placeholder="https://maps.google.com/..." />
           </>
         )}
 
-        {/* 2. FACILITY FORM */}
+        {/* --- FACILITY FIELDS --- */}
         {resourceType === 'facility' && (
           <>
             <Input label="Facility Name" id="name" value={formData.name} onChange={handleChange} required />
@@ -140,52 +130,52 @@ const AdminCreatePage = () => {
               <textarea id="description" className={styles.textarea} value={formData.description} onChange={handleChange} rows="3" />
             </div>
             <div className={styles.row}>
-              <Input label="Price (₹ per slot)" id="price" type="number" step="0.01" value={formData.price} onChange={handleChange} placeholder="0 for Free" />
-              <Input label="Capacity (Max People)" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
+              <Input label="Price (₹/slot)" id="price" type="number" step="0.01" value={formData.price} onChange={handleChange} placeholder="0 for Free" />
+              <Input label="Capacity" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
             </div>
             <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
-            <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://..." />
-            <Input label="Google Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} placeholder="https://maps.google.com/..." />
+            <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} />
+            <Input label="Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} />
           </>
         )}
 
-        {/* 3. PARKING FORM */}
+        {/* --- PARKING FIELDS --- */}
         {resourceType === 'parking' && (
           <>
             <Input label="Parking Lot Name" id="name" value={formData.name} onChange={handleChange} required />
             <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
             <div className={styles.row}>
-              <Input label="Total Capacity (Spots)" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
-              <Input label="Rate (₹ per Hour)" id="rate_per_hour" type="number" step="0.01" value={formData.rate_per_hour} onChange={handleChange} required />
+              <Input label="Total Capacity" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
+              <Input label="Rate (₹/Hour)" id="rate_per_hour" type="number" step="0.01" value={formData.rate_per_hour} onChange={handleChange} required />
             </div>
-            <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} placeholder="https://..." />
-            <Input label="Google Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} placeholder="https://maps.google.com/..." />
+            <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} />
+            <Input label="Maps Link" id="google_maps_url" value={formData.google_maps_url} onChange={handleChange} />
           </>
         )}
 
-        {/* 4. ANNOUNCEMENT FORM (NEW) */}
+        {/* --- ANNOUNCEMENT FIELDS --- */}
         {resourceType === 'announcement' && (
-          <>
-            <div className={styles.inputGroup}>
-              <label className={styles.label}>Broadcast Message</label>
-              <textarea 
-                id="description" 
-                className={styles.textarea} 
-                value={formData.description} 
-                onChange={handleChange} 
-                rows="3"
-                placeholder="e.g. ⚠️ Heavy Rain Alert: Central Parking Closed today."
-                maxLength="100"
-                required
-              />
-              <span style={{fontSize: '0.8rem', color: '#888', marginTop: '5px'}}>Max 100 characters. Shows on Home Page ticker.</span>
-            </div>
-          </>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Broadcast Message</label>
+            <textarea 
+              id="description" 
+              className={styles.textarea} 
+              value={formData.description} 
+              onChange={handleChange} 
+              rows="3"
+              placeholder="e.g. ⚠️ Central Parking is currently full."
+              maxLength="100"
+              required
+            />
+            <span style={{fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '5px'}}>
+              Displays on the Global News Ticker (Max 100 chars).
+            </span>
+          </div>
         )}
 
         <div className={styles.buttonWrapper}>
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Creating...' : `Create ${resourceType.charAt(0).toUpperCase() + resourceType.slice(1)}`}
+          <Button type="submit" disabled={loading} variant="primary" style={{width: '100%'}}>
+            {loading ? 'Processing...' : 'Confirm Creation'}
           </Button>
         </div>
       </form>

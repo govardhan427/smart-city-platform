@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import RegistrationCard from '../components/RegistrationCard/RegistrationCard';
-import styles from './MyUnifiedBookingsPage.module.css'; // We'll create this next
+// Use the common RegistrationCard for events
+import RegistrationCard from '../components/RegistrationCard/RegistrationCard'; 
+import styles from './MyUnifiedBookingsPage.module.css';
 
 const MyUnifiedBookingsPage = () => {
   const [activeTab, setActiveTab] = useState('events'); // 'events', 'facilities', 'parking'
@@ -39,7 +40,7 @@ const MyUnifiedBookingsPage = () => {
   // --- RENDER HELPERS ---
 
   const renderEvents = () => {
-    if (events.length === 0) return <div className={styles.empty}>No event registrations found.</div>;
+    if (events.length === 0) return <div className={styles.empty}>No event tickets found.</div>;
     return (
       <div className={styles.list}>
         {events.map(reg => <RegistrationCard key={reg.id} registration={reg} />)}
@@ -55,7 +56,7 @@ const MyUnifiedBookingsPage = () => {
           <div key={booking.id} className={styles.card}>
             <div className={styles.cardImageWrapper}>
               <img 
-                src={booking.facility_details.image_url || 'https://placehold.co/100'} 
+                src={booking.facility_details.image_url || 'https://placehold.co/150/101015/FFF?text=Facility'} 
                 alt="Facility" 
                 className={styles.cardImage}
               />
@@ -64,8 +65,8 @@ const MyUnifiedBookingsPage = () => {
               <h3>{booking.facility_details.name}</h3>
               <p>📍 {booking.facility_details.location}</p>
               <div className={styles.tags}>
-                <span className={styles.tagBlue}>{booking.booking_date}</span>
-                <span className={styles.tagOrange}>{booking.time_slot}</span>
+                <span className={styles.tagBlue}>📅 {booking.booking_date}</span>
+                <span className={styles.tagOrange}>⏰ {booking.time_slot}</span>
               </div>
             </div>
             <div className={styles.statusBadge}>Confirmed</div>
@@ -83,7 +84,7 @@ const MyUnifiedBookingsPage = () => {
           <div key={res.id} className={styles.card}>
              <div className={styles.cardImageWrapper}>
               <img 
-                src={res.parking_details.image_url || 'https://placehold.co/100?text=Parking'} 
+                src={res.parking_details.image_url || 'https://placehold.co/150/101015/FFF?text=Parking'} 
                 alt="Parking" 
                 className={styles.cardImage}
               />
@@ -91,13 +92,14 @@ const MyUnifiedBookingsPage = () => {
             <div className={styles.cardContent}>
               <h3>{res.parking_details.name}</h3>
               <p>📍 {res.parking_details.location}</p>
-              <p><strong>Vehicle:</strong> {res.vehicle_number}</p>
+              <p style={{marginTop: '5px'}}><strong>Vehicle:</strong> {res.vehicle_number}</p>
+              
               <div className={styles.tags}>
                 <span className={styles.tagBlue}>
-                  {new Date(res.start_time).toLocaleDateString()}
+                  📅 {new Date(res.start_time).toLocaleDateString()}
                 </span>
                 <span className={styles.tagOrange}>
-                   {new Date(res.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  ⏰ {new Date(res.start_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </span>
               </div>
             </div>
@@ -108,11 +110,11 @@ const MyUnifiedBookingsPage = () => {
     );
   };
 
-  if (loading) return <div className={styles.loading}>Loading your dashboard...</div>;
+  if (loading) return <div className={styles.loading}>Syncing Digital Wallet...</div>;
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>My Bookings Dashboard</h1>
+      <h1 className={styles.pageTitle}>My Wallet</h1>
 
       {/* TABS */}
       <div className={styles.tabs}>

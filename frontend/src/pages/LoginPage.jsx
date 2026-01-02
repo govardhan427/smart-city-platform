@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import styles from './LoginPage.module.css'; // For the container and form layout
+import styles from './LoginPage.module.css';
 
-// Import our new reusable components
+// Reusable Components
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { toast } from 'react-toastify';
@@ -18,10 +18,9 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form browser submission
+    e.preventDefault(); 
     
     if (!email || !password) {
-      // setError('Please enter both email and password.');
       toast.warn("Please enter both email and password.");
       return;
     }
@@ -30,18 +29,14 @@ const LoginPage = () => {
     setError(null);
 
     try {
-      // Call the login function from our AuthContext
       await login(email, password);
-      toast.success("Login successful! Welcome back.");
-      // On success, redirect to the homepage
+      toast.success("Welcome back to CityOS");
       navigate('/');
-    } catch (err) { // This block is now syntactically correct
+    } catch (err) {
       if (err.response && err.response.status === 401) {
-        // setError('Invalid email or password.');
-        toast.error("Invalid credentials. Please try again.");
+        setError('Incorrect email or password.');
       } else {
-        // setError('Login failed. Please try again.');
-        toast.error("Server error. Please try again later.");
+        setError('Server unavailable. Please try again.');
       }
       setLoading(false);
     }
@@ -50,49 +45,50 @@ const LoginPage = () => {
   return (
     <div className={styles.authContainer}>
       <form className={styles.authForm} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Login to your Account</h2>
         
-        {/* Error Message */}
+        <h2 className={styles.title}>System Access</h2>
+        
         {error && <div className={styles.errorBox}>{error}</div>}
 
-        {/* Email Input (Using reusable component) */}
         <Input 
-          label="Email Address"
+          label="Email Identity"
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
+          placeholder="citizen@smartcity.com"
         />
 
-        {/* Password Input (Using reusable component) */}
         <Input 
-          label="Password"
+          label="Passkey"
           id="password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="current-password"
+          placeholder="••••••••"
         />
 
-        {/* Submit Button (Using reusable component) */}
-        <Button 
-          type="submit" 
-          disabled={loading}
-          variant="primary" // This prop selects the style from Button.module.css
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </Button>
+        <div style={{ marginTop: '10px' }}>
+          <Button 
+            type="submit" 
+            disabled={loading}
+            variant="primary"
+            style={{ width: '100%' }}
+          >
+            {loading ? 'Authenticating...' : 'Sign In'}
+          </Button>
+        </div>
 
-        {/* Link to Register Page */}
-        <p className={styles.redirectText}>
-          Don't have an account?{' '}
+        <div className={styles.redirectText}>
+          New resident?
           <Link to="/register" className={styles.redirectLink}>
-            Sign up here
+            Initialize ID
           </Link>
-        </p>
+        </div>
       </form>
     </div>
   );

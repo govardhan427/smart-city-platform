@@ -43,12 +43,11 @@ const PaymentPage = () => {
           await api.post(`/transport/parking/${id}/book/`, extraData);
         }
         
-        // Success! Redirect to Unified Bookings
-        toast.success("💳 Payment Successful! Booking Confirmed.");
+        toast.success("💳 Payment Approved! Booking Confirmed.");
         navigate('/my-bookings'); 
         
       } catch (err) {
-        toast.error("Booking failed after payment. Please contact support.");
+        toast.error("Transaction failed. Please try again.");
         console.error(err);
       } finally {
         setLoading(false);
@@ -56,7 +55,7 @@ const PaymentPage = () => {
     }, 2000); 
   };
 
-  // Helper to format card number for display (#### #### #### ####)
+  // Helper to format card number
   const formatCardDisplay = (num) => {
     return num.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
   };
@@ -67,29 +66,29 @@ const PaymentPage = () => {
         
         {/* LEFT COL: Order Summary */}
         <div className={styles.summarySection}>
-          <h1 className={styles.pageTitle}>CHECKOUT</h1>
+          <h1 className={styles.pageTitle}>Secure Checkout</h1>
           
           <div className={styles.itemDetails}>
-            <div className={styles.itemLabel}>Item</div>
+            <div className={styles.itemLabel}>Item / Service</div>
             <div className={styles.itemValue}>{title}</div>
 
             {extraData.tickets && (
               <>
                 <div className={styles.itemLabel}>Quantity</div>
-                <div className={styles.itemValue}>{extraData.tickets} Tickets</div>
+                <div className={styles.itemValue}>{extraData.tickets} Ticket(s)</div>
               </>
             )}
             
             {extraData.vehicle_number && (
               <>
-                <div className={styles.itemLabel}>Vehicle</div>
+                <div className={styles.itemLabel}>Vehicle ID</div>
                 <div className={styles.itemValue}>{extraData.vehicle_number}</div>
               </>
             )}
           </div>
 
-          <div style={{marginTop: 'auto'}}>
-            <div className={styles.totalLabel}>Total to Pay</div>
+          <div className={styles.totalContainer}>
+            <div className={styles.totalLabel}>Total Amount</div>
             <div className={styles.totalPrice}>₹{price}</div>
           </div>
         </div>
@@ -99,9 +98,7 @@ const PaymentPage = () => {
           
           {/* VISUAL CREDIT CARD */}
           <div className={styles.visualCard}>
-            <div>
-              <div className={styles.chip}></div>
-            </div>
+            <div className={styles.chip}></div>
             <div className={styles.cardNumDisplay}>
               {formatCardDisplay(cardNumber)}
             </div>
@@ -131,7 +128,7 @@ const PaymentPage = () => {
 
             <div className={styles.row}>
               <Input 
-                label="Expiry" 
+                label="Expiry Date" 
                 placeholder="MM/YY" 
                 value={expiry} 
                 onChange={e => setExpiry(e.target.value)} 
@@ -139,7 +136,7 @@ const PaymentPage = () => {
                 maxLength="5"
               />
               <Input 
-                label="CVV" 
+                label="CVV / CVC" 
                 placeholder="123" 
                 type="password" 
                 value={cvv} 
@@ -149,14 +146,14 @@ const PaymentPage = () => {
               />
             </div>
 
-            <div style={{marginTop: '1.5rem'}}>
-              <Button type="submit" disabled={loading} variant="primary">
-                {loading ? 'Processing Transaction...' : `CONFIRM PAYMENT ₹${price}`}
+            <div style={{marginTop: '20px'}}>
+              <Button type="submit" disabled={loading} variant="success">
+                {loading ? 'Processing Transaction...' : `Pay ₹${price}`}
               </Button>
             </div>
 
             <div className={styles.secureBadge}>
-              🔒 256-bit SSL Encrypted Payment
+              <span className={styles.secureIcon}>🔒</span> 256-bit SSL Encrypted Connection
             </div>
           </form>
         </div>

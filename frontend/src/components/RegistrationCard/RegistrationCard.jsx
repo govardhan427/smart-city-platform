@@ -1,70 +1,68 @@
 import React from 'react';
-import styles from './RegistrationCard.module.css'; // We'll create this next
+import styles from './RegistrationCard.module.css';
 
 const RegistrationCard = ({ registration }) => {
-  // The 'registration' prop contains the nested 'event' object
   const { event, attended_at, id } = registration;
 
-  // Function to format date and time
+  // Format Full Date for Event
   const formatDateTime = (dateStr, timeStr) => {
     try {
       const date = new Date(`${dateStr}T${timeStr}`);
       return date.toLocaleString('en-US', {
-        dateStyle: 'long', // "October 30, 2025"
-        timeStyle: 'short', // "2:00 PM"
+        month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit'
       });
     } catch (e) {
       return "Invalid date";
     }
   };
 
-  // Function to format just the check-in time
+  // Format Check-In Time
   const formatAttendedTime = (dateTimeStr) => {
      try {
       const date = new Date(dateTimeStr);
       return date.toLocaleString('en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        hour: 'numeric', minute: '2-digit'
       });
     } catch (e) {
-      return "Invalid time";
+      return "--:--";
     }
   }
 
-  // This is our unique UUID for the QR code
-  const registrationId = id;
-
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${attended_at ? styles.checkedIn : styles.pending}`}>
+      
+      {/* --- INFO SECTION --- */ }
       <div className={styles.cardBody}>
         <h3 className={styles.cardTitle}>{event.title}</h3>
-        <p className={styles.cardLocation}>{event.location}</p>
-        <p className={styles.cardDateTime}>
-          {formatDateTime(event.date, event.time)}
-        </p>
+        
+        <div className={styles.cardMeta}>
+          <span className={styles.metaItem}>📅 {formatDateTime(event.date, event.time)}</span>
+          <span className={styles.metaItem}>📍 {event.location}</span>
+        </div>
 
-        {/* Show the QR code ID, so the user has it for reference */}
+        {/* Digital ID Badge */}
         <div className={styles.qrInfo}>
-          <span className={styles.qrLabel}>Registration ID:</span>
-          <span className={styles.qrId}>{registrationId}</span>
+          <span className={styles.qrLabel}>ACCESS ID:</span>
+          <span className={styles.qrId}>{id.substring(0, 8).toUpperCase()}...</span>
         </div>
       </div>
       
-      {/* This is the status badge on the side */}
-      <div 
-        className={`${styles.statusBadge} ${
-          attended_at ? styles.statusCheckedIn : styles.statusPending
-        }`}
-      >
+      {/* --- STATUS BADGE --- */}
+      <div className={styles.statusBadge}>
         {attended_at ? (
           <>
-            Checked In
+            <div className={styles.statusText}>
+              Verified <span className={styles.indicator}></span>
+            </div>
             <span className={styles.statusTime}>
-              ({formatAttendedTime(attended_at)})
+              Entered at {formatAttendedTime(attended_at)}
             </span>
           </>
         ) : (
-          'Pending Check-In'
+          <div className={styles.statusText}>
+            Pending <span className={styles.indicator}></span>
+          </div>
         )}
       </div>
     </div>

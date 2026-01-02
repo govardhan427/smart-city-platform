@@ -5,11 +5,12 @@ const HeroIntro = ({ onComplete }) => {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // Hide animation after 2.5 seconds
+    // 1. Wait for animation to finish (2.5s)
     const timer = setTimeout(() => {
       setVisible(false);
-      onComplete(); // Tell App to show content
-    }, 2500);
+      if (onComplete) onComplete(); 
+    }, 2500); 
+
     return () => clearTimeout(timer);
   }, [onComplete]);
 
@@ -17,11 +18,12 @@ const HeroIntro = ({ onComplete }) => {
 
   return (
     <div className={styles.container}>
+      {/* The Liquid Glow Background */}
+      <div className={styles.orb}></div>
+
       <div className={styles.content}>
-        <h1 className={styles.title}>SMART ACCESS HUB</h1>
-        <p className={styles.subtitle}>INITIALIZING URBAN SYSTEMS...427</p>
-        <div className={styles.scanLine}></div>
-        <div className={styles.loader}></div>
+        <h1 className={styles.title}>CityOS</h1>
+        <div className={styles.subtitle}>INITIALIZING SECURE ENVIRONMENT</div>
       </div>
     </div>
   );

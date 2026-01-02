@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom';
 import styles from './FacilityCard.module.css';
 
 const FacilityCard = ({ facility }) => {
-  // We don't need 'loading' here. We just render data.
-  
   const price = parseFloat(facility.price || 0);
 
   return (
@@ -12,7 +10,7 @@ const FacilityCard = ({ facility }) => {
       {/* Image Section */}
       <div className={styles.imageWrapper}>
         <img 
-          src={facility.image_url || 'https://placehold.co/600x400?text=Facility'} 
+          src={facility.image_url || 'https://placehold.co/600x400/1e1e24/FFF?text=Facility'} 
           alt={facility.name} 
           className={styles.image}
         />
@@ -23,28 +21,13 @@ const FacilityCard = ({ facility }) => {
         {/* Header with Price Badge */}
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
           <h3 className={styles.title}>{facility.name}</h3>
+          
           {price > 0 ? (
-            <span style={{
-              background: 'rgba(255, 187, 40, 0.2)', 
-              color: '#FFBB28', 
-              border: '1px solid #FFBB28', 
-              padding: '4px 8px', 
-              borderRadius: '4px', 
-              fontSize: '0.75rem', 
-              fontWeight: 'bold'
-            }}>
+            <span className={`${styles.badge} ${styles.paid}`}>
               ₹{price}
             </span>
           ) : (
-            <span style={{
-              background: 'rgba(0, 255, 157, 0.2)', 
-              color: '#00FF9D', 
-              border: '1px solid #00FF9D', 
-              padding: '4px 8px', 
-              borderRadius: '4px', 
-              fontSize: '0.75rem', 
-              fontWeight: 'bold'
-            }}>
+            <span className={`${styles.badge} ${styles.free}`}>
               FREE
             </span>
           )}
@@ -52,21 +35,26 @@ const FacilityCard = ({ facility }) => {
 
         {/* Location with Map Link */}
         <div className={styles.location}>
+          <span>📍</span>
           {facility.google_maps_url ? (
             <a 
               href={facility.google_maps_url} 
               target="_blank" 
               rel="noopener noreferrer"
-              style={{color: 'var(--primary-neon)', textDecoration: 'none'}}
+              className={styles.mapLink}
             >
-              📍 {facility.location} (Map)
+              {facility.location} (Map)
             </a>
           ) : (
-            <span>📍 {facility.location}</span>
+            <span>{facility.location}</span>
           )}
         </div>
 
-        <p className={styles.description}>{facility.description}</p>
+        <p className={styles.description}>
+            {facility.description?.length > 100 
+                ? facility.description.substring(0, 100) + '...' 
+                : facility.description}
+        </p>
         
         <div className={styles.footer}>
           <span className={styles.capacity}>
@@ -75,16 +63,8 @@ const FacilityCard = ({ facility }) => {
           
           <div className={styles.btnWrapper}>
              <Link to={`/facilities/${facility.id}/book`}>
-               <button className={styles.btnPrimary} style={{
-                 background: 'var(--primary-neon)',
-                 color: 'black',
-                 border: 'none',
-                 padding: '8px 16px',
-                 borderRadius: '6px',
-                 fontWeight: 'bold',
-                 cursor: 'pointer'
-               }}>
-                 Book
+               <button className={styles.bookBtn}>
+                 Book Now
                </button>
              </Link>
           </div>

@@ -8,29 +8,26 @@ const AdminScanPage = () => {
   const [scanStatus, setScanStatus] = useState(null); // 'success', 'error', 'warning'
   const [message, setMessage] = useState('');
   
-  // This key forces the useEffect to re-run when we want to restart the scanner
+  // Key to force re-render/reset of scanner
   const [scannerKey, setScannerKey] = useState(0); 
-  
   const scannerRef = useRef(null);
 
   useEffect(() => {
-    // 1. CLEANUP PREVIOUS SCANNERS (Crucial for preventing duplicates)
-    // If the scanner already exists in the ref, don't create another one.
-    if (scannerRef.current) {
-        return;
-    }
+    // 1. Prevent duplicate initialization
+    if (scannerRef.current) return;
 
-    // Double safety: Clear the DOM container
+    // 2. Clear previous instance from DOM if exists
     const container = document.getElementById("qr-reader-container");
     if (container) container.innerHTML = "";
 
-    // 2. Initialize Scanner
+    // 3. Init Scanner
     const qrScanner = new Html5QrcodeScanner(
       "qr-reader-container",
       { 
         fps: 10, 
         qrbox: { width: 250, height: 250 },
-        facingMode: "environment" 
+        facingMode: "environment",
+        aspectRatio: 1.0 
       },
       false
     );
@@ -38,29 +35,29 @@ const AdminScanPage = () => {
     scannerRef.current = qrScanner;
 
     const onScanSuccess = (decodedText) => {
-      // Pause/Clear scanning immediately to prevent multiple hits
+      // Pause scanner immediately
       if (scannerRef.current) {
         scannerRef.current.clear().catch(console.error);
       }
       handleCheckIn(decodedText);
     };
 
-    qrScanner.render(onScanSuccess, (err) => {});
+    qrScanner.render(onScanSuccess, (err) => { 
+        // Ignore minor scan errors (noisy frames)
+    });
 
-    // 3. CLEANUP FUNCTION
+    // 4. Cleanup on unmount or re-key
     return () => {
       if (scannerRef.current) {
         try {
-          scannerRef.current.clear().catch((err) => {
-            console.warn("Failed to clear scanner on unmount", err);
-          });
+          scannerRef.current.clear().catch(err => console.warn("Scanner clear error", err));
         } catch (e) {
           console.warn("Scanner cleanup error", e);
         }
         scannerRef.current = null;
       }
     };
-  }, [scannerKey]); // Re-run when scannerKey changes
+  }, [scannerKey]);
 
   const handleCheckIn = async (qrData) => {
     setLoading(true);
@@ -73,14 +70,14 @@ const AdminScanPage = () => {
       });
       
       setScanStatus('success');
-      setMessage(response.data.message || 'Check-in successful!');
+      setMessage(response.data.message || 'Access Granted: Welcome!');
 
     } catch (err) {
       console.error(err);
       const errorResponse = err.response?.data;
       const errorMsg = errorResponse?.error || errorResponse?.detail || 'Scan failed';
       
-      // 4. CHECK FOR "ALREADY CHECKED IN" (Case-insensitive)
+      // Check for "Duplicate" or "Already Checked In"
       if (errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('duplicate')) {
         setScanStatus('warning');
         setMessage(`⚠️ ${errorMsg}`);
@@ -93,20 +90,19 @@ const AdminScanPage = () => {
     }
   };
 
-  // Helper to restart without reloading the page
   const handleScanNext = () => {
     setScanStatus(null);
     setMessage('');
-    // Increment key -> Triggers useEffect cleanup -> Triggers useEffect start
-    setScannerKey(prev => prev + 1); 
+    setScannerKey(prev => prev + 1); // Triggers re-mount of scanner
   };
 
   return (
     <div className={styles.scanContainer}>
-      <h1 className={styles.title}>QR Check-In</h1>
-      <p className={styles.subtitle}>Scan user ticket for entry</p>
+      <h1 className={styles.title}>Access Scanner</h1>
+      <p className={styles.subtitle}>Align ticket QR code within the frame.</p>
 
-      {/* Camera Container */}
+      {/* --- CAMERA FEED --- */}
+      {/* Hide camera when we have a result */}
       <div 
         className={styles.scannerWrapper} 
         style={{ display: scanStatus ? 'none' : 'block' }} 
@@ -114,22 +110,25 @@ const AdminScanPage = () => {
         <div id="qr-reader-container"></div>
       </div>
       
-      {/* Feedback Messages */}
+      {/* --- RESULT FEEDBACK --- */}
       <div className={styles.feedbackContainer}>
+        
         {loading && (
-          <div className={styles.feedbackLoading}>Processing...</div>
+          <div className={styles.feedbackLoading}>
+             Verifying ID...
+          </div>
         )}
 
         {!loading && scanStatus === 'success' && (
           <div className={styles.feedbackSuccess}>
-            ✅ {message}
+            {message}
           </div>
         )}
 
         {!loading && scanStatus === 'warning' && (
           <div className={styles.feedbackWarning}>
             {message}
-            <div className={styles.timestamp}>Recorded previously</div>
+            <div className={styles.timestamp}>Duplicate Entry Attempt</div>
           </div>
         )}
 
@@ -140,10 +139,10 @@ const AdminScanPage = () => {
         )}
       </div>
       
-      {/* Scan Next Button */}
+      {/* --- RESET BUTTON --- */}
       {(scanStatus) && (
         <button className={styles.nextBtn} onClick={handleScanNext}>
-          Scan Next Person
+          Scan Next Ticket
         </button>
       )}
     </div>

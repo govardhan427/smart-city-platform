@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from .models import User
 from .serializers import UserSerializer, UserRegisterSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -44,3 +44,12 @@ class UpdateProfileView(generics.UpdateAPIView):
     
     def get_object(self):
         return self.request.user
+
+class UserListView(generics.ListAPIView):
+    """
+    Returns a list of all registered users.
+    Only accessible by Admins.
+    """
+    permission_classes = [IsAdminUser]
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer

@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from '../services/api'; // Direct API call or use eventService
+import api from '../services/api';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import styles from './AdminCreateEventPage.module.css'; // Reuse the create page styles
+import styles from './AdminCreateEventPage.module.css'; // Shared CSS
+import { toast } from 'react-toastify';
 
 const AdminEditEventPage = () => {
-  const { id } = useParams(); // Get the Event ID from the URL
+  const { id } = useParams();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
-  // Form State
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -22,7 +22,6 @@ const AdminEditEventPage = () => {
     location: '',
   });
 
-  // 1. Fetch the existing event data when page loads
   useEffect(() => {
     const fetchEvent = async () => {
       try {
@@ -31,11 +30,11 @@ const AdminEditEventPage = () => {
           title: response.data.title,
           description: response.data.description,
           date: response.data.date,
-          time: response.data.time, // Ensure time format matches input (HH:MM:SS)
+          time: response.data.time,
           location: response.data.location,
         });
       } catch (err) {
-        setError("Failed to load event details.");
+        toast.error("Could not load event data.");
       } finally {
         setLoading(false);
       }
@@ -56,20 +55,19 @@ const AdminEditEventPage = () => {
     setError(null);
 
     try {
-      // 2. Send PUT request to update
       await api.put(`/events/${id}/`, formData);
-      
-      // On success, go back home
+      toast.success("Event updated successfully.");
       navigate('/');
     } catch (err) {
       console.error(err);
-      setError('Failed to update event. Please check your inputs.');
+      setError('Update failed. Please verify input data.');
+      toast.error("Update failed.");
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <div style={{textAlign: 'center', marginTop: '2rem'}}>Loading event...</div>;
+  if (loading) return <div style={{textAlign: 'center', marginTop: '100px', color: 'rgba(255,255,255,0.6)'}}>Accessing Database...</div>;
 
   return (
     <div className={styles.container}>
@@ -125,14 +123,12 @@ const AdminEditEventPage = () => {
         />
 
         <div className={styles.buttonWrapper}>
-          <Button type="submit" disabled={saving}>
-            {saving ? 'Saving Changes...' : 'Update Event'}
+          <Button type="submit" disabled={saving} variant="primary">
+            {saving ? 'Updating...' : 'Save Changes'}
           </Button>
-          <div style={{marginTop: '10px'}}>
-             <Button type="button" variant="secondary" onClick={() => navigate('/')}>
-               Cancel
-             </Button>
-          </div>
+          <Button type="button" variant="secondary" onClick={() => navigate('/')}>
+            Cancel
+          </Button>
         </div>
       </form>
     </div>

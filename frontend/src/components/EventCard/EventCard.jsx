@@ -10,14 +10,14 @@ const EventCard = ({ event, onDelete }) => {
   const navigate = useNavigate();
   
   const [isRegistering, setIsRegistering] = useState(false);
-  const [ticketCount, setTicketCount] = useState(1); // Ticket Counter State
+  const [ticketCount, setTicketCount] = useState(1);
 
-  // Function to format date and time
+  // Format Date
   const formatDateTime = (dateStr, timeStr) => {
     try {
       const date = new Date(`${dateStr}T${timeStr}`);
       return date.toLocaleString('en-US', {
-        dateStyle: 'long',
+        dateStyle: 'medium',
         timeStyle: 'short',
       });
     } catch (e) {
@@ -25,22 +25,21 @@ const EventCard = ({ event, onDelete }) => {
     }
   };
 
-  // --- Handle Delete (Admin Only) ---
+  // --- DELETE (Admin) ---
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
-
     try {
       await api.delete(`/events/${event.id}/`);
       if (onDelete) onDelete(event.id);
+      toast.success("Event deleted.");
     } catch (err) {
       console.error("Failed to delete", err);
-      alert("Failed to delete event.");
+      toast.error("Failed to delete event.");
     }
   };
 
-  // --- Handle Register / Buy Logic ---
+  // --- ACTION (Register/Buy) ---
   const handleAction = async () => {
-    // 1. Check Login
     if (!user) {
       navigate('/login');
       return;
@@ -49,8 +48,8 @@ const EventCard = ({ event, onDelete }) => {
     const price = parseFloat(event.price || 0);
     const totalPrice = price * ticketCount;
 
-    // 2. IF PAID: Go to Payment Page
     if (price > 0) {
+      // Paid Flow
       navigate('/payment', {
         state: {
           type: 'event',
@@ -60,19 +59,17 @@ const EventCard = ({ event, onDelete }) => {
           extraData: { tickets: ticketCount }
         }
       });
-    } 
-    // 3. IF FREE: Register Immediately
-    else {
+    } else {
+      // Free Flow
       setIsRegistering(true);
       try {
         await api.post(`/events/${event.id}/register/`, { tickets: ticketCount });
         toast.success("🎫 Registration Successful! Check your email.");
-        // You might want to refresh the page or disable the button here
       } catch (err) {
         if (err.response && err.response.status === 400) {
-          toast.error("You are already registered for this event.");
+          toast.error("You are already registered.");
         } else {
-          toast.error("❌ Registration failed. Please try again.");
+          toast.error("❌ Registration failed.");
         }
       } finally {
         setIsRegistering(false);
@@ -82,18 +79,19 @@ const EventCard = ({ event, onDelete }) => {
 
   return (
     <div className={styles.card}>
-      {/* 1. EVENT IMAGE */}
+      {/* 1. IMAGE COVER */}
       <img 
-        src={event.image_url || 'https://placehold.co/600x400?text=Event'} 
+        src={event.image_url || 'https://placehold.co/600x400/101015/FFF?text=CityEvent'} 
         alt={event.title} 
         className={styles.image}
       />
 
       <div className={styles.cardBody}>
+        
+        {/* 2. HEADER */}
         <div className={styles.header}>
           <h3 className={styles.cardTitle}>{event.title}</h3>
           
-          {/* 2. PRICE BADGE */}
           {parseFloat(event.price) > 0 ? (
             <span className={styles.badgePaid}>₹{event.price}</span>
           ) : (
@@ -101,19 +99,24 @@ const EventCard = ({ event, onDelete }) => {
           )}
         </div>
 
-        <p className={styles.cardText}>{event.description}</p>
+        {/* 3. DESCRIPTION */}
+        <p className={styles.cardText}>
+            {event.description?.length > 100 
+                ? event.description.substring(0, 100) + '...' 
+                : event.description}
+        </p>
         
+        {/* 4. METADATA BOX */}
         <div className={styles.cardInfo}>
           <span className={styles.infoItem}>
-            <strong>Date:</strong> {formatDateTime(event.date, event.time)}
+            <strong>📅</strong> {formatDateTime(event.date, event.time)}
           </span>
           
-          {/* 3. GOOGLE MAPS LINK */}
           <span className={styles.infoItem}>
-            <strong>Location:</strong> 
+            <strong>📍</strong> 
             {event.google_maps_url ? (
               <a href={event.google_maps_url} target="_blank" rel="noopener noreferrer" className={styles.mapLink}>
-                 📍 {event.location} (View Map)
+                  {event.location} (Map)
               </a>
             ) : (
               <span> {event.location}</span>
@@ -121,7 +124,7 @@ const EventCard = ({ event, onDelete }) => {
           </span>
         </div>
 
-        {/* 4. TICKET COUNTER */}
+        {/* 5. TICKET SELECTOR */}
         <div className={styles.ticketControl}>
           <label>Tickets:</label>
           <select value={ticketCount} onChange={e => setTicketCount(parseInt(e.target.value))}>
@@ -131,13 +134,13 @@ const EventCard = ({ event, onDelete }) => {
           </select>
         </div>
 
-        {/* --- ADMIN CONTROLS (Only visible to Staff) --- */}
+        {/* --- ADMIN CONTROLS --- */}
         {user && user.is_staff && (
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem', borderTop: '1px solid #eee', paddingTop: '10px' }}>
+          <div className={styles.adminControls}>
             <button 
               className={`${styles.btn} ${styles.btnPrimary}`}
               onClick={() => navigate(`/admin/edit-event/${event.id}`)}
-              style={{ backgroundColor: '#6c757d' }} 
+              style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }} 
             >
               Edit
             </button>
@@ -150,8 +153,8 @@ const EventCard = ({ event, onDelete }) => {
           </div>
         )}
 
-        {/* 5. ACTION BUTTON */}
-        <div className={styles.cardFooter}>
+        {/* 6. MAIN ACTION BUTTON */}
+        <div style={{ marginTop: 'auto' }}>
           <button 
             className={`${styles.btn} ${styles.btnPrimary}`} 
             onClick={handleAction} 
@@ -160,6 +163,7 @@ const EventCard = ({ event, onDelete }) => {
             {isRegistering ? 'Processing...' : parseFloat(event.price) > 0 ? `Buy Tickets (₹${event.price * ticketCount})` : 'Register Free'}
           </button>
         </div>
+
       </div>
     </div>
   );

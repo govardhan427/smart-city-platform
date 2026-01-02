@@ -7,7 +7,7 @@ import styles from './BookFacilityPage.module.css';
 import { toast } from 'react-toastify';
 
 const BookFacilityPage = () => {
-  const { id } = useParams(); // Get facility ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
   
   const [facility, setFacility] = useState(null);
@@ -18,15 +18,13 @@ const BookFacilityPage = () => {
   const [date, setDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
 
-  // Hardcoded slots matching the backend choices
   const TIME_SLOTS = [
-    { value: '09:00-11:00', label: 'Morning (9 AM - 11 AM)' },
-    { value: '12:00-14:00', label: 'Afternoon (12 PM - 2 PM)' },
-    { value: '15:00-17:00', label: 'Evening (3 PM - 5 PM)' },
-    { value: '18:00-20:00', label: 'Night (6 PM - 8 PM)' },
+    { value: '09:00-11:00', label: 'Morning (09:00 - 11:00)' },
+    { value: '12:00-14:00', label: 'Midday (12:00 - 14:00)' },
+    { value: '15:00-17:00', label: 'Afternoon (15:00 - 17:00)' },
+    { value: '18:00-20:00', label: 'Evening (18:00 - 20:00)' },
   ];
 
-  // Fetch facility details on mount
   useEffect(() => {
     const fetchFacility = async () => {
       try {
@@ -34,6 +32,7 @@ const BookFacilityPage = () => {
         setFacility(response.data);
       } catch (error) {
         console.error("Error", error);
+        toast.error("Could not load facility details.");
       } finally {
         setLoading(false);
       }
@@ -46,7 +45,7 @@ const BookFacilityPage = () => {
     setBookingError(null);
 
     if (!date || !timeSlot) {
-      setBookingError("Please select both a date and a time slot.");
+      toast.warning("Please select both a date and a time slot.");
       return;
     }
 
@@ -55,48 +54,63 @@ const BookFacilityPage = () => {
         booking_date: date,
         time_slot: timeSlot
       });
-      // Redirect to a "My Bookings" page (we'll make this next)
-      // For now, redirect to Home or alert
-      toast.success("Booking Successful!,Check your email");
+      toast.success("✅ Booking Confirmed! Check your email.");
       navigate('/facilities'); 
     } catch (err) {
-      // Backend returns 400 if slot is taken
       if (err.response && err.response.data && err.response.data.error) {
         setBookingError(err.response.data.error);
+        toast.error(err.response.data.error);
       } else {
         toast.error("Booking failed. Please try again.");
       }
     }
   };
 
-  if (loading) return <div className={styles.loading}>Loading details...</div>;
-  if (!facility) return <div className={styles.error}>Facility not found.</div>;
+  if (loading) return <div className={styles.loading}>Accessing Facility Database...</div>;
+  if (!facility) return <div className={styles.error}>Facility Not Found.</div>;
 
   return (
     <div className={styles.container}>
       <div className={styles.layout}>
         
-        {/* LEFT SIDE: Facility Info */}
+        {/* LEFT SIDE: Visuals & Info */}
         <div className={styles.infoSection}>
-          <img 
-            src={facility.image_url || 'https://placehold.co/600x400'} 
-            alt={facility.name} 
-            className={styles.image} 
-          />
-          <h1 className={styles.title}>{facility.name}</h1>
-          <p className={styles.location}>📍 {facility.location}</p>
-          <p className={styles.desc}>{facility.description}</p>
-          <p className={styles.capacity}>Max Capacity: {facility.capacity} people</p>
+          <div className={styles.imageWrapper}>
+            <img 
+              src={facility.image_url || 'https://placehold.co/600x400/101015/FFF?text=Facility'} 
+              alt={facility.name} 
+              className={styles.image} 
+            />
+            <div className={styles.overlayGradient}></div>
+          </div>
+          
+          <div className={styles.details}>
+            <h1 className={styles.title}>{facility.name}</h1>
+            <p className={styles.location}>📍 {facility.location}</p>
+            <div className={styles.divider}></div>
+            <p className={styles.desc}>{facility.description}</p>
+            
+            <div className={styles.metaRow}>
+                <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>Capacity</span>
+                    <span className={styles.metaValue}>{facility.capacity} Persons</span>
+                </div>
+                <div className={styles.metaItem}>
+                    <span className={styles.metaLabel}>Base Rate</span>
+                    <span className={styles.metaValue}>{parseFloat(facility.price) > 0 ? `₹${facility.price}` : 'Free'}</span>
+                </div>
+            </div>
+          </div>
         </div>
 
         {/* RIGHT SIDE: Booking Form */}
         <div className={styles.formSection}>
           <div className={styles.formCard}>
-            <h2 className={styles.formTitle}>Reserve a Slot</h2>
+            <h2 className={styles.formTitle}>Secure Reservation</h2>
             
             {bookingError && <div className={styles.errorBox}>{bookingError}</div>}
             
-            <form onSubmit={handleBook}>
+            <form onSubmit={handleBook} className={styles.form}>
               <Input 
                 label="Select Date"
                 id="date"
@@ -104,28 +118,35 @@ const BookFacilityPage = () => {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 required
-                // Prevent booking in the past
                 min={new Date().toISOString().split('T')[0]} 
               />
 
               <div className={styles.selectGroup}>
-                <label className={styles.label}>Select Time Slot</label>
-                <select 
-                  className={styles.select}
-                  value={timeSlot}
-                  onChange={(e) => setTimeSlot(e.target.value)}
-                  required
-                >
-                  <option value="">-- Choose a time --</option>
-                  {TIME_SLOTS.map((slot) => (
-                    <option key={slot.value} value={slot.value}>
-                      {slot.label}
-                    </option>
-                  ))}
-                </select>
+                <label className={styles.label}>Time Slot</label>
+                <div className={styles.selectWrapper}>
+                    <select 
+                    className={styles.select}
+                    value={timeSlot}
+                    onChange={(e) => setTimeSlot(e.target.value)}
+                    required
+                    >
+                    <option value="">-- Select Time --</option>
+                    {TIME_SLOTS.map((slot) => (
+                        <option key={slot.value} value={slot.value}>
+                        {slot.label}
+                        </option>
+                    ))}
+                    </select>
+                    <div className={styles.selectArrow}>▼</div>
+                </div>
               </div>
 
-              <div style={{ marginTop: '1.5rem' }}>
+              <div className={styles.summary}>
+                <p>Reservation for <strong>{date || '...'}</strong></p>
+                <p>at <strong>{timeSlot ? TIME_SLOTS.find(t=>t.value===timeSlot)?.label : '...'}</strong></p>
+              </div>
+
+              <div style={{ marginTop: 'auto' }}>
                 <Button type="submit" variant="primary">
                   Confirm Booking
                 </Button>

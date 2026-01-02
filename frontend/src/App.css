@@ -1,42 +1,90 @@
-#root {
+/* src/App.css */
+
+/* --- 1. THE LIVING BACKGROUND (Blobs) --- */
+.ambient-light {
+  position: fixed;
+  top: 0; left: 0; 
+  width: 100vw; height: 100vh;
+  z-index: -1; /* Puts it behind everything else */
+  overflow: hidden;
+  background: var(--bg-dark); /* Fallback */
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px); /* This creates the soft "light" effect */
+  opacity: 0.6;
+  animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* Blob 1: Blue (Top Left) */
+.blob-1 {
+  top: -10%; left: -10%; 
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, var(--accent-primary), transparent 70%);
+  animation-delay: 0s;
+}
+
+/* Blob 2: Violet (Bottom Right) */
+.blob-2 {
+  bottom: -10%; right: -10%; 
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, var(--accent-secondary), transparent 70%);
+  animation-delay: -5s;
+}
+
+/* Blob 3: Cyan (Center Moving) */
+.blob-3 {
+  top: 40%; left: 40%; 
+  width: 30vw; height: 30vw;
+  background: radial-gradient(circle, #06b6d4, transparent 70%);
+  animation-delay: -10s;
+}
+
+/* The Floating Animation */
+@keyframes float {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, 20px) scale(1.1); }
+  100% { transform: translate(-20px, 40px) scale(0.9); }
+}
+
+/* --- 2. LAYOUT UTILITIES --- */
+
+/* Ensures the content sits on top of the blobs */
+.app-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Central container for all pages */
+.main-container {
+  width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 0 20px;
+  flex: 1;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Page Transition Animation */
+.animate-page {
+  animation: fadeIn 0.6s ease-out;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Helper to hide scrollbar but keep functionality */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

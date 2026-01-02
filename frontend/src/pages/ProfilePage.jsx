@@ -23,11 +23,10 @@ const ProfilePage = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-  // --- SAFE AVATAR HELPER ---
   const getAvatarChar = () => {
     if (username && username.length > 0) return username[0].toUpperCase();
     if (email && email.length > 0) return email[0].toUpperCase();
-    return "U"; // Default 'U' for User
+    return "U"; 
   };
 
   const handleUpdateProfile = async (e) => {
@@ -55,17 +54,17 @@ const ProfilePage = () => {
     e.preventDefault();
     try {
       await authService.changePassword({ old_password: oldPassword, new_password: newPassword });
-      toast.success("Password changed successfully!");
+      toast.success("Password updated securely.");
       setOldPassword('');
       setNewPassword('');
     } catch (err) {
-      toast.error("Failed. Check your old password.");
+      toast.error("Update failed. Please verify your current password.");
     }
   };
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>MY PROFILE</h1>
+      <h1 className={styles.title}>Citizen Profile</h1>
       
       <div className={styles.layout}>
         
@@ -73,7 +72,6 @@ const ProfilePage = () => {
         <div className={styles.identitySection}>
           <div className={styles.avatarWrapper}>
             <div className={styles.avatar}>
-              {/* USE THE HELPER FUNCTION HERE */}
               {getAvatarChar()}
             </div>
             <div className={styles.roleBadge}>
@@ -81,7 +79,6 @@ const ProfilePage = () => {
             </div>
           </div>
           
-          {/* Display Name */}
           <h2 className={styles.displayName}>
             {firstName} {lastName}
           </h2>
@@ -94,13 +91,13 @@ const ProfilePage = () => {
           {/* 1. PERSONAL DETAILS CARD */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
-              <h3>Personal Details</h3>
+              <h3>Personal Information</h3>
               {!isEditing && (
                 <button 
                   className={styles.editBtn} 
                   onClick={() => setIsEditing(true)}
                 >
-                  Edit
+                  Edit Details
                 </button>
               )}
             </div>
@@ -140,8 +137,8 @@ const ProfilePage = () => {
                   <span className={styles.value}>{email}</span>
                 </div>
                 <div className={styles.infoRow}>
-                  <span className={styles.label}>Account ID</span>
-                  <span className={styles.value} style={{fontFamily:'monospace'}}>#{user.id}</span>
+                  <span className={styles.label}>Citizen ID</span>
+                  <span className={styles.value} style={{fontFamily:'monospace', opacity:0.8}}>#{user.id}</span>
                 </div>
               </div>
             )}
@@ -149,7 +146,10 @@ const ProfilePage = () => {
 
           {/* 2. SECURITY CARD */}
           <div className={styles.card}>
-            <h3>Security & Password</h3>
+            <div className={styles.cardHeader}>
+                <h3>Security Settings</h3>
+            </div>
+            
             <form onSubmit={handleChangePassword}>
               <div className={styles.row}>
                 <Input 
@@ -167,7 +167,7 @@ const ProfilePage = () => {
                   placeholder="••••••"
                 />
               </div>
-              <div style={{marginTop: '1rem'}}>
+              <div style={{marginTop: '20px'}}>
                  <Button type="submit" variant="secondary">Update Password</Button>
               </div>
             </form>

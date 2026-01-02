@@ -1,254 +1,196 @@
-/* ... (Keep all existing desktop styles above) ... */
+/* src/pages/MyUnifiedBookingsPage.module.css */
 
 .container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem;
-  animation: slideUpFade 0.6s ease-out;
-}
-
-@keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  padding: 40px 20px 80px 20px;
+  min-height: 80vh;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .pageTitle {
-  text-align: center;
-  font-family: 'Orbitron', sans-serif;
   font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
   color: white;
-  margin-bottom: 3rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 0 0 15px rgba(0, 255, 224, 0.4);
+  margin-bottom: 40px;
+  letter-spacing: -1px;
 }
 
 /* --- TABS --- */
 .tabs {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  margin-bottom: 3rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 0.5rem;
+  gap: 15px;
+  margin-bottom: 40px;
+  padding-bottom: 10px;
   
-  /* Mobile Scroll Logic */
+  /* Mobile Horizontal Scroll */
   overflow-x: auto;
   white-space: nowrap;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
-.tabs::-webkit-scrollbar {
-  display: none;
-}
+.tabs::-webkit-scrollbar { display: none; }
 
 .tab {
-  background: none;
-  border: none;
-  font-size: 1.1rem;
-  font-family: 'Inter', sans-serif;
-  font-weight: 500;
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  padding: 0.8rem 1.5rem;
-  transition: all 0.3s ease;
-  position: relative;
-  letter-spacing: 1px;
-  flex-shrink: 0; /* Don't shrink tabs */
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .tab:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  text-shadow: 0 0 8px white;
 }
 
 .activeTab {
-  color: var(--primary-neon) !important;
-  background: transparent !important;
-  font-weight: 700;
-  text-shadow: 0 0 10px var(--primary-neon);
+  background: white !important;
+  color: black !important;
+  border-color: white !important;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
 }
 
-.activeTab::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--primary-neon);
-  box-shadow: 0 -2px 10px var(--primary-neon);
-  animation: expandWidth 0.3s ease;
+/* --- CONTENT AREA --- */
+.contentArea {
+  min-height: 300px;
 }
 
-@keyframes expandWidth {
-  from { width: 0%; left: 50%; }
-  to { width: 100%; left: 0; }
-}
-
-/* --- CARDS --- */
 .list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
+/* --- BOOKING CARD (Facility/Parking) --- */
 .card {
   display: flex;
-  align-items: center;
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 20px;
+  transition: transform 0.2s;
+  align-items: center;
+  gap: 20px;
 }
 
 .card:hover {
-  transform: translateX(5px);
-  border-color: var(--primary-neon);
-  box-shadow: 0 5px 25px -5px rgba(0, 255, 224, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
 }
 
 .cardImageWrapper {
   width: 100px;
-  height: 80px;
-  margin-right: 1.5rem;
-  flex-shrink: 0;
-  border-radius: var(--radius-sm);
+  height: 100px;
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .cardImage {
-  width: 100%; height: 100%; object-fit: cover; opacity: 0.9;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.cardContent { flex-grow: 1; }
-
-.cardContent h3 { 
-  margin: 0 0 0.5rem 0; 
-  font-size: 1.2rem; 
-  color: white; 
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 0.5px;
+.cardContent {
+  flex-grow: 1;
 }
 
-.cardContent p { 
-  margin: 0 0 0.75rem 0; 
-  color: var(--text-muted); 
-  font-size: 0.9rem; 
+.cardContent h3 {
+  margin: 0 0 8px 0;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
-/* Tags */
-.tags { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-
-.tagBlue { 
-  background: rgba(0, 136, 254, 0.15); 
-  color: #4da6ff; 
-  border: 1px solid #4da6ff; 
-  padding: 4px 10px; 
-  border-radius: 4px; 
-  font-size: 0.8rem; 
-  font-weight: 600; 
+.cardContent p {
+  margin: 0 0 8px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
 }
 
-.tagOrange { 
-  background: rgba(255, 128, 66, 0.15); 
-  color: #ff9f68; 
-  border: 1px solid #ff9f68; 
-  padding: 4px 10px; 
-  border-radius: 4px; 
-  font-size: 0.8rem; 
-  font-weight: 600; 
+.tags {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
 
-/* Status Badge */
+.tagBlue, .tagOrange {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.tagBlue {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.tagOrange {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* --- STATUS BADGE --- */
 .statusBadge {
-  background: rgba(0, 255, 157, 0.1);
-  color: var(--success-neon);
-  border: 1px solid var(--success-neon);
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
   padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: bold;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  white-space: nowrap; /* Prevent badge wrap */
+  white-space: nowrap;
 }
 
-/* --- MOBILE RESPONSIVENESS --- */
-@media (max-width: 768px) {
-  .pageTitle {
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
-  }
+/* --- STATES --- */
+.loading {
+  text-align: center;
+  margin-top: 50px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.1rem;
+}
 
-  /* --- Full Width Scrollable Tabs --- */
-  .tabs {
-    display: flex;
-    justify-content: flex-start; /* Align start for scrolling */
-    gap: 0.8rem;
-    padding-bottom: 0.5rem;
-    margin-bottom: 2rem;
-    
-    /* Ensure it takes full width */
-    width: 100vw; 
-    margin-left: -1rem; /* Counteract container padding */
-    padding-left: 1rem; /* Add left padding back */
-    padding-right: 1rem; /* Add right padding */
-    
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
+.empty {
+  text-align: center;
+  padding: 60px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.5);
+}
 
-  .tab {
-    flex: 0 0 auto; /* Don't shrink, don't grow */
-    padding: 0.7rem 1.5rem;
-    font-size: 0.95rem;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 30px; /* Pill shape */
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-  .activeTab {
-    background: rgba(0, 255, 224, 0.15) !important;
-    border-color: var(--primary-neon);
-    color: var(--primary-neon) !important;
-    text-shadow: none; /* Cleaner on mobile */
-  }
-  
-  .activeTab::after {
-    display: none; /* Remove underline on mobile */
-  }
-
-  /* --- Stacked Cards --- */
+/* Mobile */
+@media (max-width: 600px) {
   .card {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-    padding: 1.2rem;
   }
-
   .cardImageWrapper {
     width: 100%;
-    height: 160px; /* Bigger banner image */
-    margin-right: 0;
-    border-radius: var(--radius-sm);
+    height: 150px;
   }
-
-  .cardContent {
-    width: 100%;
-  }
-
   .statusBadge {
     align-self: flex-start;
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
-    padding: 4px 10px;
+    margin-top: 10px;
   }
 }

@@ -1,92 +1,130 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap');
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* --- 🌌 NEO-CITY PALETTE --- */
-  --bg-dark: #050505;       /* Deepest Black */
-  --bg-panel: #0F0F12;      /* Card Background */
+  /* --- 🌌 BACKGROUND --- */
+  --bg-dark: #050505;
+
+  /* --- 🧊 THE GLASS RECIPE (Apple Style) --- */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-highlight: rgba(255, 255, 255, 0.15);
+  --glass-blur: 25px; 
+  --glass-saturation: 180%; 
+
+  /* --- 🎨 COLORS --- */
+  /* Primary: Electric Blue */
+  --accent-primary: #3b82f6; 
+  --accent-glow: rgba(59, 130, 246, 0.5);
   
-  /* Neon Accents */
-  --primary-neon: #00FFE0;  /* Cyan Glow */
-  --secondary-neon: #9B5CFF; /* Electric Purple */
-  --error-neon: #FF2E63;    /* Cyber Red */
-  --success-neon: #00FF9D;  /* Matrix Green */
+  /* Secondary: Violet/Purple */
+  --accent-secondary: #8b5cf6; 
+
+  /* Status Colors */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
 
   /* Text */
-  --text-main: #FFFFFF;
-  --text-muted: #A0A0B0;
+  --text-main: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.6);
 
-  /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.03);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --blur-amt: 12px;
-
-  /* Spacing & Radius */
-  --radius-sm: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
-}
-::-webkit-scrollbar {
-  display: none;
+  /* Shapes */
+  --radius-xl: 32px;
+  --radius-lg: 20px;
+  --radius-md: 12px;
+  --radius-pill: 100px;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
-html, body, * {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
 /* --- RESET & BASE --- */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  outline: none;
+}
 
 body {
   background-color: var(--bg-dark);
   color: var(--text-main);
   font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
   overflow-x: hidden;
-  /* Subtle Grid Background for that "Tech" feel */
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+  /* Removed the Grid Background to let the Blobs shine */
 }
 
-/* --- TYPOGRAPHY --- */
-h1, h2, h3 {
-  font-family: 'Orbitron', sans-serif; /* Futuristic Headers */
-  letter-spacing: 1px;
-  background: linear-gradient(90deg, #fff, var(--primary-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* --- SCROLLBAR HIDING (Kept your logic) --- */
+::-webkit-scrollbar {
+  display: none;
+}
+html, body, * {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
 
-a { text-decoration: none; color: inherit; transition: 0.3s; }
-
-/* --- UTILITIES (Apply these classes anywhere) --- */
+/* --- 🧊 UTILITY CLASSES (Use these everywhere) --- */
 
 /* 1. The Glass Card Effect */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(var(--blur-amt));
-  -webkit-backdrop-filter: blur(var(--blur-amt));
-  border: var(--glass-border);
-  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+  border: 1px solid var(--glass-border);
+  border-top: 1px solid var(--glass-highlight);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-lg);
 }
 
-/* 2. Neon Glow Hover */
-.neon-hover:hover {
-  box-shadow: 0 0 15px var(--primary-neon), inset 0 0 5px var(--primary-neon);
-  border-color: var(--primary-neon);
+/* 2. Interactive Glass (Hover effects) */
+.glass-interactive {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  cursor: pointer;
+}
+.glass-interactive:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* 3. Page Transition Animation */
-@keyframes slideUpFade {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+/* 3. Glass Inputs */
+.glass-input {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+.glass-input:focus {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
 }
 
-.animate-page {
-  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* 4. Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
-.hidden { display: none; }
-.fade-in-content { animation: fadeIn 1s; }
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* 5. Typography */
+h1, h2, h3 {
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  color: white;
+}

@@ -22,13 +22,25 @@ const NewsTicker = () => {
   if (!message) return null;
 
   return (
-    <div className={styles.tickerContainer}>
-      <div className={styles.label}>💠 CITY UPDATES</div>
-      <div className={styles.scrollWrapper}>
-        <div className={styles.scrollingText}>
-          {message} &nbsp; • &nbsp; {message} &nbsp; • &nbsp; {message}
+    <div className={styles.wrapper}>
+        <div className={styles.tickerContainer}>
+        {/* The Glass Badge */}
+        <div className={styles.label}>
+            <span className={styles.dot}>●</span> 
+            SYSTEM ALERT
         </div>
-      </div>
+        
+        {/* The Scrolling Text Area */}
+        <div className={styles.scrollWrapper}>
+            <div className={styles.scrollingText}>
+            {/* Repeat message 4 times for smooth infinite loop on wide screens */}
+            {message} &nbsp; • &nbsp; 
+            {message} &nbsp; • &nbsp; 
+            {message} &nbsp; • &nbsp; 
+            {message} &nbsp; • &nbsp;
+            </div>
+        </div>
+        </div>
     </div>
   );
 };

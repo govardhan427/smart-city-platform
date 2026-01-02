@@ -1,160 +1,162 @@
+/* src/components/layout/Navbar.module.css */
+
+/* --- 1. THE FLOATING GLASS PILL --- */
 .navbar {
-  width: 100%;
-  height: 80px;
+  /* Positioning */
   position: sticky;
-  top: 0;
+  top: 20px; /* Floats it off the top edge */
   z-index: 1000;
-  position: sticky;
   
-  /* Glassmorphism */
-  background: rgba(5, 5, 5, 0.6); /* Semi-transparent black */
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  /* Size & Shape */
+  width: 95%;
+  max-width: 1200px;
+  height: 70px;
+  margin: 0 auto; /* Centers it horizontally */
+  border-radius: 100px; /* The Pill Shape */
+  
+  /* The Crystal Glass Effect */
+  background: rgba(255, 255, 255, 0.01); /* Almost invisible background */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  
+  /* Borders & Shadows */
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Subtle edge */
+  border-top: 1px solid rgba(255, 255, 255, 0.15); /* Top highlight */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Deep shadow for depth */
+  
+  /* Layout */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 30px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 2. LOGO (Gradient Text) --- */
+.logo {
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  
+  /* Gradient Fill */
+  background: linear-gradient(to right, #ffffff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   
   display: flex;
   align-items: center;
-  padding: 0 2rem;
+  gap: 10px;
+  transition: opacity 0.2s;
 }
 
-.navContainer {
-  width: 100%; max-width: 1400px; margin: 0 auto;
-  display: flex; justify-content: space-between; align-items: center;
+.logo:hover {
+  opacity: 0.8;
 }
 
-.navBrand {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-main);
-  text-shadow: 0 0 10px rgba(0, 255, 224, 0.3);
-  display: flex; align-items: center; gap: 10px;
+/* --- 3. LINKS --- */
+.navLinks {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  list-style: none;
 }
 
-.navbarNav { display: flex; gap: 2rem; list-style: none; align-items: center; }
-
-.navLink {
-  color: var(--text-muted);
+.link {
+  color: rgba(255, 255, 255, 0.6); /* Muted white */
+  text-decoration: none;
   font-size: 0.95rem;
   font-weight: 500;
+  transition: all 0.2s ease;
   position: relative;
-  transition: all 0.3s ease;
 }
 
-.navLink:hover {
-  color: var(--primary-neon);
-  text-shadow: 0 0 8px var(--primary-neon);
+/* Hover Effect: Turns white & floats up slightly */
+.link:hover {
+  color: #ffffff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 
-/* The active indicator line */
-.navLink::after {
-  content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 2px;
-  background: var(--primary-neon); transition: 0.3s;
-}
-.navLink:hover::after { width: 100%; }
-
-/* Special Admin Link */
-.navLinkAdmin {
-  color: var(--secondary-neon);
+/* Active Link State */
+.active {
+  color: #ffffff;
   font-weight: 600;
 }
-.navLinkAdmin:hover { color: #b98aff; text-shadow: 0 0 8px #b98aff; }
+.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #3b82f6; /* Blue Dot */
+  border-radius: 50%;
+  box-shadow: 0 0 8px #3b82f6;
+}
 
-/* Logout Button */
-.navButton {
-  background: transparent;
-  border: 1px solid var(--error-neon);
-  color: var(--error-neon);
-  padding: 8px 16px;
-  border-radius: 20px;
+/* --- 4. BUTTONS --- */
+
+/* Logout Button (Subtle Red Glass) */
+.logoutBtn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 8px 20px;
+  border-radius: 50px;
   font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: 0.3s;
-}
-.navButton:hover {
-  background: var(--error-neon); color: white;
-  box-shadow: 0 0 15px var(--error-neon);
-}
-/* ... existing code ... */
-
-/* LOGO ANIMATION */
-.logoSvg {
-  height: 40px;
-  width: 40px;
-  /* Neon Cyan Color */
-  color: var(--primary-neon); 
-  /* Push text slightly to the right */
-  margin-right: 12px;
-  /* The Pulse Animation */
-  animation: logoGlow 2s ease-in-out infinite alternate;
+  transition: all 0.2s;
 }
 
-@keyframes logoGlow {
-  0% { 
-    filter: drop-shadow(0 0 2px rgba(0, 255, 224, 0.5));
-    transform: scale(1);
-  }
-  100% { 
-    filter: drop-shadow(0 0 15px rgba(0, 255, 224, 1));
-    transform: scale(1.05); /* Subtle breathing effect */
-  }
+.logoutBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
 }
 
-/* --- MOBILE RESPONSIVENESS --- */
+/* Login Button (If visible) */
+.loginBtn {
+  background: white;
+  color: black;
+  padding: 8px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: transform 0.2s;
+}
+.loginBtn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+}
+
+/* --- 5. MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-    body {
-    overflow-x: hidden;
-  }
-
   .navbar {
+    top: 10px;
+    width: 92%;
     height: auto;
-    padding: 1rem;
-    
-    /* FIX: Change from relative to sticky so it stays at the top */
-    position: sticky; 
-    top: 0;
-    
-    /* Ensure background is solid enough to hide content behind it */
-    background: rgba(5, 5, 5, 0.95); 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .navContainer {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-    width: 100%;
-    margin: 0;
+    padding: 15px 20px;
+    border-radius: 24px; /* Less rounded on mobile */
+    background: rgba(20, 20, 25, 0.7); /* Darker for readability */
+    gap: 15px;
   }
 
-  .navBrand {
+  .navLinks {
     width: 100%;
-    justify-content: center; /* Center logo on mobile */
-    font-size: 1.2rem;
-  }
-
-  .navbarNav {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 1rem;
-    max-width: 100%;
-    overflow-x: auto; /* Enable horizontal scroll */
-    padding-bottom: 5px; /* Space for scrollbar (hidden) */
-    white-space: nowrap; /* Keep links on one line */
-    
-    /* Hide scrollbar visually but allow scrolling */
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-bottom: 5px;
   }
   
-  .navbarNav::-webkit-scrollbar {
-    display: none;
-  }
-
-  .navLink, .navButton {
+  .link {
     font-size: 0.9rem;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.05); /* Add pill background for touch targets */
-    border-radius: 20px;
   }
 }

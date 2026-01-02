@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
-import styles from './LoginPage.module.css'; // Reusing the login page styles
+// Reuse the glass styling from Login to ensure consistency
+import styles from './LoginPage.module.css'; 
 
-// Import our new reusable components
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { toast } from 'react-toastify';
@@ -22,15 +22,14 @@ const RegisterPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // 1. Check for password match
+    // 1. Validation
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      toast.warn("Passwords do not match.");
       return;
     }
     
-    // 2. Check for password length (example validation)
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      toast.warn("Password must be at least 8 characters long.");
       return;
     }
 
@@ -38,20 +37,19 @@ const RegisterPage = () => {
     setError(null);
 
     try {
-      // 3. Call the register function from our AuthContext
-      await register(username,email, password);
-      toast.success("Registration successful! Welcome to the community.");
-      // 4. On success, redirect to the homepage
+      await register(username, email, password);
+      toast.success("Welcome to CityOS! Account initialized.");
       navigate('/');
     } catch (err) {
+      // Backend error handling
       if (err.response?.data?.username) {
-        toast.error(`❌ ${err.response.data.username[0]}`);
+        setError(`Username error: ${err.response.data.username[0]}`);
       } else if (err.response?.data?.email) {
-        toast.error(`❌ ${err.response.data.email[0]}`);
+        setError(`Email error: ${err.response.data.email[0]}`);
       } else {
-        toast.error("Registration failed.");
+        setError("Registration failed. Please try again.");
       }
-    }finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -59,20 +57,21 @@ const RegisterPage = () => {
   return (
     <div className={styles.authContainer}>
       <form className={styles.authForm} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Create your Account</h2>
+        
+        <h2 className={styles.title}>New Resident Registration</h2>
         
         {/* Error Message */}
         {error && <div className={styles.errorBox}>{error}</div>}
 
         <Input 
-          label="USERNAME"
+          label="Choose Username"
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          placeholder="e.g. NeoUser2077"
+          placeholder="e.g. NeoCitizen2077"
         />
-        {/* Email Input (Using reusable component) */}
+
         <Input 
           label="Email Address"
           id="email"
@@ -81,9 +80,9 @@ const RegisterPage = () => {
           onChange={(e) => setEmail(e.target.value)}
           required
           autoComplete="email"
+          placeholder="user@smartcity.com"
         />
 
-        {/* Password Input (Using reusable component) */}
         <Input 
           label="Password"
           id="password"
@@ -92,9 +91,9 @@ const RegisterPage = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
           autoComplete="new-password"
+          placeholder="Min. 8 characters"
         />
         
-        {/* Confirm Password Input (Using reusable component) */}
         <Input 
           label="Confirm Password"
           id="confirmPassword"
@@ -103,24 +102,27 @@ const RegisterPage = () => {
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
           autoComplete="new-password"
+          placeholder="Repeat password"
         />
 
-        {/* Submit Button (Using reusable component) */}
-        <Button 
-          type="submit" 
-          disabled={loading}
-          variant="primary"
-        >
-          {loading ? 'Creating Account...' : 'Sign Up'}
-        </Button>
+        <div style={{ marginTop: '20px' }}>
+            <Button 
+                type="submit" 
+                disabled={loading} 
+                variant="primary"
+                style={{ width: '100%' }}
+            >
+                {loading ? 'Initializing ID...' : 'Create Account'}
+            </Button>
+        </div>
 
-        {/* Link to Login Page */}
-        <p className={styles.redirectText}>
-          Already have an account?{' '}
+        {/* Footer Links */}
+        <div className={styles.redirectText}>
+          Already a resident?
           <Link to="/login" className={styles.redirectLink}>
-            Log in here
+            Access System
           </Link>
-        </p>
+        </div>
       </form>
     </div>
   );

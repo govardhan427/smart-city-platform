@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import transportService from '../services/transportService';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import styles from './BookFacilityPage.module.css'; // Reuse form styles
+import styles from './BookParkingPage.module.css'; // New dedicated styles
 import { toast } from 'react-toastify';
 
 const BookParkingPage = () => {
@@ -25,13 +25,14 @@ const BookParkingPage = () => {
         vehicle_number: vehicle,
         start_time: startTime
       });
-      toast.success("Parking Spot Reserved!,Check your email");
+      toast.success("🚗 Parking Slot Reserved Successfully!");
       navigate('/parking');
     } catch (err) {
       if (err.response && err.response.data && err.response.data.error) {
-        setError(err.response.data.error); // Show "Lot is Full" error
+        setError(err.response.data.error); 
+        toast.error(err.response.data.error);
       } else {
-        toast.error("Booking failed.");
+        toast.error("Booking failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -40,32 +41,46 @@ const BookParkingPage = () => {
 
   return (
     <div className={styles.container}>
-      <div className={styles.formCard} style={{maxWidth: '500px', margin: '2rem auto'}}>
-        <h2 className={styles.formTitle}>Reserve Parking Spot</h2>
+      <div className={styles.formCard}>
+        
+        {/* HEADER */}
+        <div className={styles.header}>
+            <div className={styles.icon}>🅿️</div>
+            <h2 className={styles.title}>Secure Parking</h2>
+            <p className={styles.subtitle}>Enter vehicle details to reserve your spot.</p>
+        </div>
+
         {error && <div className={styles.errorBox}>{error}</div>}
         
-        <form onSubmit={handleBook}>
+        {/* INFO TIP */}
+        <div className={styles.infoBox}>
+            <span>ℹ️</span>
+            <span>Billing starts from the estimated arrival time.</span>
+        </div>
+        
+        <form onSubmit={handleBook} className={styles.form}>
           <Input 
-            label="Vehicle Number Plate"
+            label="Vehicle License Plate"
             id="vehicle"
             value={vehicle}
-            onChange={(e) => setVehicle(e.target.value)}
+            onChange={(e) => setVehicle(e.target.value.toUpperCase())}
             required
-            placeholder="e.g. KA-01-AB-1234"
+            placeholder="e.g. MH-12-AB-1234"
           />
           
           <Input 
-            label="Estimated Arrival Time"
+            label="Arrival Time"
             id="startTime"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
+            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
           />
 
-          <div style={{marginTop: '1.5rem'}}>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Reserving...' : 'Confirm Reservation'}
+          <div style={{marginTop: '10px'}}>
+            <Button type="submit" disabled={loading} variant="primary" style={{width: '100%'}}>
+              {loading ? 'Processing Reservation...' : 'Confirm Spot'}
             </Button>
           </div>
         </form>

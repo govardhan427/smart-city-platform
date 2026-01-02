@@ -1,78 +1,111 @@
+/* src/pages/HomePage.module.css */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 0 20px 80px 20px;
+  /* Push content down so it clears the Floating Navbar */
+  padding-top: 40px; 
+  animation: fadeIn 0.8s ease-out;
 }
 
+/* --- HERO SECTION --- */
 .hero {
   text-align: center;
-  margin-bottom: 4rem;
-  animation: fadeIn 1s ease-out;
+  margin-bottom: 60px;
+  position: relative;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.pulse {
+  color: #10b981;
+  animation: pulse 2s infinite;
 }
 
 .greeting {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin: 0 0 15px 0;
+  color: white;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
 }
 
 .username {
-  font-size: 3rem;
-  color: var(--primary-neon);
-  text-transform: uppercase;
-  text-shadow: 0 0 20px rgba(0, 255, 224, 0.4);
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .subtitle {
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  letter-spacing: 2px;
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
+/* --- SECTIONS --- */
 .sectionTitle {
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  border-left: 4px solid var(--primary-neon);
-  padding-left: 1rem;
-  margin-bottom: 2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   letter-spacing: 2px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
+.sectionTitle::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* --- GRID LAYOUT --- */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
 }
 
+/* --- ANIMATIONS --- */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; text-shadow: 0 0 10px #10b981; }
+  100% { opacity: 0.5; }
+}
+
+/* --- MOBILE --- */
 @media (max-width: 768px) {
-  .container, .homeContainer {
-    padding: 1rem; /* Less padding */
-  }
-
-  .title {
-    font-size: 1.8rem;
-    margin-bottom: 2rem;
-  }
-
-  .grid {
-    /* Force 1 column on mobile */
-    grid-template-columns: 1fr; 
-    gap: 1.5rem;
-  }
-
-  .hero {
-    margin-bottom: 2rem;
-  }
-
   .greeting {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
-  .username {
-  font-size: 1.6rem;
-}
+  
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
 }

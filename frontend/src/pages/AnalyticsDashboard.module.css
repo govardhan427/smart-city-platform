@@ -1,49 +1,45 @@
+/* src/pages/AnalyticsDashboard.module.css */
+
 .container {
-  max-width: 1300px; /* Slightly wider for charts */
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1rem 4rem 1rem;
+  
+  /* PADDING FIX: Ensure content clears the navbar */
+  padding: 80px 20px 80px 20px;
+  
   animation: fadeIn 0.8s ease-out;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* --- Header Section (Title + Download Button) --- */
+/* ... (Keep Header, Title, DownloadBtn styles same as before) ... */
 .headerRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3rem;
-  flex-wrap: wrap; /* Allows wrapping on mobile */
-  gap: 1.5rem;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
 }
 
 .title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-  
-  /* Gradient Text */
-  background: linear-gradient(90deg, #fff, var(--primary-neon));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  
-  /* Text Shadow Glow */
-  filter: drop-shadow(0 0 15px rgba(0, 255, 224, 0.3));
+  color: white;
+  letter-spacing: -1px;
 }
 
-/* Download Button Style */
+.subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 5px;
+  font-size: 1rem;
+}
+
 .downloadBtn {
-  background: rgba(0, 123, 255, 0.1);
-  color: #4da6ff;
-  border: 1px solid #4da6ff;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 10px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: 50px;
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   font-size: 0.9rem;
@@ -51,202 +47,242 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
-
 .downloadBtn:hover {
-  background: #4da6ff;
-  color: #000;
-  box-shadow: 0 0 15px rgba(77, 166, 255, 0.4);
+  background: white;
+  color: black;
   transform: translateY(-2px);
 }
 
-/* --- Summary Cards Grid --- */
+/* ... (Keep Summary Cards styles same as before) ... */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-  margin-bottom: 4rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
-/* --- Summary Card Design --- */
 .card {
-  position: relative;
-  background: rgba(20, 20, 25, 0.6); /* Semi-transparent dark */
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  
-  /* Subtle Border */
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  padding: 2rem;
-  
+  border-radius: 20px;
+  padding: 24px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
   overflow: hidden;
 }
 
-/* Hover Effect: Lift & Glow */
-.card:hover {
-  transform: translateY(-8px);
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--primary-neon);
-  box-shadow: 0 10px 30px -10px rgba(0, 255, 224, 0.15),
-              inset 0 0 20px rgba(0, 255, 224, 0.05);
+.clickable {
+  cursor: pointer;
 }
 
-/* Add a glowing line at the top instead of bottom for a "Scanner" look */
-.card::before {
+.clickable:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(96, 165, 250, 0.5); /* Light Blue border on hover */
+  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3);
+}
+
+.clickable:active {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px -5px rgba(59, 130, 246, 0.3);
+}
+
+/* Add a subtle shine effect on hover */
+.clickable::after {
   content: '';
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 3px;
-  background: linear-gradient(90deg, transparent, var(--primary-neon), transparent);
-  opacity: 0.5;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  transition: 0.5s;
 }
 
-.card h3 {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+.clickable:hover::after {
+  left: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.cardIcon {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+}
+.cardLabel {
+  font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+  font-weight: 600;
 }
-
 .number {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 3rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: white;
   margin: 0;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  line-height: 1;
+}
+.money { color: #34d399; }
+.subtext {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.money { 
-  color: var(--success-neon);
-  text-shadow: 0 0 15px rgba(0, 255, 157, 0.4);
-}
-
-.subtext { 
-  font-size: 0.8rem; 
-  color: var(--text-muted); 
-  margin-top: 5px;
-  font-style: italic;
-}
-
-/* --- Charts Layout --- */
+/* --- CHARTS GRID --- */
 .chartsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two columns */
-  gap: 2rem;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
 }
 
-/* --- Chart Card Design --- */
 .chartCard {
-  background: rgba(10, 10, 12, 0.6);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-xl);
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-  
+  border-radius: 24px;
+  padding: 24px;
   display: flex;
   flex-direction: column;
-  position: relative;
+  height: auto; 
 }
 
-/* Add corner accents for a "Tech" look */
-.chartCard::after {
-  content: '';
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 20px; height: 20px;
-  border-bottom: 2px solid var(--primary-neon);
-  border-right: 2px solid var(--primary-neon);
-  border-bottom-right-radius: 10px;
-  opacity: 0.5;
+.fullWidth { grid-column: 1 / -1; }
+
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
 }
 
-.fullWidth {
-  grid-column: 1 / -1; /* Span full width */
+.chartHeader h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: white;
 }
 
-.chartTitle {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  color: white;
-  text-align: center;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  
-  /* Subtle separator line */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 1rem;
+.chartBadge {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
 }
 
 .chartWrapper {
   flex-grow: 1;
   width: 100%;
-  height: 350px; /* Increased height slightly for better visibility */
+  height: 300px;
   min-height: 0;
+  position: relative;
 }
 
-/* Loading & Error */
-.loading, .error {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 60vh;
-  font-size: 1.5rem;
-  color: var(--text-muted);
-  font-family: 'Orbitron', sans-serif;
-  letter-spacing: 2px;
-  animation: pulse 1.5s infinite;
+/* --- FIX: CUSTOM LEGEND (For Pie Chart) --- */
+.customLegend {
+    margin-top: 15px; /* Spacing between chart and legend */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; text-shadow: 0 0 10px var(--primary-neon); }
-  100% { opacity: 0.5; }
+.legendItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    width: 100%;
+    min-width: 0;
 }
 
-/* --- Mobile Responsiveness --- */
+.legendLeft {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    margin-right: 15px;
+}
+
+.legendDot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.legendText {
+    color: rgba(255, 255, 255, 0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.legendVal {
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+/* --- UTILS --- */
+.loadingState {
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.error {
+    text-align: center;
+    padding: 50px;
+    color: #fca5a5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- MOBILE --- */
 @media (max-width: 900px) {
-  /* Header Stacking */
   .headerRow {
     flex-direction: column;
     align-items: flex-start;
+    gap: 20px;
   }
   
-  .downloadBtn {
-    width: 100%; /* Full width button on mobile */
-    justify-content: center;
-  }
-
-  /* Grid Stacking */
-  .cardGrid {
-    grid-template-columns: 1fr; /* Stack summary cards */
-    gap: 1rem;
-  }
-
   .chartsGrid {
-    grid-template-columns: 1fr; /* Stack charts */
-  }
-
-  .chartCard {
-    padding: 1rem;
-    height: auto;
-  }
-
-  .chartWrapper {
-    height: 300px; /* Slightly shorter for mobile */
+    grid-template-columns: 1fr;
   }
   
-  .number {
-    font-size: 2.5rem;
+  .chartWrapper {
+      height: 250px;
   }
 }
