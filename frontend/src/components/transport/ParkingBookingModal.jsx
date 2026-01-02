@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <--- 1. Import useNavigate
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import styles from '../events/EventBookingModal.module.css'; // Reusing the consistent modal theme
@@ -8,15 +9,39 @@ const ParkingBookingModal = ({ lot, onClose }) => {
   const [hours, setHours] = useState(2);
   const [booking, setBooking] = useState(false);
 
+  const navigate = useNavigate(); // <--- 2. Initialize Hook
+
+  // Calculate price upfront
+  const totalPrice = lot.rate_per_hour * hours;
+
   const handleBook = async () => {
     if (!vehicleNumber.trim()) {
         toast.warning("Please enter your vehicle number.");
         return;
     }
+
+    // <--- 3. CHECK FOR PAYMENT --->
+    if (totalPrice > 0) {
+        onClose(); // Close modal
+        navigate('/payment', { 
+            state: { 
+                amount: totalPrice,
+                type: 'parking', // Tell payment page this is for parking
+                details: { 
+                    parking_lot_id: lot.id,
+                    vehicle_number: vehicleNumber,
+                    duration_hours: hours,
+                    name: lot.name
+                }
+            }
+        });
+        return; // STOP here.
+    }
+
+    // <--- 4. IF FREE, BOOK IMMEDIATELY --->
     setBooking(true);
     
     try {
-      // --- FIX 1: Add lot.id to the URL ---
       await api.post(`/transport/parking/${lot.id}/book/`, { 
           vehicle_number: vehicleNumber,
           duration_hours: hours
@@ -27,17 +52,12 @@ const ParkingBookingModal = ({ lot, onClose }) => {
 
     } catch (err) {
       console.error(err);
-      
-      // --- FIX 2: Show specific error from backend (e.g. "Lot is full") ---
       const errorMessage = err.response?.data?.error || "Booking failed. Lot might be full.";
       toast.error(errorMessage);
-
     } finally {
       setBooking(false);
     }
   };
-
-  const totalPrice = lot.rate_per_hour * hours;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -109,7 +129,7 @@ const ParkingBookingModal = ({ lot, onClose }) => {
               <div style={{textAlign: 'right'}}>
                  <div className={styles.label}>Total Fee</div>
                  <div className={styles.totalPrice}>
-                    ₹{totalPrice}
+                    {totalPrice === 0 ? "FREE" : `₹${totalPrice}`}
                  </div>
               </div>
             </div>
@@ -119,7 +139,8 @@ const ParkingBookingModal = ({ lot, onClose }) => {
                 onClick={handleBook} 
                 disabled={booking}
             >
-              {booking ? 'Reserving Spot...' : 'Confirm Reservation'}
+              {/* Dynamic Button Text */}
+              {booking ? 'Reserving Spot...' : (totalPrice > 0 ? 'Proceed to Payment' : 'Confirm Reservation')}
             </button>
           </div>
 

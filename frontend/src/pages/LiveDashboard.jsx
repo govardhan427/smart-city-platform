@@ -142,9 +142,12 @@ const LiveDashboard = () => {
 
         {/* --- PARKING TAB --- */}
         {activeTab === 'parking' && data.parking.map((lot) => {
-           // Assuming 'occupied' comes from API as number of spots taken
-           const available = lot.capacity - lot.occupied;
-           const percentage = Math.round((lot.occupied / lot.capacity) * 100);
+           // FIX: Backend sends 'available_spaces' as the key 'occupied'
+           const availableSpots = lot.occupied; 
+           const takenSpots = lot.capacity - availableSpots;
+           
+           // Percentage should represent how FULL the lot is
+           const percentage = Math.round((takenSpots / lot.capacity) * 100);
 
            return (
             <div key={lot.id} className={styles.card} onClick={() => handleCardClick(lot)}>
@@ -153,7 +156,8 @@ const LiveDashboard = () => {
               <div className={styles.statRow}>
                 <div className={styles.statItem}>
                     <span className={styles.statLabel}>Available Spots</span>
-                    <span className={`${styles.statValue} ${styles.green}`}>{available}</span>
+                    {/* Display the value directly from API since it is the available count */}
+                    <span className={`${styles.statValue} ${styles.green}`}>{availableSpots}</span>
                 </div>
                 <div className={styles.statItem} style={{textAlign: 'right'}}>
                     <span className={styles.statLabel}>Total Capacity</span>
@@ -166,7 +170,7 @@ const LiveDashboard = () => {
                   className={styles.progressBar} 
                   style={{ 
                       width: `${percentage}%`,
-                      // Red if full, Green/Blue otherwise
+                      // Red if > 90% FULL (not empty)
                       background: percentage > 90 ? '#ef4444' : '#10b981'
                   }}
                 ></div>

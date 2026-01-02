@@ -1,22 +1,46 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <--- 1. Import useNavigate
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import styles from '../events/EventBookingModal.module.css'; // Reuse Event Modal Styles for consistency
+import styles from '../events/EventBookingModal.module.css'; 
 
 const FacilityBookingModal = ({ facility, onClose }) => {
   const [bookingDate, setBookingDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
   const [buying, setBuying] = useState(false);
+  
+  const navigate = useNavigate(); // <--- 2. Initialize Hook
 
   const handleBook = async () => {
     if (!bookingDate || !timeSlot) {
         toast.warning("Please select a date and time slot.");
         return;
     }
-    setBuying(true);
+
+    // <--- 3. CHECK FOR PAYMENT --->
+    // If the facility has a price > 0, redirect to Payment Page
+    const price = Number(facility.price);
     
+    if (price > 0) {
+        onClose(); // Close the modal
+        navigate('/payment', { 
+            state: { 
+                amount: price,
+                type: 'facility', // Tell payment page this is a facility
+                details: { 
+                    facility_id: facility.id,
+                    booking_date: bookingDate,
+                    time_slot: timeSlot,
+                    name: facility.name // Optional: for display on payment page
+                }
+            }
+        });
+        return; // STOP here. Do not create booking yet.
+    }
+
+    // <--- 4. IF FREE, BOOK IMMEDIATELY (Existing Logic) --->
+    setBuying(true);
     try {
-      // FIX 1: Send request to the specific URL with ID
       await api.post(`/facilities/${facility.id}/book/`, { 
           booking_date: bookingDate,
           time_slot: timeSlot
@@ -27,11 +51,8 @@ const FacilityBookingModal = ({ facility, onClose }) => {
 
     } catch (err) {
       console.error(err);
-      
-      // FIX 2: Read the actual error message from backend
       const errorMessage = err.response?.data?.error || "Booking failed due to server error.";
       toast.error(errorMessage);
-
     } finally {
       setBuying(false);
     }
@@ -90,19 +111,18 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 <div style={{flex: 1}}>
                     <div className={styles.label} style={{marginBottom:'8px'}}>Time Slot</div>
                     <select 
-    className={styles.counter}
-    style={{width: '100%', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px', background: 'rgba(0,0,0,0.3)'}}
-    value={timeSlot}
-    onChange={(e) => setTimeSlot(e.target.value)}
->
-    <option value="" style={{color: 'black'}}>Select Slot</option>
-
-    {/* THESE VALUES MUST MATCH models.py EXACTLY */}
-    <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
-    <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
-    <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
-    <option value="18:00-20:00" style={{color: 'black'}}>Night (6 PM - 8 PM)</option>
-</select>
+                        className={styles.counter}
+                        style={{width: '100%', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px', background: 'rgba(0,0,0,0.3)'}}
+                        value={timeSlot}
+                        onChange={(e) => setTimeSlot(e.target.value)}
+                    >
+                        <option value="" style={{color: 'black'}}>Select Slot</option>
+                        {/* MATCHING DJANGO BACKEND SLOTS */}
+                        <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
+                        <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
+                        <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
+                        <option value="18:00-20:00" style={{color: 'black'}}>Night (6 PM - 8 PM)</option>
+                    </select>
                 </div>
             </div>
 
@@ -120,7 +140,8 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 onClick={handleBook} 
                 disabled={buying}
             >
-              {buying ? 'Confirming...' : 'Book Facility'}
+              {/* Change button text dynamically */}
+              {buying ? 'Processing...' : (facility.price > 0 ? 'Proceed to Payment' : 'Book Now')}
             </button>
           </div>
 

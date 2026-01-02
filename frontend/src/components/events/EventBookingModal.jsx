@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // <--- 1. Import useNavigate
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import styles from './EventBookingModal.module.css';
@@ -6,41 +7,56 @@ import styles from './EventBookingModal.module.css';
 const EventBookingModal = ({ event, onClose }) => {
   const [tickets, setTickets] = useState(1);
   const [buying, setBuying] = useState(false);
+  
+  const navigate = useNavigate(); // <--- 2. Initialize Hook
 
   // Helper to format Date
   const formatDate = (dateString, timeString) => {
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
     const date = new Date(dateString).toLocaleDateString(undefined, options);
-    
-    // Format time if needed (simple slice or regex)
     const time = timeString ? timeString.slice(0, 5) : ''; 
     return `${date} • ${time}`;
   };
 
+  // Calculate price upfront so we can use it in logic
+  const totalPrice = event.price ? (event.price * tickets) : 0;
+
   const handleBuy = async () => {
     if (tickets < 1) return;
+
+    // <--- 3. CHECK FOR PAYMENT --->
+    if (totalPrice > 0) {
+        onClose(); // Close modal
+        navigate('/payment', { 
+            state: { 
+                amount: totalPrice,
+                type: 'event', // Tell payment page this is an event
+                details: { 
+                    event_id: event.id,
+                    tickets: tickets,
+                    name: event.title 
+                }
+            }
+        });
+        return; // STOP here.
+    }
+
+    // <--- 4. IF FREE, BOOK IMMEDIATELY --->
     setBuying(true);
     
     try {
-      // POST to booking endpoint
-      // Ensure the URL matches backend: /events/<id>/register/
       await api.post(`/events/${event.id}/register/`, { tickets });
       
       toast.success(`Successfully booked ${tickets} ticket(s)!`);
-      onClose(); // Close modal on success
+      onClose(); 
     } catch (err) {
       console.error(err);
-      
-      // FIX: Show specific error from backend (e.g., "You are already registered")
       const errorMessage = err.response?.data?.error || "Booking failed. Please try again.";
       toast.error(errorMessage);
-      
     } finally {
       setBuying(false);
     }
   };
-
-  const totalPrice = event.price ? (event.price * tickets) : 0;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -54,9 +70,7 @@ const EventBookingModal = ({ event, onClose }) => {
              alt={event.title} 
              className={styles.modalImage}
           />
-          <div className={styles.imageOverlay}>
-              {/* Optional: Add icons or badges here */}
-          </div>
+          <div className={styles.imageOverlay}></div>
         </div>
 
         {/* RIGHT: DETAILS */}
@@ -73,7 +87,6 @@ const EventBookingModal = ({ event, onClose }) => {
             {event.description || "No description available for this event."}
           </p>
           
-          {/* External Map Link if available */}
           {event.google_maps_url && (
              <a 
                href={event.google_maps_url} 
@@ -116,7 +129,8 @@ const EventBookingModal = ({ event, onClose }) => {
                 onClick={handleBuy} 
                 disabled={buying}
             >
-              {buying ? 'Processing...' : 'Confirm Booking'}
+              {/* Dynamic Button Text */}
+              {buying ? 'Processing...' : (totalPrice > 0 ? 'Proceed to Payment' : 'Confirm Booking')}
             </button>
           </div>
 

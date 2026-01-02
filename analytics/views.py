@@ -20,6 +20,8 @@ from .serializers import AnnouncementSerializer
 from rest_framework import generics
 from itertools import chain
 from operator import attrgetter
+from django.db.models import Sum, F, Count
+from django.db.models.functions import Coalesce
 
 # Import models
 from events.models import Event, Registration
@@ -28,6 +30,7 @@ from transport.models import ParkingLot, ParkingBooking
 import google.generativeai as genai
 import os
 from django.conf import settings
+from django.db import models  # <--- Add this line
 
 User = get_user_model()
 
@@ -36,11 +39,32 @@ class DashboardStatsView(APIView):
 
     def get(self, request):
         # --- 1. HEADLINE STATS ---
+        
+        # A. Total Registered Users (Citizens)
         total_users = User.objects.count()
-        total_revenue = ParkingBooking.objects.count() * 5.00 # $5 per parking
+
+        # B. Calculate REAL Total Revenue (Summing actual database values)
+        
+        # 1. Event Revenue: Sum(tickets * event_price)
+        event_revenue = Registration.objects.aggregate(
+            total=Coalesce(Sum(F('tickets') * F('event__price')), 0.00, output_field=models.DecimalField())
+        )['total']
+
+        # 2. Facility Revenue: Sum(facility_price)
+        facility_revenue = Booking.objects.aggregate(
+            total=Coalesce(Sum('facility__price'), 0.00, output_field=models.DecimalField())
+        )['total']
+
+        # 3. Parking Revenue: Sum(rate_per_hour) 
+        # (Note: Since we don't store duration in DB yet, we assume 1 hour fee per booking for now)
+        parking_revenue = ParkingBooking.objects.aggregate(
+            total=Coalesce(Sum('parking_lot__rate_per_hour'), 0.00, output_field=models.DecimalField())
+        )['total']
+
+        # GRAND TOTAL
+        total_revenue = float(event_revenue) + float(facility_revenue) + float(parking_revenue)
         
         # --- 2. MOST POPULAR EVENTS (Pie Chart Data) ---
-        # Get top 5 events by registration count
         popular_events = Event.objects.annotate(
             attendees=Count('registrations')
         ).order_by('-attendees')[:5]
@@ -51,16 +75,13 @@ class DashboardStatsView(APIView):
         ]
 
         # --- 3. FACILITY USAGE BY DAY OF WEEK (Bar Chart Data) ---
-        # 1=Sunday, 2=Monday, ..., 7=Saturday
         facility_days = Booking.objects.annotate(
             weekday=ExtractWeekDay('booking_date')
         ).values('weekday').annotate(count=Count('id')).order_by('weekday')
 
-        # Map numbers to names
         day_map = {1: 'Sun', 2: 'Mon', 3: 'Tue', 4: 'Wed', 5: 'Thu', 6: 'Fri', 7: 'Sat'}
         facility_chart_data = []
         
-        # Helper to ensure we don't crash if data is empty
         for item in facility_days:
             if item['weekday'] in day_map:
                 facility_chart_data.append({
@@ -68,8 +89,7 @@ class DashboardStatsView(APIView):
                     "bookings": item['count']
                 })
 
-        # --- 4. PARKING LOT OCCUPANCY (Heatmap/Bar Data) ---
-        # Which lots have the most bookings?
+        # --- 4. PARKING LOT OCCUPANCY ---
         busy_parking = ParkingLot.objects.annotate(
             usage=Count('bookings')
         ).order_by('-usage')
@@ -89,7 +109,7 @@ class DashboardStatsView(APIView):
         return Response({
             "counts": {
                 "users": total_users,
-                "revenue": total_revenue,
+                "revenue": total_revenue, # Now sends raw number (e.g., 5500.00)
                 "busiest_hour": busiest_hour_text
             },
             "charts": {
