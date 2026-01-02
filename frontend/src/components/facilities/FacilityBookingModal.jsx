@@ -29,7 +29,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
       console.error(err);
       
       // FIX 2: Read the actual error message from backend
-      // This will show "This time slot is already booked" or "Booking failed: Email error"
       const errorMessage = err.response?.data?.error || "Booking failed due to server error.";
       toast.error(errorMessage);
 
@@ -97,10 +96,11 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                         onChange={(e) => setTimeSlot(e.target.value)}
                     >
                         <option value="" style={{color: 'black'}}>Select Slot</option>
-                        <option value="09:00-10:00" style={{color: 'black'}}>09:00 AM - 10:00 AM</option>
-                        <option value="10:00-11:00" style={{color: 'black'}}>10:00 AM - 11:00 AM</option>
-                        <option value="14:00-15:00" style={{color: 'black'}}>02:00 PM - 03:00 PM</option>
-                        <option value="16:00-17:00" style={{color: 'black'}}>04:00 PM - 05:00 PM</option>
+                        {/* UPDATED SLOTS TO MATCH BACKEND MODELS.PY */}
+                        <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
+                        <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
+                        <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
+                        <option value="18:00-20:00" style={{color: 'black'}}>Night (6 PM - 8 PM)</option>
                     </select>
                 </div>
             </div>

@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
+from django.utils import timezone # <--- FIX 1: Import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
-from django.db import transaction # <--- Important Import
+from django.db import transaction
 from .models import ParkingLot, ParkingBooking
 from .serializers import ParkingLotSerializer, ParkingBookingSerializer
 from events.utils import generate_qr_code_bytes
@@ -28,6 +29,14 @@ class BookParkingView(APIView):
         data = request.data.copy()
         data['parking_lot'] = lot.id
         
+        # --- FIX 2: Set start_time to NOW automatically ---
+        # The frontend doesn't send this, so we must set it here.
+        data['start_time'] = timezone.now()
+
+        # Note: 'duration_hours' sent by frontend is currently ignored by the serializer
+        # because the model doesn't have a 'duration' field. 
+        # If you want to save it, you need to add a field to the ParkingBooking model.
+
         serializer = ParkingBookingSerializer(data=data)
         if serializer.is_valid():
             try:
@@ -37,7 +46,6 @@ class BookParkingView(APIView):
                     booking = serializer.save(user=request.user)
                     
                     # 4. Generate QR & Send Email
-                    # If this block fails, the booking above is undone
                     qr_bytes = generate_qr_code_bytes(f"parking:{booking.id}")
                     
                     try:
@@ -48,10 +56,8 @@ class BookParkingView(APIView):
                             qr_code_bytes=qr_bytes
                         )
                     except Exception as email_error:
-                        # Raise error to trigger rollback
                         raise Exception(f"Email sending failed: {str(email_error)}")
             
-                # Both succeeded
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
             except Exception as e:
@@ -71,9 +77,6 @@ class MyParkingView(generics.ListAPIView):
         return ParkingBooking.objects.filter(user=self.request.user).order_by('-created_at')
 
 class ParkingLotCreateView(generics.CreateAPIView):
-    """
-    Allows Admins to create a new Parking Lot.
-    """
     queryset = ParkingLot.objects.all()
     serializer_class = ParkingLotSerializer
     permission_classes = [IsAdminUser]
