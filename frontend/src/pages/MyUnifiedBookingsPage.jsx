@@ -3,6 +3,7 @@ import api from '../services/api';
 // Use the common RegistrationCard for events
 import RegistrationCard from '../components/RegistrationCard/RegistrationCard'; 
 import styles from './MyUnifiedBookingsPage.module.css';
+import SkeletonCard from '../components/common/SkeletonCard';
 
 const MyUnifiedBookingsPage = () => {
   const [activeTab, setActiveTab] = useState('events'); // 'events', 'facilities', 'parking'
@@ -110,11 +111,22 @@ const MyUnifiedBookingsPage = () => {
     );
   };
 
-  if (loading) return <div className={styles.loading}>Syncing Digital Wallet...</div>;
+  if (loading) {
+    return (
+      <div className={styles.container}>
+        <h1 className={styles.pageTitle}>My Bookings</h1>
+        <div className={styles.list}>
+          {[...Array(2)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.pageTitle}>My Wallet</h1>
+      <h1 className={styles.pageTitle}>My Bookings</h1>
 
       {/* TABS */}
       <div className={styles.tabs}>
@@ -137,7 +149,6 @@ const MyUnifiedBookingsPage = () => {
           Parking ({parking.length})
         </button>
       </div>
-
       {/* CONTENT */}
       <div className={styles.contentArea}>
         {activeTab === 'events' && renderEvents()}

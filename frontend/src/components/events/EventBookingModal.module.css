@@ -1,0 +1,202 @@
+/* src/components/events/EventBookingModal.module.css */
+
+.overlay {
+  position: fixed;
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%;
+  
+  /* --- 1. FORCE ON TOP (Higher than Navbar's 900) --- */
+  z-index: 2147483647 !important; 
+  
+  background: rgba(0, 0, 0, 0.85); /* Dark background */
+  backdrop-filter: blur(8px);       /* Blur everything behind it */
+  
+  /* --- 2. ALIGNMENT SETUP --- */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Start from top, do NOT center vertically */
+  
+  /* --- 3. SCROLLING --- */
+  overflow-y: auto; /* Allow scrolling if modal is tall */
+  padding: 20px;
+}
+
+.modal {
+  /* --- 4. MOVE DOWN (Adjust this value to push it lower) --- */
+  margin-top: 120px; 
+  margin-bottom: 50px;
+  /* -------------------------------------------------------- */
+
+  width: 100%;
+  max-width: 900px;
+  
+  background: #18181b; 
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- CLOSE BUTTON --- */
+.closeBtn {
+  position: absolute;
+  top: 15px; 
+  right: 15px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 50; /* Ensure button is clickable */
+  font-size: 1.2rem;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+.closeBtn:hover { background: white; color: black; }
+
+/* --- LEFT SIDE: IMAGE --- */
+.imageSection {
+  width: 45%;
+  position: relative;
+  min-height: 300px;
+}
+
+.modalImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* --- RIGHT SIDE: CONTENT --- */
+.contentSection {
+  width: 55%;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- TEXT STYLES --- */
+.header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 15px;
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  margin: 0 0 10px 0;
+  line-height: 1.1;
+}
+
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+}
+
+.description {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+  font-size: 0.95rem;
+  margin-bottom: 30px;
+}
+
+/* --- CONTROLS SECTION --- */
+.bookingControls {
+  margin-top: auto;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.controlRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.label {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.counterBtn {
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.2rem;
+  width: 24px;
+}
+
+.ticketCount {
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+.totalPrice {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: white;
+}
+
+.buyBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #3b82f6;
+  color: white;
+  transition: background 0.2s;
+}
+.buyBtn:hover { background: #2563eb; }
+.buyBtn:disabled { background: #3f3f46; cursor: not-allowed; }
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 800px) {
+  .modal {
+    flex-direction: column; 
+    margin-top: 100px; /* Adjust for mobile if needed */
+  }
+
+  .imageSection {
+    width: 100%;
+    height: 200px; /* Fixed height for image on mobile */
+    min-height: auto;
+  }
+
+  .contentSection {
+    width: 100%;
+    padding: 25px;
+  }
+}

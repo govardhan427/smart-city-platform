@@ -69,7 +69,7 @@ const RegisterPage = () => {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           required
-          placeholder="e.g. NeoCitizen2077"
+          placeholder="e.g. govardhan427"
         />
 
         <Input 
@@ -120,7 +120,7 @@ const RegisterPage = () => {
         <div className={styles.redirectText}>
           Already a resident?
           <Link to="/login" className={styles.redirectLink}>
-            Access System
+            Login
           </Link>
         </div>
       </form>

@@ -56,7 +56,7 @@ const AnalyticsDashboard = () => {
   if (loading) return (
     <div className={styles.loadingState}>
         <div className={styles.spinner}></div>
-        <span>Initializing Command Center...</span>
+        <span>Loading analytics data...</span>
     </div>
   );
   

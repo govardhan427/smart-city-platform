@@ -1,139 +1,200 @@
 /* src/pages/AdminCreateEventPage.module.css */
 
 .container {
-  max-width: 700px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 40px 20px 80px 20px;
-  animation: fadeIn 0.5s ease-out;
-}
-
-.title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 40px;
-  color: white;
-  letter-spacing: -1px;
-}
-
-/* --- TOGGLE BUTTONS (Resource Type) --- */
-.toggleContainer {
+  padding: 120px 20px 40px 20px;
+  height: 90vh;
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+  gap: 30px;
+  animation: fadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.toggleBtn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.6);
-  padding: 10px 20px;
-  border-radius: 50px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-transform: capitalize;
-  transition: all 0.2s;
-}
-
-.toggleBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-}
-
-.activeBtn {
-  background: white;
-  color: black;
-  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-  border-color: white;
-}
-
-/* --- GLASS FORM PANEL --- */
-.form {
+/* --- SIDEBAR --- */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
-  /* Glass Effect */
-  background: rgba(20, 20, 25, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 24px;
-  padding: 40px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
 }
 
-/* --- LAYOUTS --- */
-.row {
+.sidebarTitle {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.1;
+  background: linear-gradient(to right, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Wrapper for buttons (New) */
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toggleBtn {
+  text-align: left;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  padding: 14px 20px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toggleBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  transform: translateX(5px);
+}
+
+.activeBtn {
+  background: rgba(59, 130, 246, 0.15); /* Blue tint */
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+}
+
+/* --- FORM PANEL --- */
+.formPanel {
+  flex-grow: 1;
+  background: rgba(10, 10, 12, 0.7);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 30px;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.formHeader {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.formTitle {
+  font-size: 1.4rem;
+  color: white;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* --- GRID --- */
+.formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.inputGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.fullWidth { grid-column: 1 / -1; }
+
+.inputGroup { display: flex; flex-direction: column; gap: 8px; }
 
 .label {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-  font-weight: 500;
-  padding-left: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 4px;
 }
 
-/* --- TEXTAREA --- */
 .textarea {
   width: 100%;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   color: white;
   font-family: 'Inter', sans-serif;
-  font-size: 1rem;
+  font-size: 0.95rem;
   outline: none;
-  resize: vertical;
-  min-height: 100px;
-  transition: all 0.3s;
+  resize: none;
+  height: 100px;
 }
+.textarea:focus { border-color: #3b82f6; background: rgba(0,0,0,0.5); }
 
-.textarea:focus {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
+.buttonWrapper { margin-top: auto; padding-top: 25px; }
 
-/* --- UTILS --- */
-.errorBox {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  padding: 12px;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  text-align: center;
-}
+/* =========================================
+   📱 MOBILE OVERHAUL (Max Width 900px)
+   ========================================= */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column; /* Stack top-to-bottom */
+    padding: 90px 15px 100px 15px; /* More space for navbar */
+    height: auto; /* Let page scroll naturally */
+    gap: 15px;
+  }
 
-.buttonWrapper {
-  margin-top: 20px;
-  display: flex;
-  gap: 15px;
-}
+  /* 1. Transform Sidebar into Top Nav */
+  .sidebar {
+    width: 100%;
+    gap: 0;
+  }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  /* Hide the big "Create Resource" title on mobile to save space */
+  .sidebarTitle {
+    display: none; 
+  }
 
-/* Mobile */
-@media (max-width: 600px) {
-  .row { grid-template-columns: 1fr; }
-  .form { padding: 25px; }
+  /* 2. Horizontal Scrollable Tabs */
+  .navGroup {
+    flex-direction: row;
+    overflow-x: auto; /* Allow side scrolling */
+    padding-bottom: 5px;
+    gap: 10px;
+    
+    /* Hide Scrollbar */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  .navGroup::-webkit-scrollbar {
+    display: none;
+  }
+
+  .toggleBtn {
+    white-space: nowrap; /* Don't wrap text */
+    padding: 10px 16px;
+    border-radius: 50px; /* Pill shape */
+    font-size: 0.85rem;
+    flex-shrink: 0; /* Prevent squishing */
+  }
+  
+  .toggleBtn:hover {
+    transform: none; /* Disable shift effect on touch */
+  }
+
+  /* 3. Adjust Form */
+  .formPanel {
+    padding: 20px;
+    border-radius: 20px;
+    overflow-y: visible; /* Let container scroll */
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr; /* Single column inputs */
+    gap: 15px;
+  }
+  
+  .formTitle {
+    font-size: 1.2rem;
+  }
 }

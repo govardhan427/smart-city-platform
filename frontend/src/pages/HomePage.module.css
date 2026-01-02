@@ -5,7 +5,7 @@
   margin: 0 auto;
   padding: 0 20px 80px 20px;
   /* Push content down so it clears the Floating Navbar */
-  padding-top: 40px; 
+  padding-top: 90px; 
   animation: fadeIn 0.8s ease-out;
 }
 

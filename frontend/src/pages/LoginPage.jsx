@@ -62,7 +62,7 @@ const LoginPage = () => {
         />
 
         <Input 
-          label="Passkey"
+          label="Password"
           id="password"
           type="password"
           value={password}
@@ -86,7 +86,7 @@ const LoginPage = () => {
         <div className={styles.redirectText}>
           New resident?
           <Link to="/register" className={styles.redirectLink}>
-            Initialize ID
+            Sign up
           </Link>
         </div>
       </form>

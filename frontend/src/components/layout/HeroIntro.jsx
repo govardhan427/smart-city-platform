@@ -22,8 +22,8 @@ const HeroIntro = ({ onComplete }) => {
       <div className={styles.orb}></div>
 
       <div className={styles.content}>
-        <h1 className={styles.title}>CityOS</h1>
-        <div className={styles.subtitle}>INITIALIZING SECURE ENVIRONMENT</div>
+        <h1 className={styles.title}>Smart Access Hub </h1>
+        <div className={styles.subtitle}>for Urban Mobility </div>
       </div>
     </div>
   );

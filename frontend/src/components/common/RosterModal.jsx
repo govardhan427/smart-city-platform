@@ -31,19 +31,19 @@ const RosterModal = ({ type, item, onClose }) => {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
+    <div className={styles.overlay} onClick={onClose}>
+      <div className={styles.modal} onClick={e => e.stopPropagation()}>
         
         {/* --- HEADER --- */}
         <div className={styles.header}>
           <div className={styles.titleGroup}>
             <h2>{item.title || item.name}</h2>
-            <div className={styles.badge}>{type.toUpperCase()}</div>
+            <div className={styles.badge}>{type.toUpperCase()} ROSTER</div>
           </div>
           
           <div className={styles.actions}>
             <button onClick={handleDownload} className={styles.downloadBtn} title="Download CSV">
-               <span>📥</span> Export Data
+               <span>📥</span> Export CSV
             </button>
             <button onClick={onClose} className={styles.closeBtn}>&times;</button>
           </div>
@@ -53,21 +53,21 @@ const RosterModal = ({ type, item, onClose }) => {
         <div className={styles.content}>
           {loading ? (
             <div className={styles.loading}>
-                <span className={styles.spinner}>●</span> Loading Data...
+                <span className={styles.spinner}>●</span> Retrieving Records...
             </div>
           ) : (
             <div className={styles.tableWrapper}>
                 <table className={styles.table}>
                 <thead>
                     <tr>
-                    <th>User</th>
-                    <th>Status / Details</th>
-                    <th>Time</th>
+                    <th style={{width: '35%'}}>Registered User</th>
+                    <th style={{width: '35%'}}>Status / Info</th>
+                    <th style={{width: '30%'}}>Timestamp</th>
                     </tr>
                 </thead>
                 <tbody>
                     {attendees.length === 0 ? (
-                    <tr><td colSpan="3" className={styles.empty}>No records found.</td></tr>
+                    <tr><td colSpan="3" className={styles.empty}>No active records found.</td></tr>
                     ) : (
                     attendees.map((person) => (
                         <tr key={person.id}>
@@ -77,9 +77,12 @@ const RosterModal = ({ type, item, onClose }) => {
                         </td>
                         <td>
                             {person.extra ? (
-                            <span><strong>{person.extra}</strong> <span className={styles.subStatus}>({person.status})</span></span>
+                            <span>
+                                <strong>{person.extra}</strong> 
+                                <span className={styles.subStatus}> • {person.status}</span>
+                            </span>
                             ) : (
-                            <span className={person.status === 'Checked In' ? styles.statusGreen : styles.statusGray}>
+                            <span className={person.status === 'Checked In' || person.status === 'Active' ? styles.statusGreen : styles.statusGray}>
                                 {person.status}
                             </span>
                             )}

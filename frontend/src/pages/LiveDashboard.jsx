@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import styles from './LiveDashboard.module.css';
-import RosterModal from '../components/common/RosterModal'; // Ensure path is correct
+import RosterModal from '../components/common/RosterModal'; // Updated path based on previous context
 
 const LiveDashboard = () => {
   const [data, setData] = useState(null);
@@ -19,8 +19,8 @@ const LiveDashboard = () => {
 
   useEffect(() => {
     fetchData(); // Fetch immediately
-    const interval = setInterval(fetchData, 5000); // Fetch every 5 seconds
-    return () => clearInterval(interval); // Cleanup
+    const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleCardClick = (item) => {
@@ -38,8 +38,9 @@ const LiveDashboard = () => {
   };
 
   if (!data) return (
-    <div className={styles.loading}>
-        <span>📡</span> Connecting to Live Feed...
+    <div className={styles.loadingState}>
+        <div className={styles.spinner}></div>
+        <div>Loading live data...</div>
     </div>
   );
 
@@ -52,7 +53,7 @@ const LiveDashboard = () => {
         <div className={styles.pulse}>Monitoring Active</div>
       </div>
 
-      {/* TABS */}
+      {/* TABS (Segmented Control) */}
       <div className={styles.tabs}>
         <button 
             className={activeTab === 'events' ? styles.active : ''} 
@@ -78,85 +79,101 @@ const LiveDashboard = () => {
       <div className={styles.grid}>
         
         {/* --- EVENTS TAB --- */}
-        {activeTab === 'events' && data.events.map((evt) => (
-          <div 
-            key={evt.id} 
-            className={styles.card} 
-            onClick={() => handleCardClick(evt)}
-            style={{borderLeftColor: '#3b82f6'}} // Blue Status Bar
-          >
-            <h3>{evt.title}</h3>
-            <div className={styles.statRow}>
-              <span>Registered: <strong>{evt.registered}</strong></span>
-              <span>Checked In: <strong className={styles.green}>{evt.checked_in}</strong></span>
+        {activeTab === 'events' && data.events.map((evt) => {
+           const percentage = Math.round((evt.checked_in / (evt.registered || 1)) * 100);
+           
+           return (
+            <div key={evt.id} className={styles.card} onClick={() => handleCardClick(evt)}>
+              <h3>{evt.title}</h3>
+              
+              <div className={styles.statRow}>
+                <div className={styles.statItem}>
+                    <span className={styles.statLabel}>Registered</span>
+                    <span className={styles.statValue}>{evt.registered}</span>
+                </div>
+                <div className={styles.statItem} style={{textAlign: 'right'}}>
+                    <span className={styles.statLabel}>Checked In</span>
+                    <span className={`${styles.statValue} ${styles.green}`}>{evt.checked_in}</span>
+                </div>
+              </div>
+              
+              <div className={styles.progressContainer}>
+                <div 
+                  className={styles.progressBar} 
+                  style={{ width: `${percentage}%` }}
+                ></div>
+              </div>
             </div>
-            
-            <div className={styles.progressContainer}>
-              <div 
-                className={styles.progressBar} 
-                style={{
-                    width: `${(evt.checked_in / (evt.registered || 1)) * 100}%`,
-                    background: '#3b82f6',
-                    boxShadow: '0 0 10px #3b82f6'
-                }}
-              ></div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* --- FACILITIES TAB --- */}
-        {activeTab === 'facilities' && data.facilities.map((fac) => (
-          <div 
-            key={fac.id} 
-            className={styles.card} 
-            onClick={() => handleCardClick(fac)}
-            style={{borderLeftColor: '#f59e0b'}} // Amber Status Bar
-          >
-            <h3>{fac.name}</h3>
-            <div className={styles.statRow}>
-              <span>Capacity: <strong>{fac.capacity}</strong></span>
-              <span>Booked: <strong>{fac.booked_count}</strong></span>
+        {activeTab === 'facilities' && data.facilities.map((fac) => {
+           const percentage = Math.round((fac.booked_count / fac.capacity) * 100);
+           
+           return (
+            <div key={fac.id} className={styles.card} onClick={() => handleCardClick(fac)}>
+              <h3>{fac.name}</h3>
+              
+              <div className={styles.statRow}>
+                <div className={styles.statItem}>
+                    <span className={styles.statLabel}>Capacity</span>
+                    <span className={styles.statValue}>{fac.capacity}</span>
+                </div>
+                <div className={styles.statItem} style={{textAlign: 'right'}}>
+                    <span className={styles.statLabel}>Booked Today</span>
+                    <span className={`${styles.statValue} ${styles.green}`}>{fac.booked_count}</span>
+                </div>
+              </div>
+
+              <div className={styles.progressContainer}>
+                <div 
+                  className={styles.progressBar} 
+                  style={{ 
+                      width: `${percentage}%`,
+                      // Dynamic color: Red if > 80% full
+                      background: percentage > 80 ? '#ef4444' : undefined 
+                  }}
+                ></div>
+              </div>
             </div>
-            <div className={styles.progressContainer}>
-              <div 
-                className={styles.progressBar} 
-                style={{
-                    width: `${(fac.booked_count / fac.capacity) * 100}%`, 
-                    backgroundColor: '#f59e0b',
-                    boxShadow: '0 0 10px #f59e0b'
-                }}
-              ></div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* --- PARKING TAB --- */}
-        {activeTab === 'parking' && data.parking.map((lot) => (
-          <div 
-            key={lot.id} 
-            className={styles.card} 
-            onClick={() => handleCardClick(lot)}
-            style={{borderLeftColor: '#ef4444'}} // Red Status Bar
-          >
-            <h3>{lot.name}</h3>
-            <p className={styles.bigStat}>
-              {lot.capacity - lot.occupied} 
-              <span className={styles.small}>/ {lot.capacity} spots open</span>
-            </p>
-            
-            {/* Occupancy Bar */}
-            <div className={styles.progressContainer}>
-              <div 
-                className={styles.progressBar} 
-                style={{
-                    width: `${((lot.capacity - lot.occupied) / lot.capacity) * 100}%`, 
-                    backgroundColor: '#ef4444',
-                    boxShadow: '0 0 10px #ef4444'
-                }}
-              ></div>
+        {activeTab === 'parking' && data.parking.map((lot) => {
+           // Assuming 'occupied' comes from API as number of spots taken
+           const available = lot.capacity - lot.occupied;
+           const percentage = Math.round((lot.occupied / lot.capacity) * 100);
+
+           return (
+            <div key={lot.id} className={styles.card} onClick={() => handleCardClick(lot)}>
+              <h3>{lot.name}</h3>
+              
+              <div className={styles.statRow}>
+                <div className={styles.statItem}>
+                    <span className={styles.statLabel}>Available Spots</span>
+                    <span className={`${styles.statValue} ${styles.green}`}>{available}</span>
+                </div>
+                <div className={styles.statItem} style={{textAlign: 'right'}}>
+                    <span className={styles.statLabel}>Total Capacity</span>
+                    <span className={styles.statValue}>{lot.capacity}</span>
+                </div>
+              </div>
+              
+              <div className={styles.progressContainer}>
+                <div 
+                  className={styles.progressBar} 
+                  style={{ 
+                      width: `${percentage}%`,
+                      // Red if full, Green/Blue otherwise
+                      background: percentage > 90 ? '#ef4444' : '#10b981'
+                  }}
+                ></div>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
       </div>
 

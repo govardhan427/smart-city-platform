@@ -1,104 +1,117 @@
 /* src/components/common/NewsTicker.module.css */
 
-.wrapper {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  animation: slideDown 0.5s ease-out forwards;
-}
-
 .tickerContainer {
-  /* Layout & Size */
+  /* Position it right below the Navbar */
+  position: fixed;
+  top: 100px; 
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  
   width: 90%;
-  max-width: 1000px;
+  max-width: 800px;
   height: 40px;
+  
+  /* Glass Bar */
+  background: rgba(239, 68, 68, 0.1); /* Subtle Red Tint */
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  
   display: flex;
   align-items: center;
-  
-  /* Glass Effect */
-  background: rgba(255, 255, 255, 0.03); /* Very subtle */
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 100px; /* Pill shape */
-  
-  padding: 4px;
   overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+  animation: slideDown 0.5s ease-out;
 }
 
-/* The "SYSTEM ALERT" Badge */
+/* "LIVE ALERT" Label */
 .label {
-  background: rgba(59, 130, 246, 0.15); /* Soft Blue */
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  
-  font-family: 'Inter', sans-serif;
+  background: #ef4444;
+  color: white;
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  
-  padding: 4px 12px;
-  border-radius: 50px;
-  margin-right: 15px;
+  font-weight: 800;
+  padding: 0 15px;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 6px;
-  z-index: 2; /* Sits on top of scrolling text */
+  gap: 8px;
+  flex-shrink: 0;
+  z-index: 2;
+  border-radius: 50px 0 0 50px;
+  box-shadow: 5px 0 15px rgba(0,0,0,0.2);
 }
 
 .dot {
-  color: #60a5fa;
-  animation: pulse 2s infinite;
-  font-size: 1.2em; /* Slightly larger dot */
+  width: 8px; height: 8px;
+  background: white;
+  border-radius: 50%;
+  animation: blink 1.5s infinite;
 }
 
-@keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; text-shadow: 0 0 10px #60a5fa; }
-  100% { opacity: 0.4; }
-}
-
-/* The Scrolling Area */
-.scrollWrapper {
-  flex: 1;
+/* Scrolling Text Area */
+.scrollingContent {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
   overflow: hidden;
-  position: relative;
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-}
-
-.scrollingText {
-  display: inline-block;
   white-space: nowrap;
-  color: rgba(255, 255, 255, 0.8);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
-  font-weight: 500;
-  
-  padding-left: 100%; /* Start off-screen */
-  animation: scroll 30s linear infinite;
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
 }
 
+.text {
+  display: inline-block;
+  padding-left: 100%; /* Start off-screen */
+  animation: scroll 15s linear infinite;
+  color: #fca5a5;
+  font-weight: 600;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* Close Button */
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.2rem;
+  padding: 0 15px;
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.2s;
+}
+.closeBtn:hover {
+  color: white;
+}
+
+/* Animations */
 @keyframes scroll {
   0% { transform: translateX(0); }
   100% { transform: translateX(-100%); }
 }
 
-/* Entrance Animation */
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-/* Mobile Adjustments */
-@media (max-width: 768px) {
+@keyframes slideDown {
+  from { opacity: 0; transform: translate(-50%, -20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Mobile Adjustment */
+@media (max-width: 600px) {
   .tickerContainer {
-    width: 95%;
-    border-radius: 12px; /* Less round on mobile */
+    width: 85%;
+    top: 90px; /* Adjust based on your mobile navbar height */
   }
-  
   .label {
-    padding: 4px 8px;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    padding: 0 10px;
+  }
+  .text {
+    font-size: 0.8rem;
   }
 }

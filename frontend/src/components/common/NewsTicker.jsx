@@ -4,43 +4,41 @@ import styles from './NewsTicker.module.css';
 
 const NewsTicker = () => {
   const [message, setMessage] = useState(null);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
+        // This hits the endpoint we just used in AdminCreatePage
         const res = await api.get('/analytics/announcement/');
-        if (res.data.message) {
+        if (res.data && res.data.message) {
           setMessage(res.data.message);
         }
       } catch (err) {
         console.error("News fetch error", err);
       }
     };
+
     fetchNews();
+    // Refresh news every 60 seconds
+    const interval = setInterval(fetchNews, 60000);
+    return () => clearInterval(interval);
   }, []);
 
-  if (!message) return null;
+  if (!message || !visible) return null;
 
   return (
-    <div className={styles.wrapper}>
-        <div className={styles.tickerContainer}>
-        {/* The Glass Badge */}
-        <div className={styles.label}>
-            <span className={styles.dot}>●</span> 
-            SYSTEM ALERT
-        </div>
-        
-        {/* The Scrolling Text Area */}
-        <div className={styles.scrollWrapper}>
-            <div className={styles.scrollingText}>
-            {/* Repeat message 4 times for smooth infinite loop on wide screens */}
-            {message} &nbsp; • &nbsp; 
-            {message} &nbsp; • &nbsp; 
-            {message} &nbsp; • &nbsp; 
-            {message} &nbsp; • &nbsp;
-            </div>
-        </div>
-        </div>
+    <div className={styles.tickerContainer}>
+      <div className={styles.label}>
+        <span className={styles.dot}></span> LIVE ALERT
+      </div>
+      <div className={styles.scrollingContent}>
+        <span className={styles.text}>{message}</span>
+        {/* Duplicate text for smooth infinite scroll effect */}
+        <span className={styles.text}>{message}</span>
+        <span className={styles.text}>{message}</span>
+      </div>
+      <button className={styles.closeBtn} onClick={() => setVisible(false)}>&times;</button>
     </div>
   );
 };

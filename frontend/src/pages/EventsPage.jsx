@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-// Assuming we moved EventCard to common in the previous step
-import EventCard from '../components/EventCard/EventCard'; 
-import SkeletonCard from '../components/common/SkeletonCard';
+import EventBookingModal from '../components/events/EventBookingModal';
 import styles from './EventsPage.module.css';
+import SkeletonCard from '../components/common/SkeletonCard'; // Import Skeleton
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        // Optional: Artificial delay to show off the skeleton loading state
-        // await new Promise(r => setTimeout(r, 800)); 
-        
         const response = await api.get('/events/');
         setEvents(response.data);
-      } catch (err) {
-        setError("Unable to retrieve event stream.");
+      } catch (error) {
+        console.error("Failed to load events", error);
       } finally {
         setLoading(false);
       }
@@ -27,50 +23,74 @@ const EventsPage = () => {
     fetchEvents();
   }, []);
 
-  const handleDeleteEvent = (deletedId) => {
-    setEvents((prev) => prev.filter(e => e.id !== deletedId));
-  };
-
   return (
     <div className={styles.container}>
-      {/* Header Section */}
+      
+      {/* HEADER (Visible during loading) */}
       <div className={styles.header}>
         <h1 className={styles.title}>City Events</h1>
         <p className={styles.subtitle}>Discover and book upcoming activities in the metro area.</p>
       </div>
-      
-      {/* LOADING STATE */}
-      {loading && (
-        <div className={styles.grid}>
-          {[...Array(6)].map((_, i) => <SkeletonCard key={i} />)}
-        </div>
+
+      {/* GRID */}
+      <div className={styles.grid}>
+        
+        {/* LOADING STATE: Show Skeletons */}
+        {loading && (
+            [...Array(6)].map((_, i) => (
+                <SkeletonCard key={i} />
+            ))
+        )}
+
+        {/* LOADED STATE: Show Real Data */}
+        {!loading && events.map((evt) => (
+          <div 
+            key={evt.id} 
+            className={styles.card}
+            onClick={() => setSelectedEvent(evt)}
+          >
+            {/* Background Image */}
+            <img 
+               src={evt.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80"} 
+               alt={evt.title} 
+               className={styles.cardImage}
+            />
+
+            {/* Floating Price Badge */}
+            <div className={`${styles.priceTag} ${evt.price == 0 ? styles.freeTag : ''}`}>
+               {evt.price > 0 ? `₹${evt.price}` : 'FREE'}
+            </div>
+
+            {/* Bottom Content Overlay */}
+            <div className={styles.cardContent}>
+               <h3 className={styles.cardTitle}>{evt.title}</h3>
+               
+               <div className={styles.cardDate}>
+                  <span>📅</span> 
+                  {new Date(evt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  {evt.time && ` • ${evt.time.slice(0, 5)}`}
+               </div>
+
+               <p className={styles.cardDesc}>
+                 {evt.description || "Click to see more details about this event."}
+               </p>
+
+               <div className={styles.viewBtn}>
+                 View Details &rarr;
+               </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* MODAL (Only renders if an event is selected) */}
+      {selectedEvent && (
+        <EventBookingModal 
+           event={selectedEvent} 
+           onClose={() => setSelectedEvent(null)} 
+        />
       )}
 
-      {/* ERROR STATE */}
-      {!loading && error && (
-        <div className={styles.stateContainer}>
-            <div className={styles.errorIcon}>⚠️</div>
-            <div className={styles.errorText}>{error}</div>
-        </div>
-      )}
-
-      {/* EMPTY STATE */}
-      {!loading && !error && events.length === 0 && (
-         <div className={styles.stateContainer}>
-            <div className={styles.emptyIcon}>📅</div>
-            <h3>No Events Scheduled</h3>
-            <p>Check back later for updates.</p>
-         </div>
-      )}
-
-      {/* DATA STATE */}
-      {!loading && !error && events.length > 0 && (
-        <div className={styles.grid}>
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} onDelete={handleDeleteEvent} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
