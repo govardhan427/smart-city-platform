@@ -90,18 +90,19 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 <div style={{flex: 1}}>
                     <div className={styles.label} style={{marginBottom:'8px'}}>Time Slot</div>
                     <select 
-                        className={styles.counter}
-                        style={{width: '100%', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px', background: 'rgba(0,0,0,0.3)'}}
-                        value={timeSlot}
-                        onChange={(e) => setTimeSlot(e.target.value)}
-                    >
-                        <option value="" style={{color: 'black'}}>Select Slot</option>
-                        {/* UPDATED SLOTS TO MATCH BACKEND MODELS.PY */}
-                        <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
-                        <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
-                        <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
-                        <option value="18:00-20:00" style={{color: 'black'}}>Night (6 PM - 8 PM)</option>
-                    </select>
+    className={styles.counter}
+    style={{width: '100%', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '10px', background: 'rgba(0,0,0,0.3)'}}
+    value={timeSlot}
+    onChange={(e) => setTimeSlot(e.target.value)}
+>
+    <option value="" style={{color: 'black'}}>Select Slot</option>
+
+    {/* THESE VALUES MUST MATCH models.py EXACTLY */}
+    <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
+    <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
+    <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
+    <option value="18:00-20:00" style={{color: 'black'}}>Night (6 PM - 8 PM)</option>
+</select>
                 </div>
             </div>
 
