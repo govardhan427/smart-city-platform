@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'sendgrid_backend',
+    # 'sendgrid_backend',
     'corsheaders',
     'rest_framework_simplejwt',
     'users.apps.UsersConfig',
@@ -183,7 +183,22 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60), # Access token lasts 1 hour
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),    # Refresh token lasts 1 day
 }
-EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-DEFAULT_FROM_EMAIL = 'ccgovardhan4@gmail.com'
-SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+# EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+# SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+# DEFAULT_FROM_EMAIL = 'ccgovardhan4@gmail.com'
+# SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+
+# --- EMAIL CONFIGURATION (BREVO / SMTP) ---
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp-relay.brevo.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# Your Brevo Login Email
+EMAIL_HOST_USER = os.environ.get('BREVO_EMAIL_USER') 
+
+# Your Brevo Master Password (SMTP Key)
+EMAIL_HOST_PASSWORD = os.environ.get('BREVO_API_KEY') 
+
+# Sender Address
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'ccgovardhan4@gmail.com')
