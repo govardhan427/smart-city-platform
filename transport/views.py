@@ -1,16 +1,13 @@
-from django.shortcuts import render
-
-# Create your views here.
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAdminUser
+from django.db import transaction # <--- Important Import
 from .models import ParkingLot, ParkingBooking
 from .serializers import ParkingLotSerializer, ParkingBookingSerializer
 from events.utils import generate_qr_code_bytes
 from .utils import send_parking_email
-from core.permissions import IsTransportManager
-from rest_framework.permissions import IsAdminUser
 
 class ParkingLotListView(generics.ListAPIView):
     queryset = ParkingLot.objects.all()
@@ -33,26 +30,36 @@ class BookParkingView(APIView):
         
         serializer = ParkingBookingSerializer(data=data)
         if serializer.is_valid():
-            # 3. Save Booking
-            booking = serializer.save(user=request.user)
-            
-            # --- 4. GENERATE QR & SEND EMAIL ---
             try:
-                # Generate QR (using booking ID)
-                qr_bytes = generate_qr_code_bytes(f"parking:{booking.id}")
-                
-                # Send Email
-                send_parking_email(
-                    user_email=request.user.email,
-                    parking_lot_name=lot.name,
-                    booking=booking,
-                    qr_code_bytes=qr_bytes
-                )
-            except Exception as e:
-                # Don't fail the whole request just because email failed, but log it
-                print(f"Email failed: {e}")
+                # START TRANSACTION (All or Nothing)
+                with transaction.atomic():
+                    # 3. Save Booking
+                    booking = serializer.save(user=request.user)
+                    
+                    # 4. Generate QR & Send Email
+                    # If this block fails, the booking above is undone
+                    qr_bytes = generate_qr_code_bytes(f"parking:{booking.id}")
+                    
+                    try:
+                        send_parking_email(
+                            user_email=request.user.email,
+                            parking_lot_name=lot.name,
+                            booking=booking,
+                            qr_code_bytes=qr_bytes
+                        )
+                    except Exception as email_error:
+                        # Raise error to trigger rollback
+                        raise Exception(f"Email sending failed: {str(email_error)}")
             
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+                # Both succeeded
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            except Exception as e:
+                print(f"Parking Booking Failed: {e}")
+                return Response(
+                    {"error": f"Booking failed: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

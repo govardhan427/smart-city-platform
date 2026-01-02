@@ -16,17 +16,23 @@ const FacilityBookingModal = ({ facility, onClose }) => {
     setBuying(true);
     
     try {
-      // POST to facility booking endpoint
-      await api.post('/facilities/book/', { 
-          facility_id: facility.id,
+      // FIX 1: Send request to the specific URL with ID
+      await api.post(`/facilities/${facility.id}/book/`, { 
           booking_date: bookingDate,
           time_slot: timeSlot
       });
+      
       toast.success(`Successfully booked ${facility.name}!`);
       onClose();
+
     } catch (err) {
       console.error(err);
-      toast.error("Booking failed. Slot might be taken.");
+      
+      // FIX 2: Read the actual error message from backend
+      // This will show "This time slot is already booked" or "Booking failed: Email error"
+      const errorMessage = err.response?.data?.error || "Booking failed due to server error.";
+      toast.error(errorMessage);
+
     } finally {
       setBuying(false);
     }

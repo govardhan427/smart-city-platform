@@ -16,17 +16,22 @@ const ParkingBookingModal = ({ lot, onClose }) => {
     setBooking(true);
     
     try {
-      // POST to parking booking endpoint
-      await api.post('/transport/parking/book/', { 
-          parking_lot_id: lot.id,
+      // --- FIX 1: Add lot.id to the URL ---
+      await api.post(`/transport/parking/${lot.id}/book/`, { 
           vehicle_number: vehicleNumber,
           duration_hours: hours
       });
+      
       toast.success(`Spot reserved at ${lot.name}!`);
       onClose();
+
     } catch (err) {
       console.error(err);
-      toast.error("Booking failed. Lot might be full.");
+      
+      // --- FIX 2: Show specific error from backend (e.g. "Lot is full") ---
+      const errorMessage = err.response?.data?.error || "Booking failed. Lot might be full.";
+      toast.error(errorMessage);
+
     } finally {
       setBooking(false);
     }
@@ -92,7 +97,7 @@ const ParkingBookingModal = ({ lot, onClose }) => {
                    <button 
                      className={styles.counterBtn} 
                      onClick={() => setHours(Math.max(1, hours - 1))}
-                   >−</button>
+                   >-</button>
                    <span className={styles.ticketCount}>{hours}h</span>
                    <button 
                      className={styles.counterBtn} 

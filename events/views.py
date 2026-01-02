@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
-from django.utils import timezone # <-- Import this for check-in
+from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from django.db import transaction # <--- Important Import
 from core.permissions import IsEventManager
 from facilities.models import Booking
 from transport.models import ParkingBooking
@@ -44,25 +45,51 @@ class EventRegisterView(APIView):
     def post(self, request, pk, *args, **kwargs):
         event = get_object_or_404(Event, pk=pk)
         tickets = int(request.data.get('tickets', 1))
+        
+        # 1. Check if already registered
         if Registration.objects.filter(user=request.user, event=event).exists():
             return Response(
                 {"error": "You are already registered for this event."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        registration = Registration.objects.create(
-            user=request.user,
-            event=event,
-            tickets=tickets
-        )
-        qr_code_bytes = generate_qr_code_bytes(f"event:{registration.id}")
-        send_registration_email(
-            user_email=request.user.email,
-            event_title=event.title,
-            registration_id=registration.id,
-            qr_code_bytes=qr_code_bytes
-        )
-        serializer = RegistrationSerializer(registration)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        try:
+            # START TRANSACTION (Atomic block)
+            with transaction.atomic():
+                # 2. Create Registration
+                registration = Registration.objects.create(
+                    user=request.user,
+                    event=event,
+                    tickets=tickets
+                )
+                
+                # 3. Generate QR & Send Email
+                # If this fails, the registration above is rolled back
+                qr_code_bytes = generate_qr_code_bytes(f"event:{registration.id}")
+                
+                try:
+                    send_registration_email(
+                        user_email=request.user.email,
+                        event_title=event.title,
+                        registration_id=registration.id,
+                        qr_code_bytes=qr_code_bytes
+                    )
+                except Exception as email_error:
+                    # Manually raise error to trigger rollback
+                    raise Exception(f"Email sending failed: {str(email_error)}")
+            
+            # If we get here, both succeeded
+            serializer = RegistrationSerializer(registration)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            print(f"Event Registration Error: {e}")
+            # If it was the "Email sending failed" error, we return 500
+            # If it was something else (DB error), we still return 500
+            return Response(
+                {"error": f"Registration failed: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class MyRegistrationsView(generics.ListAPIView):

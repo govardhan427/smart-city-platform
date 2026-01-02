@@ -23,12 +23,18 @@ const EventBookingModal = ({ event, onClose }) => {
     
     try {
       // POST to booking endpoint
+      // Ensure the URL matches backend: /events/<id>/register/
       await api.post(`/events/${event.id}/register/`, { tickets });
+      
       toast.success(`Successfully booked ${tickets} ticket(s)!`);
       onClose(); // Close modal on success
     } catch (err) {
       console.error(err);
-      toast.error("Booking failed. Please try again.");
+      
+      // FIX: Show specific error from backend (e.g., "You are already registered")
+      const errorMessage = err.response?.data?.error || "Booking failed. Please try again.";
+      toast.error(errorMessage);
+      
     } finally {
       setBuying(false);
     }
@@ -49,7 +55,7 @@ const EventBookingModal = ({ event, onClose }) => {
              className={styles.modalImage}
           />
           <div className={styles.imageOverlay}>
-             {/* Optional: Add icons or badges here */}
+              {/* Optional: Add icons or badges here */}
           </div>
         </div>
 
@@ -88,7 +94,7 @@ const EventBookingModal = ({ event, onClose }) => {
                    <button 
                      className={styles.counterBtn} 
                      onClick={() => setTickets(Math.max(1, tickets - 1))}
-                   >−</button>
+                   >-</button>
                    <span className={styles.ticketCount}>{tickets}</span>
                    <button 
                      className={styles.counterBtn} 
