@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../services/api'; // <--- Ensure this imports your axios instance
 import { jwtDecode } from 'jwt-decode';
 
 export const AuthContext = createContext(null);
@@ -9,17 +9,17 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 1. On Mount: Try to refresh the token to check if we are logged in
+  // 1. On Mount: Check for HttpOnly Cookie
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // The browser automatically sends the HttpOnly cookie with this request
         const response = await api.post('/users/token/refresh/');
         const { access } = response.data;
         
+        // --- FIX 1: Attach token to Axios immediately ---
         setAccessToken(access);
+        api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
         
-        // Decode access token to get user data
         const userData = jwtDecode(access);
         setUser({
              id: userData.user_id, 
@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
              groups: userData.groups || []
         });
       } catch (error) {
-        // If refresh fails (no cookie or expired), we remain logged out
         setUser(null);
       } finally {
         setLoading(false);
@@ -43,8 +42,9 @@ export const AuthProvider = ({ children }) => {
     const response = await api.post('/users/token/', { email, password });
     const { access } = response.data;
 
-    // Save Access Token in Memory (State) ONLY
+    // --- FIX 2: Attach token to Axios on Login ---
     setAccessToken(access);
+    api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
     
     const userData = jwtDecode(access);
     setUser({ 
@@ -54,7 +54,6 @@ export const AuthProvider = ({ children }) => {
          is_staff: userData.is_staff,
          groups: userData.groups || []
     });
-    // Note: We don't save to localStorage anymore!
   };
 
   const register = async (username, email, password) => {
@@ -64,13 +63,15 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-        // Call backend to delete the cookie
         await api.post('/users/logout/'); 
     } catch (e) {
         console.error("Logout error", e);
     }
     setUser(null);
     setAccessToken(null);
+    
+    // --- FIX 3: Remove token from Axios on Logout ---
+    delete api.defaults.headers.common['Authorization'];
   };
 
   const value = {
