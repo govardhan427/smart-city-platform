@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from .models import User
 from .serializers import UserSerializer, UserRegisterSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .serializers import MyTokenObtainPairSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
