@@ -269,55 +269,52 @@ class ExportFinancialsCSV(APIView):
 class CityBotAIView(APIView):
     """
     Advanced AI City Assistant
-    Accepts { "message": "..." }
     """
     permission_classes = [AllowAny] 
 
     def post(self, request):
         user_message = request.data.get('message', '')
         
-        # --- 1. GATHER INTELLIGENT REAL-TIME DATA ---
-        
-        # A. General Stats
+        # --- 1. GATHER DATA ---
         total_users = User.objects.count()
         
-        # B. Get Upcoming Events (Next 3) - Crucial for specific questions
+        # Get Upcoming Events
         upcoming_events = Event.objects.filter(date__gte=timezone.now()).order_by('date')[:3]
         if upcoming_events:
             events_context = "\n".join([f"- {e.title} (Date: {e.date}, Price: ₹{e.price})" for e in upcoming_events])
         else:
-            events_context = "No upcoming events scheduled."
+            events_context = "No upcoming events."
 
-        # C. Get Parking Status
-        # We fetch the top 3 lots to give variety
+        # Get Parking Status
         parking_lots = ParkingLot.objects.all()[:3]
         if parking_lots:
-            parking_context = "\n".join([f"- {p.name} (Capacity: {p.capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
+            # --- FIX IS HERE: Changed p.capacity to p.total_capacity ---
+            parking_context = "\n".join([f"- {p.name} (Capacity: {p.total_capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
         else:
             parking_context = "No parking data available."
 
-        # D. Get Facilities List
+        # Get Facilities
         facilities = Facility.objects.all()[:3]
         if facilities:
             facility_context = ", ".join([f"{f.name}" for f in facilities])
         else:
             facility_context = "None"
 
-        # --- 2. CONSTRUCT THE "SUPER PROMPT" ---
+        # --- 2. CONSTRUCT PROMPT ---
         system_context = f"""
         You are CityBot, the AI Concierge for 'Smart Access Hub'. You are helpful, futuristic, and precise.
-
-        === LIVE CITY DATA (Use this to answer) ===
+        
+        === LIVE CITY DATA ===
         • Registered Citizens: {total_users}
         
         • Upcoming Events:
         {events_context}
         
-        • Parking Lots & Rates:
+        • Parking Lots:
         {parking_context}
         
-        • Available Facilities: {facility_context}
-        ===========================================
+        • Facilities: {facility_context}
+        ======================
 
         === NAVIGATION RULES ===
         If the user wants to book or view details, guide them to these paths:
@@ -337,24 +334,17 @@ class CityBotAIView(APIView):
         try:
             api_key = os.environ.get('GROQ_API_KEY')
             if not api_key:
-                return Response({"response": "System Error: AI Neural Link Disconnected (Missing Key)."}, status=500)
+                return Response({"response": "System Error: Missing API Key."}, status=500)
 
             client = Groq(api_key=api_key)
             
             chat_completion = client.chat.completions.create(
                 messages=[
-                    {
-                        "role": "system",
-                        "content": system_context
-                    },
-                    {
-                        "role": "user",
-                        "content": user_message
-                    }
+                    {"role": "system", "content": system_context},
+                    {"role": "user", "content": user_message}
                 ],
-                # 'llama-3.1-8b-instant' is excellent for this. Fast and smart.
                 model="llama-3.1-8b-instant", 
-                temperature=0.6, # Lower temperature = More factual/less hallucination
+                temperature=0.6,
                 max_tokens=250,
             )
             
@@ -363,10 +353,7 @@ class CityBotAIView(APIView):
 
         except Exception as e:
             print(f"Groq AI Error: {e}")
-            return Response(
-                {"response": "Connection to City Core unstable. Please try again later."}, 
-                status=500
-            )
+            return Response({"response": "I am having trouble connecting. Please try again."}, status=500)
 
 class AnnouncementView(APIView):
     """
