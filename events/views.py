@@ -101,10 +101,9 @@ class MyRegistrationsView(generics.ListAPIView):
 
 
 class CheckInView(APIView):
-    permission_classes = [IsAdminUser] # Or specific manager permissions
+    permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
-        # The scanner sends: "event:UUID" or "facility:ID"
         qr_data = request.data.get('registration_id') 
         
         if not qr_data or ":" not in qr_data:
@@ -113,31 +112,54 @@ class CheckInView(APIView):
         prefix, item_id = qr_data.split(":", 1)
         
         try:
+            # --- 1. EVENT ---
             if prefix == 'event':
                 obj = Registration.objects.get(id=item_id)
-                if obj.attended_at: return Response({"error": "Already Checked In"}, status=400)
+                if obj.attended_at: 
+                    return Response({"error": "Already Checked In"}, status=400)
                 obj.attended_at = timezone.now()
                 obj.save()
                 return Response({"message": f"Welcome to {obj.event.title}!"})
 
+            # --- 2. FACILITY ---
             elif prefix == 'facility':
                 obj = Booking.objects.get(id=item_id)
-                # Logic: Check if today is the correct date, etc.
-                # For MVP, just mark entry.
-                # We need to add an 'is_checked_in' field to Booking model first?
-                # For now, let's assume we added attended_at to Booking model too, 
-                # OR just return success for the demo.
+                
+                # Check 1: Already Scanned?
+                if obj.is_checked_in:
+                    return Response({"error": "Already Checked In"}, status=400)
+                
+                # Check 2: Wrong Date?
+                today = timezone.localdate()
+                if obj.booking_date != today:
+                     return Response({"error": f"Invalid Date! Booking is for {obj.booking_date}"}, status=400)
+
+                # Mark as Checked In
+                obj.is_checked_in = True
+                obj.save()
                 return Response({"message": f"Checked in to {obj.facility.name}"})
 
+            # --- 3. PARKING ---
             elif prefix == 'parking':
                 obj = ParkingBooking.objects.get(id=item_id)
-                if not obj.is_active: return Response({"error": "Booking Expired"}, status=400)
-                # In parking, scanning might mean ENTRY (start) or EXIT (end).
-                # For MVP, let's just confirm validity.
+
+                # Check 1: Already Scanned?
+                if obj.is_checked_in:
+                    return Response({"error": "Already Checked In (Vehicle Inside)"}, status=400)
+                
+                # Check 2: Expired/Cancelled?
+                if not obj.is_active: 
+                    return Response({"error": "Booking Expired"}, status=400)
+                
+                # Mark as Checked In
+                obj.is_checked_in = True
+                obj.save()
                 return Response({"message": f"Access Granted: {obj.vehicle_number}"})
             
             else:
                 return Response({"error": "Unknown QR Type"}, status=400)
 
+        except (Registration.DoesNotExist, Booking.DoesNotExist, ParkingBooking.DoesNotExist):
+             return Response({"error": "Booking not found"}, status=404)
         except Exception as e:
-            return Response({"error": "Booking not found"}, status=404)
+            return Response({"error": str(e)}, status=500)

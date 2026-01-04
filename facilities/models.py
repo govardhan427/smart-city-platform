@@ -36,6 +36,7 @@ class Booking(models.Model):
     booking_date = models.DateField()
     time_slot = models.CharField(max_length=20, choices=TIME_SLOTS)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_checked_in = models.BooleanField(default=False)
 
     class Meta:
         # A facility cannot be double-booked for the same slot on the same day

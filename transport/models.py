@@ -36,6 +36,7 @@ class ParkingBooking(models.Model):
     # We add a flag to manually "complete" a parking session
     is_active = models.BooleanField(default=True) 
     created_at = models.DateTimeField(auto_now_add=True)
+    is_checked_in = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.parking_lot.name} - {self.vehicle_number}"

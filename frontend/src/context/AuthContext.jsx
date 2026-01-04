@@ -1,83 +1,78 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../services/api'; // Our new api service
-import { jwtDecode } from 'jwt-decode'; // We need this to read the token
+import api from '../services/api';
+import { jwtDecode } from 'jwt-decode';
 
-// 1. Create the Context
 export const AuthContext = createContext(null);
 
-// 2. Create the Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
-  const [loading, setLoading] = useState(true); // Loading on app start
+  const [loading, setLoading] = useState(true);
 
-  // On component mount, check localStorage for existing auth data
+  // 1. On Mount: Try to refresh the token to check if we are logged in
   useEffect(() => {
-    const authData = localStorage.getItem('auth');
-    if (authData) {
-      const { access_token, user_data } = JSON.parse(authData);
-      if (access_token && user_data) {
-        setAccessToken(access_token);
-        setUser(user_data);
+    const checkAuth = async () => {
+      try {
+        // The browser automatically sends the HttpOnly cookie with this request
+        const response = await api.post('/users/token/refresh/');
+        const { access } = response.data;
+        
+        setAccessToken(access);
+        
+        // Decode access token to get user data
+        const userData = jwtDecode(access);
+        setUser({
+             id: userData.user_id, 
+             username: userData.username,
+             email: userData.email,
+             is_staff: userData.is_staff,
+             groups: userData.groups || []
+        });
+      } catch (error) {
+        // If refresh fails (no cookie or expired), we remain logged out
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
-  }, []);
-
-  // Helper function to set auth state and save to localStorage
-  const setAuthState = (token, userData) => {
-    // 1. Set state
-    setAccessToken(token);
-    setUser(userData);
+    };
     
-    // 2. Save to local storage
-    localStorage.setItem(
-      'auth',
-      JSON.stringify({
-        access_token: token,
-        user_data: userData,
-      })
-    );
-  };
-
-  // --- Auth Functions ---
+    checkAuth();
+  }, []);
 
   const login = async (email, password) => {
     const response = await api.post('/users/token/', { email, password });
-    const { access, refresh } = response.data;
+    const { access } = response.data;
 
-    // Decode the token to get user info (like is_staff)
-    const userData = jwtDecode(access); 
+    // Save Access Token in Memory (State) ONLY
+    setAccessToken(access);
     
-    // Use our helper to save everything
-    setAuthState(access, { 
-      id: userData.user_id, 
-      email: email, 
-      username: userData.username,
-      is_staff: userData.is_staff,
-      groups: userData.groups || [] // <-- Add this
+    const userData = jwtDecode(access);
+    setUser({ 
+         id: userData.user_id, 
+         username: userData.username,
+         email: email, 
+         is_staff: userData.is_staff,
+         groups: userData.groups || []
     });
-    // We don't use the refresh token in this 20% scope, but you would store it here
+    // Note: We don't save to localStorage anymore!
   };
 
-  const register = async (username,email, password) => {
-    // This endpoint doesn't return a token, so we just log the user in after
-    await api.post('/users/register/', { username,email, password });
-    
-    // After successful registration, log them in
+  const register = async (username, email, password) => {
+    await api.post('/users/register/', { username, email, password });
     await login(email, password);
   };
 
-  const logout = () => {
-    // Clear state
+  const logout = async () => {
+    try {
+        // Call backend to delete the cookie
+        await api.post('/users/logout/'); 
+    } catch (e) {
+        console.error("Logout error", e);
+    }
     setUser(null);
     setAccessToken(null);
-    
-    // Clear local storage
-    localStorage.removeItem('auth');
   };
 
-  // The value that will be provided to all consuming components
   const value = {
     user,
     accessToken,
@@ -87,9 +82,8 @@ export const AuthProvider = ({ children }) => {
     logout,
   };
 
-  // Don't render the app until we've checked for a token
   if (loading) {
-    return null; // Or a loading spinner
+    return <div>Loading session...</div>;
   }
 
   return (

@@ -7,6 +7,7 @@ const BASE_URL = 'https://smart-city-platform-iitb.vercel.app/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
 });
 // 2. AUTH INTERCEPTOR (Keeps you logged in)
 api.interceptors.request.use(
