@@ -10,33 +10,41 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   // 1. On Mount: Check for HttpOnly Cookie
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const response = await api.post('/users/token/refresh/');
-        const { access } = response.data;
-        
-        // --- FIX 1: Attach token to Axios immediately ---
-        setAccessToken(access);
-        api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
-        
-        const userData = jwtDecode(access);
-        setUser({
-             id: userData.user_id, 
-             username: userData.username,
-             email: userData.email,
-             is_staff: userData.is_staff,
-             groups: userData.groups || []
-        });
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
+  // Add this inside the useEffect in AuthContext.js
+useEffect(() => {
+    // 1. Response Interceptor
+    const interceptor = api.interceptors.response.use(
+        (response) => response, // Return success responses as is
+        async (error) => {
+            const originalRequest = error.config;
+            
+            // If error is 401 (Unauthorized) AND we haven't retried yet
+            if (error.response?.status === 401 && !originalRequest._retry) {
+                originalRequest._retry = true; // Mark as retried
+                try {
+                    // Ask backend for new token (browser sends cookie automatically)
+                    const response = await api.post('/users/token/refresh/');
+                    const { access } = response.data;
+                    
+                    // Update header and state
+                    setAccessToken(access);
+                    api.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+                    
+                    // Retry original request with new token
+                    originalRequest.headers['Authorization'] = `Bearer ${access}`;
+                    return api(originalRequest);
+                } catch (refreshError) {
+                    // If refresh fails (cookie expired), logout
+                    logout();
+                }
+            }
+            return Promise.reject(error);
+        }
+    );
+
+    // Cleanup
+    return () => api.interceptors.response.eject(interceptor);
+}, [logout]); // dependency array
 
   const login = async (email, password) => {
     const response = await api.post('/users/token/', { email, password });

@@ -57,7 +57,11 @@ class CookieTokenRefreshView(TokenRefreshView):
 class LogoutView(APIView):
     def post(self, request):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        response.delete_cookie('refresh_token')
+        response.delete_cookie(
+            key='refresh_token',
+            samesite='None',
+            secure=True
+        )
         return response
 
 class ChangePasswordView(APIView):
