@@ -18,11 +18,32 @@ const PaymentPage = () => {
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // If no data passed, go home
+  // --- FIX: Handle Missing State (Page Refresh) ---
   if (!state) {
-    navigate('/');
-    return null;
+    return (
+      <div className={styles.container} style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: '80vh', 
+          textAlign: 'center' 
+      }}>
+        <div className={styles.summarySection} style={{ maxWidth: '500px', padding: '40px', border: '1px solid #ff4d4d' }}>
+          <h1 style={{ color: '#ff4d4d', marginBottom: '15px' }}>⚠️ Session Expired</h1>
+          <p style={{ color: '#ccc', marginBottom: '30px', lineHeight: '1.6' }}>
+            For security reasons, payment details are not saved when you refresh the page.
+            <br />
+            Please go back and select your booking again.
+          </p>
+          <Button onClick={() => navigate('/')} variant="danger">
+            Return to Home
+          </Button>
+        </div>
+      </div>
+    );
   }
+  // --- END FIX ---
 
   const { type, id, title, price, extraData } = state; 
 
