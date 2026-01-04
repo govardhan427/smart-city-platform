@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Button from '../components/common/Button';
@@ -12,20 +12,39 @@ const PaymentPage = () => {
   
   const [loading, setLoading] = useState(false);
   
-  // Payment State
+  // Payment Form State
   const [cardName, setCardName] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // If no data passed, go home
+  // DEBUG: Open Console (F12) to see why Price might be missing
+  useEffect(() => {
+    console.log("💳 PAYMENT PAGE RECEIVED DATA:", state);
+  }, [state]);
+
+  // 1. SESSION CHECK (Prevents Crash on Refresh)
   if (!state) {
-    navigate('/');
-    return null;
+    return (
+      <div className={styles.container} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', textAlign: 'center' }}>
+        <div className={styles.summarySection} style={{ maxWidth: '500px', padding: '40px', border: '1px solid #ff4d4d' }}>
+          <h1 style={{ color: '#ff4d4d', marginBottom: '15px' }}>⚠️ Session Expired</h1>
+          <p style={{ color: '#ccc', marginBottom: '30px' }}>
+             Payment details are lost on refresh. Please go back and select your booking again.
+          </p>
+          <Button onClick={() => navigate('/')} variant="danger">Return to Home</Button>
+        </div>
+      </div>
+    );
   }
 
-  // Default extraData to {} so extraData.tickets doesn't crash if missing
-const { type, id, title, price, extraData = {} } = state; 
+  // 2. SAFE DESTRUCTURING
+  // We default extraData to {} so it never crashes if missing
+  const { type, id, title, price, extraData = {} } = state; 
+
+  // 3. PRICE FALLBACK (Fixes "Total Amount Not Getting")
+  // If price is missing, show 0.
+  const displayPrice = price ? price : 0;
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -35,7 +54,8 @@ const { type, id, title, price, extraData = {} } = state;
     setTimeout(async () => {
       try {
         if (type === 'event') {
-          await api.post(`/events/${id}/register/`, { tickets: extraData.tickets });
+          // Default to 1 ticket if missing, to prevent backend error
+          await api.post(`/events/${id}/register/`, { tickets: extraData?.tickets || 1 });
         } 
         else if (type === 'facility') {
           await api.post(`/facilities/${id}/book/`, extraData);
@@ -56,7 +76,6 @@ const { type, id, title, price, extraData = {} } = state;
     }, 2000); 
   };
 
-  // Helper to format card number
   const formatCardDisplay = (num) => {
     return num.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
   };
@@ -73,14 +92,15 @@ const { type, id, title, price, extraData = {} } = state;
             <div className={styles.itemLabel}>Item / Service</div>
             <div className={styles.itemValue}>{title}</div>
 
-            {extraData.tickets && (
+            {/* Check if tickets exist using optional chaining */}
+            {extraData?.tickets && (
               <>
                 <div className={styles.itemLabel}>Quantity</div>
                 <div className={styles.itemValue}>{extraData.tickets} Ticket(s)</div>
               </>
             )}
             
-            {extraData.vehicle_number && (
+            {extraData?.vehicle_number && (
               <>
                 <div className={styles.itemLabel}>Vehicle ID</div>
                 <div className={styles.itemValue}>{extraData.vehicle_number}</div>
@@ -90,14 +110,14 @@ const { type, id, title, price, extraData = {} } = state;
 
           <div className={styles.totalContainer}>
             <div className={styles.totalLabel}>Total Amount</div>
-            <div className={styles.totalPrice}>₹{price}</div>
+            {/* Display the Safe Price */}
+            <div className={styles.totalPrice}>₹{displayPrice}</div>
           </div>
         </div>
 
         {/* RIGHT COL: Form */}
         <div className={styles.formSection}>
           
-          {/* VISUAL CREDIT CARD */}
           <div className={styles.visualCard}>
             <div className={styles.chip}></div>
             <div className={styles.cardNumDisplay}>
@@ -149,7 +169,7 @@ const { type, id, title, price, extraData = {} } = state;
 
             <div style={{marginTop: '20px'}}>
               <Button type="submit" disabled={loading} variant="success">
-                {loading ? 'Processing Transaction...' : `Pay ₹${price}`}
+                {loading ? 'Processing Transaction...' : `Pay ₹${displayPrice}`}
               </Button>
             </div>
 
