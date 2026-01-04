@@ -1,3 +1,4 @@
+// src/pages/PaymentPage.js
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../services/api';
@@ -18,44 +19,34 @@ const PaymentPage = () => {
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // --- FIX: Handle Missing State (Page Refresh) ---
+  // 1. SESSION CHECK (Prevents the blank screen)
   if (!state) {
     return (
-      <div className={styles.container} style={{ 
-          display: 'flex', 
-          flexDirection: 'column',
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          height: '80vh', 
-          textAlign: 'center' 
-      }}>
+      <div className={styles.container} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', textAlign: 'center' }}>
         <div className={styles.summarySection} style={{ maxWidth: '500px', padding: '40px', border: '1px solid #ff4d4d' }}>
           <h1 style={{ color: '#ff4d4d', marginBottom: '15px' }}>⚠️ Session Expired</h1>
-          <p style={{ color: '#ccc', marginBottom: '30px', lineHeight: '1.6' }}>
-            For security reasons, payment details are not saved when you refresh the page.
-            <br />
-            Please go back and select your booking again.
+          <p style={{ color: '#ccc', marginBottom: '30px' }}>
+             Payment details are lost on refresh. Please go back and select your booking again.
           </p>
-          <Button onClick={() => navigate('/')} variant="danger">
-            Return to Home
-          </Button>
+          <Button onClick={() => navigate('/')} variant="danger">Return to Home</Button>
         </div>
       </div>
     );
   }
-  // --- END FIX ---
 
-  const { type, id, title, price, extraData } = state; 
+  // 2. SAFETY FIX: Default extraData to an empty object {}
+  // This prevents "Cannot read properties of undefined"
+  const { type, id, title, price, extraData = {} } = state; 
 
   const handlePayment = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // SIMULATE PAYMENT DELAY
     setTimeout(async () => {
       try {
         if (type === 'event') {
-          await api.post(`/events/${id}/register/`, { tickets: extraData.tickets });
+          // Safe access using ?. (Optional Chaining)
+          await api.post(`/events/${id}/register/`, { tickets: extraData?.tickets || 1 });
         } 
         else if (type === 'facility') {
           await api.post(`/facilities/${id}/book/`, extraData);
@@ -76,7 +67,6 @@ const PaymentPage = () => {
     }, 2000); 
   };
 
-  // Helper to format card number
   const formatCardDisplay = (num) => {
     return num.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
   };
@@ -85,7 +75,6 @@ const PaymentPage = () => {
     <div className={styles.container}>
       <div className={styles.paymentWrapper}>
         
-        {/* LEFT COL: Order Summary */}
         <div className={styles.summarySection}>
           <h1 className={styles.pageTitle}>Secure Checkout</h1>
           
@@ -93,14 +82,15 @@ const PaymentPage = () => {
             <div className={styles.itemLabel}>Item / Service</div>
             <div className={styles.itemValue}>{title}</div>
 
-            {extraData.tickets && (
+            {/* 3. SAFETY FIX: Use optional chaining here too */}
+            {extraData?.tickets && (
               <>
                 <div className={styles.itemLabel}>Quantity</div>
                 <div className={styles.itemValue}>{extraData.tickets} Ticket(s)</div>
               </>
             )}
             
-            {extraData.vehicle_number && (
+            {extraData?.vehicle_number && (
               <>
                 <div className={styles.itemLabel}>Vehicle ID</div>
                 <div className={styles.itemValue}>{extraData.vehicle_number}</div>
@@ -114,15 +104,11 @@ const PaymentPage = () => {
           </div>
         </div>
 
-        {/* RIGHT COL: Form */}
+        {/* Form Section (No changes needed here) */}
         <div className={styles.formSection}>
-          
-          {/* VISUAL CREDIT CARD */}
           <div className={styles.visualCard}>
             <div className={styles.chip}></div>
-            <div className={styles.cardNumDisplay}>
-              {formatCardDisplay(cardNumber)}
-            </div>
+            <div className={styles.cardNumDisplay}>{formatCardDisplay(cardNumber)}</div>
             <div className={styles.cardBottom}>
               <span>{cardName || 'YOUR NAME'}</span>
               <span>{expiry || 'MM/YY'}</span>
@@ -130,51 +116,14 @@ const PaymentPage = () => {
           </div>
 
           <form onSubmit={handlePayment} className={styles.form}>
-            <Input 
-              label="Card Number" 
-              placeholder="0000 0000 0000 0000" 
-              value={cardNumber} 
-              onChange={e => setCardNumber(e.target.value)} 
-              required 
-              maxLength="16"
-            />
-            
-            <Input 
-              label="Cardholder Name" 
-              placeholder="AS ON CARD" 
-              value={cardName} 
-              onChange={e => setCardName(e.target.value.toUpperCase())} 
-              required 
-            />
-
+            <Input label="Card Number" placeholder="0000 0000 0000 0000" value={cardNumber} onChange={e => setCardNumber(e.target.value)} required maxLength="16"/>
+            <Input label="Cardholder Name" placeholder="AS ON CARD" value={cardName} onChange={e => setCardName(e.target.value.toUpperCase())} required />
             <div className={styles.row}>
-              <Input 
-                label="Expiry Date" 
-                placeholder="MM/YY" 
-                value={expiry} 
-                onChange={e => setExpiry(e.target.value)} 
-                required 
-                maxLength="5"
-              />
-              <Input 
-                label="CVV / CVC" 
-                placeholder="123" 
-                type="password" 
-                value={cvv} 
-                onChange={e => setCvv(e.target.value)} 
-                required 
-                maxLength="3"
-              />
+              <Input label="Expiry Date" placeholder="MM/YY" value={expiry} onChange={e => setExpiry(e.target.value)} required maxLength="5"/>
+              <Input label="CVV / CVC" placeholder="123" type="password" value={cvv} onChange={e => setCvv(e.target.value)} required maxLength="3"/>
             </div>
-
             <div style={{marginTop: '20px'}}>
-              <Button type="submit" disabled={loading} variant="success">
-                {loading ? 'Processing Transaction...' : `Pay ₹${price}`}
-              </Button>
-            </div>
-
-            <div className={styles.secureBadge}>
-              <span className={styles.secureIcon}>🔒</span> 256-bit SSL Encrypted Connection
+              <Button type="submit" disabled={loading} variant="success">{loading ? 'Processing...' : `Pay ₹${price}`}</Button>
             </div>
           </form>
         </div>
