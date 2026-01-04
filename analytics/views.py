@@ -31,6 +31,7 @@ import google.generativeai as genai
 import os
 from django.conf import settings
 from django.db import models  # <--- Add this line
+from groq import Groq
 
 User = get_user_model()
 
@@ -263,6 +264,7 @@ class ExportFinancialsCSV(APIView):
              writer.writerow(['Facility', f.facility.name, f.user.email, f.booking_date, f.facility.price])
 
         return response
+
 class CityBotAIView(APIView):
     """
     Accepts { "message": "..." }
@@ -273,18 +275,12 @@ class CityBotAIView(APIView):
     def post(self, request):
         user_message = request.data.get('message', '')
         
-        # 1. GATHER REAL-TIME DATA 
+        # 1. GATHER REAL-TIME DATA (Same as before)
         total_users = User.objects.count()
-        
-        # Get Busiest Parking
         busy_parking = ParkingLot.objects.annotate(usage=Count('bookings')).order_by('-usage').first()
         busy_parking_name = busy_parking.name if busy_parking else "None"
-        
-        # Get Most Popular Event
         pop_event = Event.objects.annotate(attendees=Count('registrations')).order_by('-attendees').first()
         pop_event_name = pop_event.title if pop_event else "None"
-        
-        # Get Facility Status
         total_facilities = Facility.objects.count()
 
         # 2. CONSTRUCT SYSTEM PROMPT 
@@ -298,50 +294,49 @@ class CityBotAIView(APIView):
         - Total Facilities Available: {total_facilities}
         
         Your Goal: Answer the user's question simply and helpfully using this data.
-        - If they ask about "busiest" or "famous", use the data above.
         - If they ask for navigation, tell them which page to go to (Events, Parking, Facilities).
         - Keep answers short (under 2 sentences).
         - Be friendly and futuristic.
         """
 
-        # 3. CALL GEMINI API
+        # 3. CALL GROQ API
         try:
-            api_key = os.environ.get('GEMINI_API_KEY')
+            api_key = os.environ.get('GROQ_API_KEY')
             if not api_key:
-                return Response({"response": "Configuration Error: GEMINI_API_KEY not found."}, status=500)
+                return Response({"response": "Configuration Error: GROQ_API_KEY not found."}, status=500)
 
-            genai.configure(api_key=api_key)
+            # Initialize Groq Client
+            client = Groq(api_key=api_key)
             
-            # --- FIX: Use 'gemini-1.5-flash' instead of 'gemini-pro' ---
-            model = genai.GenerativeModel('gemini-2.0-flash')
+            chat_completion = client.chat.completions.create(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": system_context
+                    },
+                    {
+                        "role": "user",
+                        "content": user_message
+                    }
+                ],
+                # Using Llama 3 (Fast & Smart)
+                model="llama3-8b-8192",
+                temperature=0.7,
+                max_tokens=200,
+            )
             
-            # Combine context + user question
-            full_prompt = f"{system_context}\n\nUser Question: {user_message}"
+            # Extract the answer
+            ai_response = chat_completion.choices[0].message.content
             
-            response = model.generate_content(full_prompt)
-            
-            if response.text:
-                return Response({"response": response.text})
-            else:
-                return Response({"response": "I'm thinking, but I have no words right now."})
+            return Response({"response": ai_response})
 
         except Exception as e:
-            # Enhanced Error Logging
-            print(f"AI Error: {e}")
-            
-            # If the model is not found, list available ones in the terminal to help debug
-            if "404" in str(e) or "not found" in str(e):
-                print("\n--- DEBUG: Available Models ---")
-                try:
-                    for m in genai.list_models():
-                        if 'generateContent' in m.supported_generation_methods:
-                            print(m.name)
-                except Exception as list_err:
-                    print(f"Could not list models: {list_err}")
-                print("-------------------------------\n")
+            print(f"Groq AI Error: {e}")
+            return Response(
+                {"response": "I am having trouble connecting to the City Network. Please try again later."}, 
+                status=500
+            )
 
-            return Response({"response": "I am having trouble connecting to the City Network (AI Error). Please try again."}, status=500)
-        
 class AnnouncementView(APIView):
     """
     GET: Returns the latest active announcement.
