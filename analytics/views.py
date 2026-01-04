@@ -319,8 +319,8 @@ class CityBotAIView(APIView):
                         "content": user_message
                     }
                 ],
-                # Using Llama 3 (Fast & Smart)
-                model="llama3-8b-8192",
+                # UPDATED MODEL ID FROM YOUR LIST:
+                model="llama-3.1-8b-instant", 
                 temperature=0.7,
                 max_tokens=200,
             )
