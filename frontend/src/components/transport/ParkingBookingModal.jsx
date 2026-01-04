@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // <--- 1. Import useNavigate
+import { useNavigate } from 'react-router-dom'; 
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import styles from '../events/EventBookingModal.module.css'; // Reusing the consistent modal theme
@@ -9,7 +9,7 @@ const ParkingBookingModal = ({ lot, onClose }) => {
   const [hours, setHours] = useState(2);
   const [booking, setBooking] = useState(false);
 
-  const navigate = useNavigate(); // <--- 2. Initialize Hook
+  const navigate = useNavigate(); 
 
   // Calculate price upfront
   const totalPrice = lot.rate_per_hour * hours;
@@ -25,13 +25,16 @@ const ParkingBookingModal = ({ lot, onClose }) => {
         onClose(); // Close modal
         navigate('/payment', { 
             state: { 
-                amount: totalPrice,
-                type: 'parking', // Tell payment page this is for parking
-                details: { 
-                    parking_lot_id: lot.id,
+                type: 'parking',
+                
+                // --- FIX: MATCH PAYMENT PAGE FORMAT ---
+                id: lot.id,             // PaymentPage uses this for the API URL
+                title: lot.name,        // PaymentPage displays this title
+                price: totalPrice,      // PaymentPage looks for 'price' (not amount)
+                
+                extraData: {            // PaymentPage sends this as the POST body
                     vehicle_number: vehicleNumber,
-                    duration_hours: hours,
-                    name: lot.name
+                    duration_hours: hours
                 }
             }
         });
@@ -67,9 +70,9 @@ const ParkingBookingModal = ({ lot, onClose }) => {
         {/* LEFT: VISUALS */}
         <div className={styles.imageSection}>
           <img 
-             src={lot.image_url || "https://images.unsplash.com/photo-1470224114660-3f6686c562eb?auto=format&fit=crop&q=80"} 
-             alt={lot.name} 
-             className={styles.modalImage}
+              src={lot.image_url || "https://images.unsplash.com/photo-1470224114660-3f6686c562eb?auto=format&fit=crop&q=80"} 
+              alt={lot.name} 
+              className={styles.modalImage}
           />
           <div className={styles.imageOverlay}></div>
         </div>
@@ -139,7 +142,6 @@ const ParkingBookingModal = ({ lot, onClose }) => {
                 onClick={handleBook} 
                 disabled={booking}
             >
-              {/* Dynamic Button Text */}
               {booking ? 'Reserving Spot...' : (totalPrice > 0 ? 'Proceed to Payment' : 'Confirm Reservation')}
             </button>
           </div>

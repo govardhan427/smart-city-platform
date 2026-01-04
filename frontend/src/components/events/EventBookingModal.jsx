@@ -29,12 +29,12 @@ const EventBookingModal = ({ event, onClose }) => {
         onClose(); // Close modal
         navigate('/payment', { 
             state: { 
-                amount: totalPrice,
-                type: 'event', // Tell payment page this is an event
-                details: { 
-                    event_id: event.id,
-                    tickets: tickets,
-                    name: event.title 
+                type: 'event', 
+                id: event.id,          // <--- FIX 1: Send 'id' explicitly
+                title: event.title,    // <--- FIX 2: Send 'title' explicitly
+                price: totalPrice,     // <--- FIX 3: Rename 'amount' to 'price'
+                extraData: {           // <--- FIX 4: Put tickets inside 'extraData'
+                    tickets: tickets 
                 }
             }
         });

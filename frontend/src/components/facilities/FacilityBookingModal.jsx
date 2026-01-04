@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // <--- 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import styles from '../events/EventBookingModal.module.css'; 
@@ -9,7 +9,7 @@ const FacilityBookingModal = ({ facility, onClose }) => {
   const [timeSlot, setTimeSlot] = useState('');
   const [buying, setBuying] = useState(false);
   
-  const navigate = useNavigate(); // <--- 2. Initialize Hook
+  const navigate = useNavigate(); 
 
   const handleBook = async () => {
     if (!bookingDate || !timeSlot) {
@@ -18,27 +18,29 @@ const FacilityBookingModal = ({ facility, onClose }) => {
     }
 
     // <--- 3. CHECK FOR PAYMENT --->
-    // If the facility has a price > 0, redirect to Payment Page
     const price = Number(facility.price);
     
     if (price > 0) {
-        onClose(); // Close the modal
+        onClose(); 
         navigate('/payment', { 
             state: { 
-                amount: price,
-                type: 'facility', // Tell payment page this is a facility
-                details: { 
-                    facility_id: facility.id,
+                type: 'facility',
+                
+                // --- FIX: MATCH PAYMENT PAGE FORMAT ---
+                id: facility.id,        // PaymentPage looks for 'id'
+                title: facility.name,   // PaymentPage looks for 'title'
+                price: price,           // PaymentPage looks for 'price'
+                
+                extraData: {            // PaymentPage looks for 'extraData'
                     booking_date: bookingDate,
-                    time_slot: timeSlot,
-                    name: facility.name // Optional: for display on payment page
+                    time_slot: timeSlot
                 }
             }
         });
-        return; // STOP here. Do not create booking yet.
+        return; // STOP here.
     }
 
-    // <--- 4. IF FREE, BOOK IMMEDIATELY (Existing Logic) --->
+    // <--- 4. IF FREE, BOOK IMMEDIATELY --->
     setBuying(true);
     try {
       await api.post(`/facilities/${facility.id}/book/`, { 
@@ -66,9 +68,9 @@ const FacilityBookingModal = ({ facility, onClose }) => {
         {/* LEFT: VISUALS */}
         <div className={styles.imageSection}>
           <img 
-             src={facility.image_url || "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"} 
-             alt={facility.name} 
-             className={styles.modalImage}
+              src={facility.image_url || "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"} 
+              alt={facility.name} 
+              className={styles.modalImage}
           />
           <div className={styles.imageOverlay}></div>
         </div>
@@ -117,7 +119,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                         onChange={(e) => setTimeSlot(e.target.value)}
                     >
                         <option value="" style={{color: 'black'}}>Select Slot</option>
-                        {/* MATCHING DJANGO BACKEND SLOTS */}
                         <option value="09:00-11:00" style={{color: 'black'}}>Morning (9 AM - 11 AM)</option>
                         <option value="12:00-14:00" style={{color: 'black'}}>Afternoon (12 PM - 2 PM)</option>
                         <option value="15:00-17:00" style={{color: 'black'}}>Evening (3 PM - 5 PM)</option>
@@ -140,7 +141,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 onClick={handleBook} 
                 disabled={buying}
             >
-              {/* Change button text dynamically */}
               {buying ? 'Processing...' : (facility.price > 0 ? 'Proceed to Payment' : 'Book Now')}
             </button>
           </div>
