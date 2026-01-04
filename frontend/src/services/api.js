@@ -1,29 +1,20 @@
 import axios from 'axios';
 
-// --- CHANGE THIS BLOCK ---
-// If VITE_API_URL is set (like in Vercel), use it.
-// Otherwise, default to your LIVE Render Backend.
-const BASE_URL = 'https://smart-city-platform-iitb.vercel.app/api';
+// --- CONFIGURATION ---
+// 1. Check for an environment variable (for Localhost: http://127.0.0.1:8000/api)
+// 2. If not found, fall back to your LIVE Backend URL
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://smart-city-platform-iitb.vercel.app/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: true,
-});
-// 2. AUTH INTERCEPTOR (Keeps you logged in)
-api.interceptors.request.use(
-  (config) => {
-    const authData = localStorage.getItem('auth');
-    if (authData) {
-      const { access_token } = JSON.parse(authData);
-      if (access_token) {
-        config.headers['Authorization'] = `Bearer ${access_token}`;
-      }
-    }
-    return config;
+  withCredentials: true, // CRITICAL: This allows the browser to send the HttpOnly Cookie
+  headers: {
+    'Content-Type': 'application/json',
   },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+});
+
+// NOTE: We REMOVED the interceptor.
+// Why? We no longer store tokens in localStorage.
+// Your AuthContext.js now handles injecting the token into headers automatically.
 
 export default api;
