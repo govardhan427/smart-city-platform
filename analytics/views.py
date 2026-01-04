@@ -22,6 +22,7 @@ from itertools import chain
 from operator import attrgetter
 from django.db.models import Sum, F, Count
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 
 # Import models
 from events.models import Event, Registration
@@ -267,45 +268,77 @@ class ExportFinancialsCSV(APIView):
 
 class CityBotAIView(APIView):
     """
+    Advanced AI City Assistant
     Accepts { "message": "..." }
-    Returns { "response": "AI generated answer based on DB stats" }
     """
     permission_classes = [AllowAny] 
 
     def post(self, request):
         user_message = request.data.get('message', '')
         
-        # 1. GATHER REAL-TIME DATA (Same as before)
+        # --- 1. GATHER INTELLIGENT REAL-TIME DATA ---
+        
+        # A. General Stats
         total_users = User.objects.count()
-        busy_parking = ParkingLot.objects.annotate(usage=Count('bookings')).order_by('-usage').first()
-        busy_parking_name = busy_parking.name if busy_parking else "None"
-        pop_event = Event.objects.annotate(attendees=Count('registrations')).order_by('-attendees').first()
-        pop_event_name = pop_event.title if pop_event else "None"
-        total_facilities = Facility.objects.count()
+        
+        # B. Get Upcoming Events (Next 3) - Crucial for specific questions
+        upcoming_events = Event.objects.filter(date__gte=timezone.now()).order_by('date')[:3]
+        if upcoming_events:
+            events_context = "\n".join([f"- {e.title} (Date: {e.date}, Price: ₹{e.price})" for e in upcoming_events])
+        else:
+            events_context = "No upcoming events scheduled."
 
-        # 2. CONSTRUCT SYSTEM PROMPT 
+        # C. Get Parking Status
+        # We fetch the top 3 lots to give variety
+        parking_lots = ParkingLot.objects.all()[:3]
+        if parking_lots:
+            parking_context = "\n".join([f"- {p.name} (Capacity: {p.capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
+        else:
+            parking_context = "No parking data available."
+
+        # D. Get Facilities List
+        facilities = Facility.objects.all()[:3]
+        if facilities:
+            facility_context = ", ".join([f"{f.name}" for f in facilities])
+        else:
+            facility_context = "None"
+
+        # --- 2. CONSTRUCT THE "SUPER PROMPT" ---
         system_context = f"""
-        You are CityBot, the AI assistant for the 'Smart Access Hub' city platform.
+        You are CityBot, the AI Concierge for 'Smart Access Hub'. You are helpful, futuristic, and precise.
+
+        === LIVE CITY DATA (Use this to answer) ===
+        • Registered Citizens: {total_users}
         
-        Here is the REAL-TIME Live Data from the database:
-        - Total Citizens Registered: {total_users}
-        - Most Popular Event: {pop_event_name}
-        - Busiest Parking Lot: {busy_parking_name}
-        - Total Facilities Available: {total_facilities}
+        • Upcoming Events:
+        {events_context}
         
-        Your Goal: Answer the user's question simply and helpfully using this data.
-        - If they ask for navigation, tell them which page to go to (Events, Parking, Facilities).
-        - Keep answers short (under 2 sentences).
-        - Be friendly and futuristic.
+        • Parking Lots & Rates:
+        {parking_context}
+        
+        • Available Facilities: {facility_context}
+        ===========================================
+
+        === NAVIGATION RULES ===
+        If the user wants to book or view details, guide them to these paths:
+        - Events -> '/events'
+        - Parking -> '/parking'
+        - Facilities -> '/facilities'
+        - My Profile/Bookings -> '/profile'
+
+        === INSTRUCTIONS ===
+        1. Answer based ONLY on the Live City Data above. If the user asks about an event not listed, say you don't have info on it.
+        2. Keep responses concise (max 2-3 sentences).
+        3. If a user asks to book something, mention the specific name and the navigation path.
+        4. Tone: Professional, slightly cybernetic, but friendly.
         """
 
-        # 3. CALL GROQ API
+        # --- 3. CALL GROQ API ---
         try:
             api_key = os.environ.get('GROQ_API_KEY')
             if not api_key:
-                return Response({"response": "Configuration Error: GROQ_API_KEY not found."}, status=500)
+                return Response({"response": "System Error: AI Neural Link Disconnected (Missing Key)."}, status=500)
 
-            # Initialize Groq Client
             client = Groq(api_key=api_key)
             
             chat_completion = client.chat.completions.create(
@@ -319,21 +352,19 @@ class CityBotAIView(APIView):
                         "content": user_message
                     }
                 ],
-                # UPDATED MODEL ID FROM YOUR LIST:
+                # 'llama-3.1-8b-instant' is excellent for this. Fast and smart.
                 model="llama-3.1-8b-instant", 
-                temperature=0.7,
-                max_tokens=200,
+                temperature=0.6, # Lower temperature = More factual/less hallucination
+                max_tokens=250,
             )
             
-            # Extract the answer
             ai_response = chat_completion.choices[0].message.content
-            
             return Response({"response": ai_response})
 
         except Exception as e:
             print(f"Groq AI Error: {e}")
             return Response(
-                {"response": "I am having trouble connecting to the City Network. Please try again later."}, 
+                {"response": "Connection to City Core unstable. Please try again later."}, 
                 status=500
             )
 
