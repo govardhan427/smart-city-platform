@@ -21,29 +21,25 @@ class MyProfileView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        # Generate the tokens
         response = super().post(request, *args, **kwargs)
-        
-        # Extract the refresh token
         refresh_token = response.data.get('refresh')
 
         if refresh_token:
-            # Set the HttpOnly cookie
             response.set_cookie(
                 key='refresh_token', 
                 value=refresh_token,
-                httponly=True,  # Crucial: JS cannot read this
-                samesite='Lax', # Protects against CSRF
-                secure=False,   # Set to True in Production (HTTPS only)
-                max_age=7 * 24 * 60 * 60 # 7 days
+                httponly=True,
+                # --- CHANGE THESE TWO LINES ---
+                samesite='None',  # Allows Cross-Site (Frontend -> Backend)
+                secure=True,      # Required for SameSite='None' (HTTPS)
+                max_age=7 * 24 * 60 * 60 
             )
-            # Optional: Remove refresh token from JSON response for extra security
             del response.data['refresh']
-        
         return response
 
 # 2. Custom Refresh View to read from Cookie
