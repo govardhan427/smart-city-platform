@@ -79,18 +79,21 @@ class CookieTokenRefreshView(TokenRefreshView):
 
 # --- 5. LOGOUT (The Fix) ---
 class LogoutView(APIView):
-    # --- CRITICAL FIX: Allow ANYONE to logout, even if token is expired ---
     permission_classes = [AllowAny] 
     authentication_classes = [] 
-    # ----------------------------------------------------------------------
 
     def post(self, request):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
-        # Delete the cookie with exact matching settings
-        response.delete_cookie(
+        
+        # Manually overwrite the cookie to force deletion
+        response.set_cookie(
             key='refresh_token',
-            samesite='None',
-            secure=True
+            value='',             # Empty value
+            max_age=0,            # Expire immediately
+            expires='Thu, 01 Jan 1970 00:00:00 GMT', # Safety net for older browsers
+            httponly=True,
+            samesite='None',      # MUST match the login cookie
+            secure=True           # MUST match the login cookie
         )
         return response
 
