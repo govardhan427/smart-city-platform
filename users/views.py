@@ -1,20 +1,27 @@
-from rest_framework import generics
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
-from .models import User
-from .serializers import UserSerializer, UserRegisterSerializer
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from .serializers import MyTokenObtainPairSerializer
+from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .serializers import ChangePasswordSerializer, UserUpdateSerializer
+# --- FIX: Import AllowAny ---
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.conf import settings
+from .models import User
+from .serializers import (
+    UserSerializer, 
+    UserRegisterSerializer, 
+    MyTokenObtainPairSerializer, 
+    ChangePasswordSerializer, 
+    UserUpdateSerializer
+)
 
+# --- 1. REGISTER ---
 class UserRegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
     permission_classes = [AllowAny]
 
+# --- 2. PROFILE ---
 class MyProfileView(generics.RetrieveAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -22,41 +29,64 @@ class MyProfileView(generics.RetrieveAPIView):
     def get_object(self):
         return self.request.user
 
+# --- 3. LOGIN (Sets Secure Cookie) ---
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        refresh_token = response.data.get('refresh')
+        try:
+            response = super().post(request, *args, **kwargs)
+            refresh_token = response.data.get('refresh')
 
-        if refresh_token:
-            response.set_cookie(
-                key='refresh_token', 
-                value=refresh_token,
-                httponly=True,
-                # --- CHANGE THESE TWO LINES ---
-                samesite='None',  # Allows Cross-Site (Frontend -> Backend)
-                secure=True,      # Required for SameSite='None' (HTTPS)
-                max_age=7 * 24 * 60 * 60 
-            )
-            del response.data['refresh']
-        return response
+            if refresh_token:
+                response.set_cookie(
+                    key='refresh_token', 
+                    value=refresh_token,
+                    httponly=True,
+                    samesite='None',  
+                    secure=True,      
+                    max_age=7 * 24 * 60 * 60 
+                )
+                if 'refresh' in response.data:
+                    del response.data['refresh']
+            
+            return response
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-# 2. Custom Refresh View to read from Cookie
+# --- 4. REFRESH (Reads Secure Cookie) ---
 class CookieTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
-        # If the refresh token is in the cookie, inject it into the request data
         refresh_token = request.COOKIES.get('refresh_token')
-        
-        if refresh_token:
-            request.data['refresh'] = refresh_token
-            
-        return super().post(request, *args, **kwargs)
 
-# 3. Logout View to clear the cookie
+        if not refresh_token:
+            return Response(
+                {"detail": "Authentication Cookie Missing. Please login again."}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        data = request.data.copy()
+        data['refresh'] = refresh_token
+        
+        serializer = self.get_serializer(data=data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+# --- 5. LOGOUT (The Fix) ---
 class LogoutView(APIView):
+    # --- CRITICAL FIX: Allow ANYONE to logout, even if token is expired ---
+    permission_classes = [AllowAny] 
+    authentication_classes = [] 
+    # ----------------------------------------------------------------------
+
     def post(self, request):
         response = Response({"message": "Logged out successfully"}, status=status.HTTP_200_OK)
+        # Delete the cookie with exact matching settings
         response.delete_cookie(
             key='refresh_token',
             samesite='None',
@@ -64,6 +94,7 @@ class LogoutView(APIView):
         )
         return response
 
+# --- 6. CHANGE PASSWORD ---
 class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -79,6 +110,7 @@ class ChangePasswordView(APIView):
             return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+# --- 7. UPDATE PROFILE ---
 class UpdateProfileView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserUpdateSerializer
@@ -86,11 +118,8 @@ class UpdateProfileView(generics.UpdateAPIView):
     def get_object(self):
         return self.request.user
 
+# --- 8. ADMIN USER LIST ---
 class UserListView(generics.ListAPIView):
-    """
-    Returns a list of all registered users.
-    Only accessible by Admins.
-    """
     permission_classes = [IsAdminUser]
     queryset = User.objects.all().order_by('-date_joined')
     serializer_class = UserSerializer

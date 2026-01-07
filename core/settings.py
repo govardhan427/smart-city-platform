@@ -106,8 +106,17 @@ CORS_ALLOWED_ORIGINS = [
     "https://smart-city-platform-six.vercel.app",
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://smart-city-platform-iitb.vercel.app",
+    "https://smart-city-platform-six.vercel.app",
+]
+
 WSGI_APPLICATION = 'core.wsgi.application'
 
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True  # Must be True for SameSite=None
+CSRF_COOKIE_SECURE = True
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
