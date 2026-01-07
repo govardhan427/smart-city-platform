@@ -24,6 +24,4 @@ urlpatterns = [
     path('api/facilities/', include('facilities.urls')),
     path('api/transport/', include('transport.urls')),
     path('api/analytics/', include('analytics.urls')),
-    path('api/recommendations/', include('recommendations.urls')),
-    path('api/parking/', include('parking.urls')),
 ]
