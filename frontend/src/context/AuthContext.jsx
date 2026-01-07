@@ -20,9 +20,15 @@ export const AuthProvider = ({ children }) => {
     } catch (e) {
         console.error("Logout error", e);
     }
+    
+    // 1. Clear State
     setUser(null);
     setAccessToken(null);
     delete api.defaults.headers.common['Authorization'];
+
+    // 2. FORCE REDIRECT (This Fixes "Not Logging Out Properly")
+    // Using window.location forces a full page reload, ensuring a clean slate.
+    window.location.href = '/login'; 
   }, []);
 
   const login = async (email, password) => {
@@ -55,9 +61,11 @@ export const AuthProvider = ({ children }) => {
         async (error) => {
             const originalRequest = error.config;
             
+            // If error is 401 (Unauthorized) AND we haven't retried yet
             if (error.response?.status === 401 && !originalRequest._retry) {
                 originalRequest._retry = true;
                 try {
+                    console.log("🔄 Token expired. Attempting silent refresh...");
                     // Try to get new token via HttpOnly cookie
                     const response = await api.post('/users/token/refresh/');
                     const { access } = response.data;
@@ -68,6 +76,7 @@ export const AuthProvider = ({ children }) => {
                     
                     return api(originalRequest);
                 } catch (refreshError) {
+                    console.error("❌ Session expired. Logging out.");
                     logout(); // Safely called now
                 }
             }
@@ -95,7 +104,7 @@ export const AuthProvider = ({ children }) => {
             setUser({ 
                 id: userData.user_id, 
                 username: userData.username,
-                email: userData.email || "User", // Fallback if email not in token
+                email: userData.email || "User", 
                 is_staff: userData.is_staff 
             });
         } catch (error) {
