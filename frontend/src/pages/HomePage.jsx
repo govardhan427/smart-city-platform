@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import useAuth from '../hooks/useAuth';
-import DashboardCard from '../components/DashboardCard/DashboardCard'; // Ensure path is correct
+import DashboardCard from '../components/DashboardCard/DashboardCard';
+import RecommendationSection from '../components/RecommendationSection/RecommendationSection';
+import ParkingPredictor from '../components/ParkingPredictor/ParkingPredictor';
 import styles from './HomePage.module.css';
 
 const HomePage = () => {
   const { user } = useAuth();
   
+  // State to manage the Smart Bar (null = hidden)
+  const [activeFeature, setActiveFeature] = useState(null); 
+
   const getDisplayName = () => {
     if (!user) return 'CITIZEN';
     if (user.username && user.username.length > 0) return user.username;
     if (user.email) return user.email.split('@')[0];
     return 'CITIZEN';
+  };
+
+  const toggleFeature = (feature) => {
+    // If clicking the same button, close it. Otherwise, open the new one.
+    setActiveFeature(prev => prev === feature ? null : feature);
   };
 
   return (
@@ -29,7 +39,67 @@ const HomePage = () => {
         </p>
       </div>
 
-      {/* 2. PUBLIC SERVICES */}
+      {/* 2. SMART INSIGHTS (Logged In Only) */}
+      {user && (
+        <div className={styles.smartSection}>
+          <div className={styles.toggleBar}>
+            <button 
+              className={`${styles.toggleBtn} ${activeFeature === 'recommend' ? styles.activeBtn : ''}`}
+              onClick={() => toggleFeature('recommend')}
+            >
+              <span><svg
+  width="18"
+  height="18"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
+    stroke="currentColor"
+    strokeWidth="1.6"
+    strokeLinejoin="round"
+  />
+</svg>
+</span> For You
+            </button>
+            <button 
+              className={`${styles.toggleBtn} ${activeFeature === 'predict' ? styles.activeBtn : ''}`}
+              onClick={() => toggleFeature('predict')}
+            >
+              <span><svg
+  width="18"
+  height="18"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <rect
+    x="7"
+    y="2"
+    width="10"
+    height="20"
+    rx="3"
+    stroke="currentColor"
+    strokeWidth="1.6"
+  />
+  <circle cx="12" cy="7" r="1.6" fill="currentColor" />
+  <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+  <circle cx="12" cy="17" r="1.6" fill="currentColor" />
+</svg>
+</span> Traffic Forecast
+            </button>
+          </div>
+
+          {/* Conditional Content Area */}
+          <div className={styles.contentArea}>
+            {activeFeature === 'recommend' && <RecommendationSection />}
+            {activeFeature === 'predict' && <ParkingPredictor />}
+          </div>
+        </div>
+      )}
+
+      {/* 3. PUBLIC SERVICES */}
       <h2 className={styles.sectionTitle}>Core Services</h2>
       <div className={styles.grid}>
         
@@ -80,70 +150,46 @@ const HomePage = () => {
         />
       </div>
 
-      {/* 3. ADMIN ZONE (Conditional) */}
+      {/* 4. ADMIN ZONE (Conditional) */}
       {user && user.is_staff && (
         <>
           <h2 className={styles.sectionTitle}>Administration</h2>
           <div className={styles.grid}>
             
-            {/* Create */}
             <DashboardCard 
               title="Create Resource" 
               desc="Publish Events & Updates"
               link="/admin/create"
-              color="#f59e0b" /* Amber */
+              color="#f59e0b"
               delay="0.4s"
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              }
+              icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>}
             />
 
-            {/* Live Monitor */}
             <DashboardCard 
               title="Live Monitor" 
               desc="System Operations View"
               link="/admin/live"
-              color="#ef4444" /* Red */
+              color="#ef4444"
               delay="0.5s"
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                </svg>
-              }
+              icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>}
             />
 
-            {/* Analytics */}
             <DashboardCard 
               title="Data Analytics" 
               desc="Financial & Usage Reports"
               link="/admin/analytics"
               color="#3b82f6"
               delay="0.6s"
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 20V10M12 20V4M6 20v-6" />
-                </svg>
-              }
+              icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 20V10M12 20V4M6 20v-6" /></svg>}
             />
 
-            {/* Scanner */}
             <DashboardCard 
               title="Access Scanner" 
               desc="QR Code Entry"
               link="/admin/scan"
-              color="#ec4899" /* Pink */
+              color="#ec4899"
               delay="0.7s"
-              icon={
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 7V5a2 2 0 0 1 2-2h2" />
-                  <path d="M17 3h2a2 2 0 0 1 2 2v2" />
-                  <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
-                  <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
-                  <rect x="7" y="7" width="10" height="10" rx="1" />
-                </svg>
-              }
+              icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 7V5a2 2 0 0 1 2-2h2" /><path d="M17 3h2a2 2 0 0 1 2 2v2" /><path d="M21 17v2a2 2 0 0 1-2 2h-2" /><path d="M7 21H5a2 2 0 0 1-2-2v-2" /><rect x="7" y="7" width="10" height="10" rx="1" /></svg>}
             />
           </div>
         </>

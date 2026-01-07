@@ -1,0 +1,170 @@
+/* src/components/ParkingPredictor/ParkingPredictor.module.css */
+
+.container {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 500px;
+  margin: 0 auto 40px auto;
+  animation: slideDown 0.4s ease-out;
+  backdrop-filter: blur(10px);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 16px;
+}
+
+.icon {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4)); /* Emerald Glow */
+}
+
+.title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  font-weight: 400;
+}
+
+/* --- FORM --- */
+.label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+}
+
+.inputGroup {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.2s;
+  color-scheme: dark; /* Fixes calendar icon color */
+}
+
+.input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.button {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 0 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- RESULT CARD --- */
+.result {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Dynamic Colors based on Level */
+.low { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
+.moderate { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 20px rgba(245, 158, 11, 0.1); }
+.high { border-color: rgba(239, 68, 68, 0.5); box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
+.critical { border-color: rgba(220, 38, 38, 0.8); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
+
+.percentage {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(180deg, #fff, rgba(255,255,255,0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.levelTag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.low .levelTag { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.moderate .levelTag { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+.high .levelTag { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+.critical .levelTag { background: rgba(220, 38, 38, 0.3); color: #fca5a5; }
+
+.context {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* --- METER BAR --- */
+.meterBg {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+.meterFill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.low .meterFill { background: #10b981; }
+.moderate .meterFill { background: #f59e0b; }
+.high .meterFill { background: #ef4444; }
+.critical .meterFill { background: #dc2626; }
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
