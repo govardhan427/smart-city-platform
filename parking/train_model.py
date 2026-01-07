@@ -1,5 +1,4 @@
-import pandas as pd
-import numpy as np
+import pandas as pd # used ONLY locally for generating data
 import joblib
 import random
 import os
@@ -10,8 +9,11 @@ from datetime import datetime, timedelta
 # This ensures the model is saved exactly where Django looks for it
 # Get the current directory of this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# CHANGE 'transport' to your actual app name if different
-MODEL_DIR = os.path.join(BASE_DIR, 'transport') 
+
+# If your app name is 'parking', use 'parking'. If 'transport', use 'transport'.
+# Based on your previous code, it seems your app folder is 'parking'.
+APP_NAME = 'parking' 
+MODEL_DIR = os.path.join(BASE_DIR) # Since this script is INSIDE the app folder, BASE_DIR is correct
 MODEL_PATH = os.path.join(MODEL_DIR, 'parking_model.pkl')
 
 if not os.path.exists(MODEL_DIR):
@@ -52,16 +54,19 @@ def train():
     print("🤖 Generating synthetic training data...")
     df = generate_dummy_data()
     
-    X = df[['day_of_week', 'hour', 'is_weekend']]
-    y = df['occupancy_percent']
+    # --- CRITICAL CHANGE FOR VERCEL ---
+    # Convert to Numpy Arrays (.values) before training.
+    # This ensures the saved model does NOT depend on Pandas.
+    X = df[['day_of_week', 'hour', 'is_weekend']].values 
+    y = df['occupancy_percent'].values
 
-    print("🧠 Training Random Forest Regressor...")
+    print("🧠 Training Random Forest Regressor (Numpy Mode)...")
     model = RandomForestRegressor(n_estimators=100, random_state=42)
     model.fit(X, y)
 
     print(f"💾 Saving model to: {MODEL_PATH}")
     joblib.dump(model, MODEL_PATH)
-    print("✅ Prediction Model Ready!")
+    print("✅ Model Trained without Pandas dependency!")
 
 if __name__ == "__main__":
     train()
