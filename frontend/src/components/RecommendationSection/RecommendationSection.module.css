@@ -1,0 +1,189 @@
+/* src/components/RecommendationSection/RecommendationSection.module.css */
+
+.container {
+  margin-bottom: 40px;
+  animation: slideDown 0.4s ease-out;
+  width: 100%;
+  overflow: hidden; 
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* LEFT ALIGN TITLE */
+  gap: 10px;
+  margin-bottom: 20px;
+  color: #a5b4fc;
+  padding-left: 20px; /* Align with cards */
+}
+
+.title {
+  font-size: 1.25rem;
+  text-align: left;
+  font-weight: 700;
+  color: white;
+  margin: 0;
+}
+
+/* --- HORIZONTAL SCROLL CONTAINER --- */
+.scrollContainer {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 20px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab; /* Shows hand cursor for desktop */
+  
+  /* Hide Scrollbar */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* THE BLUR EFFECT (Fade out edges) */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 5%,
+    black 95%,
+    transparent 100%
+  );
+}
+
+.scrollContainer:active {
+  cursor: grabbing; /* Clenched hand while dragging */
+  scroll-snap-type: none; /* Disable snap while dragging for smoothness */
+}
+
+.scrollContainer::-webkit-scrollbar {
+  display: none;
+}
+
+/* --- CARD STYLE --- */
+.card {
+  min-width: 260px;
+  max-width: 260px;
+  /* Removed min-height to fit content tightly since desc is gone */
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  backdrop-filter: blur(10px);
+  scroll-snap-align: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  z-index: 1;
+  user-select: none; /* Prevents text selection while dragging */
+}
+
+.card:hover {
+  transform: translateY(-5px) scale(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(139, 92, 246, 0.5);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.matchBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 12px 0; /* Increased margin slightly for balance */
+  padding-right: 40px;
+  line-height: 1.3;
+}
+
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 15px; /* Space before button */
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Description class removed entirely */
+
+.action {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #8b5cf6;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+}
+
+.spacer {
+  min-width: 1px;
+}
+
+/* --- LOADING STATE --- */
+.loadingContainer {
+  padding: 30px;
+  text-align: center;
+  width: 100%;
+}
+
+.loadingText {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  animation: pulse 1.5s infinite;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #8b5cf6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

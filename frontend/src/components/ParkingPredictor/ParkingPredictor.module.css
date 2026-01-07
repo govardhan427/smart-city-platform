@@ -4,53 +4,57 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 24px;
-  max-width: 500px;
-  margin: 0 auto 40px auto;
+  padding: 16px 20px; /* Reduced vertical padding */
+  max-width: 450px;
+  margin: 0 auto 30px auto; /* Reduced bottom margin */
   animation: slideDown 0.4s ease-out;
   backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
 .header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 10px;
+  margin-bottom: 15px; /* Tighter spacing */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 16px;
+  padding-bottom: 10px;
 }
 
 .icon {
-  font-size: 1.8rem;
-  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4)); /* Emerald Glow */
+  display: flex;
+  align-items: center;
+  filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3));
 }
 
 .title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: white;
   margin: 0;
 }
 
 .subtitle {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.5);
   display: block;
-  font-weight: 400;
 }
 
 /* --- FORM --- */
+.formContainer {
+  animation: fadeIn 0.3s ease-out;
+}
+
 .label {
   display: block;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 8px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
 }
 
 .inputGroup {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 8px;
 }
 
 .input {
@@ -58,12 +62,13 @@
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
-  padding: 12px;
+  padding: 8px 12px; /* Smaller input */
   border-radius: 8px;
   font-family: inherit;
+  font-size: 0.9rem;
   outline: none;
   transition: all 0.2s;
-  color-scheme: dark; /* Fixes calendar icon color */
+  color-scheme: dark;
 }
 
 .input:focus {
@@ -75,45 +80,76 @@
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   border: none;
-  padding: 0 24px;
+  padding: 0 16px;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: transform 0.1s;
 }
 
 .button:hover {
-  transform: translateY(-1px);
   filter: brightness(1.1);
 }
 
 .button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  transform: none;
 }
 
 /* --- RESULT CARD --- */
 .result {
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
+  border-radius: 10px;
+  padding: 15px;
   border: 1px solid rgba(255, 255, 255, 0.05);
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Dynamic Colors based on Level */
-.low { border-color: rgba(16, 185, 129, 0.5); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }
-.moderate { border-color: rgba(245, 158, 11, 0.5); box-shadow: 0 0 20px rgba(245, 158, 11, 0.1); }
-.high { border-color: rgba(239, 68, 68, 0.5); box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }
-.critical { border-color: rgba(220, 38, 38, 0.8); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
+.resultHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.resetBtn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.resetBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  transform: rotate(90deg);
+}
+
+.flexRow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+/* Dynamic Colors */
+.low { border-color: rgba(16, 185, 129, 0.5); }
+.moderate { border-color: rgba(245, 158, 11, 0.5); }
+.high { border-color: rgba(239, 68, 68, 0.5); }
+.critical { border-color: rgba(220, 38, 38, 0.8); }
 
 .percentage {
-  font-size: 3rem;
+  font-size: 2.2rem;
   font-weight: 800;
   line-height: 1;
-  margin-bottom: 8px;
   background: linear-gradient(180deg, #fff, rgba(255,255,255,0.7));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -121,13 +157,12 @@
 
 .levelTag {
   display: inline-block;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
+  letter-spacing: 0.5px;
 }
 
 .low .levelTag { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -137,21 +172,20 @@
 
 .context {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* --- METER BAR --- */
 .meterBg {
-  height: 6px;
+  height: 4px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  margin: 15px 0;
+  border-radius: 2px;
   overflow: hidden;
+  margin-top: 5px;
 }
 
 .meterFill {
   height: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -161,10 +195,10 @@
 .critical .meterFill { background: #dc2626; }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
+  from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
