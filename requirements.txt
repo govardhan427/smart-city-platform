@@ -1,3 +1,4 @@
+# Updated requirements
 asgiref==3.10.0
 dj-database-url==3.0.1
 Django==5.2.7
