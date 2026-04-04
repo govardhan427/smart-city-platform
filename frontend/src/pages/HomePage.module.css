@@ -162,3 +162,126 @@
   from { opacity: 0; transform: scaleY(0.95) translateY(-10px); }
   to { opacity: 1; transform: scaleY(1) translateY(0); }
 }
+
+/* --- COMMAND CENTER TEASER BANNER (NEW) --- */
+.mapTeaser {
+  position: relative;
+  width: 100%;
+  margin: 10px 0 50px 0;
+  padding: 30px 40px;
+  background: rgba(10, 10, 12, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mapTeaser:hover {
+  transform: translateY(-5px);
+  border-color: rgba(59, 130, 246, 0.5); /* Blue glow */
+  box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(59, 130, 246, 0.15);
+}
+
+/* Simulated Radar Grid Background */
+.mapTeaserBg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: center;
+  z-index: 1;
+  opacity: 0.5;
+  transition: opacity 0.4s;
+  /* Fades out the grid at the edges */
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+}
+
+.mapTeaser:hover .mapTeaserBg {
+  opacity: 1;
+}
+
+.mapTeaserContent {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.mapTeaserIcon {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.4));
+  transition: transform 0.4s;
+}
+
+.mapTeaser:hover .mapTeaserIcon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.mapTeaserText h2 {
+  margin: 0 0 5px 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: white;
+}
+
+.mapTeaserText p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.mapTeaserAction {
+  position: relative;
+  z-index: 2;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.3s;
+}
+
+.arrow {
+  transition: transform 0.3s;
+}
+
+.mapTeaser:hover .mapTeaserAction {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.mapTeaser:hover .arrow {
+  transform: translateX(5px);
+}
+
+/* Mobile Responsiveness for the Banner */
+@media (max-width: 768px) {
+  .mapTeaser {
+    flex-direction: column;
+    text-align: center;
+    padding: 30px 20px;
+    gap: 20px;
+  }
+  .mapTeaserContent {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mapTeaserText h2 { font-size: 1.3rem; }
+  .mapTeaserText p { font-size: 0.9rem; }
+  .mapTeaserAction { width: 100%; justify-content: center; }
+}

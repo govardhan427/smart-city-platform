@@ -1,53 +1,198 @@
 /* src/pages/CityMapPage.module.css */
 
-.container {
-  max-width: 1300px;
+/* --- THE MASTER LAYOUT (Locked and Un-scrollable) --- */
+.dashboardContainer {
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 100px 20px 40px 20px;
-  height: 95vh;
+  
+  /* The Absolute Fix for Page Scrolling: */
+  height: calc(100vh - 80px); /* Subtracts the 80px padding from your App.jsx <main> tag */
+  padding: 70px 20px 10px 20px; /* Pushes content exactly below the navbar */
+  box-sizing: border-box; /* Forces padding to stay INSIDE the screen bounds */
+  
   display: flex;
-  flex-direction: column;
+  gap: 20px;
   animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden; /* Hard lock to prevent accidental scrolling */
 }
 
-.header {
-  margin-bottom: 25px;
+/* =========================================
+   30% LEFT PANEL: SMART LIST
+   ========================================= */
+.sidebar {
+  width: 380px; /* Fixed width for desktop */
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  background: rgba(18, 18, 20, 0.65);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }
 
-.title {
-  font-size: 2.5rem;
+.sidebarHeader {
+  padding: 25px 25px 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+}
+
+.sidebarTitle {
+  font-size: 1.8rem;
   font-weight: 800;
-  margin: 0;
-  /* Beautiful Sci-Fi Gradient Text */
+  margin: 0 0 5px 0;
   background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
-  filter: drop-shadow(0 2px 10px rgba(165, 180, 252, 0.2));
 }
 
-.subtitle {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 1.05rem;
+.sidebarSubtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
   margin: 0;
-  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
 }
 
-/* --- THE MAP CANVAS --- */
-.mapWrapper {
+/* Internal Scrolling for the Sidebar ONLY */
+.sidebarContent {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Custom Cyberpunk Scrollbar */
+.sidebarContent::-webkit-scrollbar { width: 6px; }
+.sidebarContent::-webkit-scrollbar-track { background: transparent; }
+.sidebarContent::-webkit-scrollbar-thumb { 
+  background: rgba(255, 255, 255, 0.1); 
+  border-radius: 10px; 
+}
+.sidebarContent::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* --- ACCORDION UI --- */
+.accordionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accordionHeader {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.accordionHeader:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(4px);
+}
+
+.activeHeader {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.stateName {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.activeHeader .badge { background: #3b82f6; color: white; }
+
+/* --- LIST ITEMS --- */
+.accordionBody {
+  padding: 5px 0 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.listItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* When Map flies to this item */
+.selectedItem {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: inset 4px 0 0 #10b981; 
+}
+
+.listIcon {
+  font-size: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+}
+
+.listCity {
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+}
+
+.listType {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+
+/* =========================================
+   70% RIGHT PANEL: THE MAP
+   ========================================= */
+.mapArea {
   flex-grow: 1;
   position: relative;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
-  /* Glowing glass border effect */
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
-    0 0 30px rgba(59, 130, 246, 0.15); /* Soft blue ambient glow */
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
   background: #09090b;
 }
 
@@ -79,12 +224,16 @@
 }
 
 .markerIcon {
-  font-size: 2.2rem;
   filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.6));
   z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 36px;  /* Size of the SVG on the map */
+  height: 36px;
+  color: white; /* Makes the SVG white! */
 }
 
-/* Add a glowing beacon dot under the emoji */
 .marker::after {
   content: '';
   width: 10px;
@@ -97,15 +246,13 @@
   z-index: 1;
 }
 
-.marker:hover {
-  transform: translateY(-12px) scale(1.15);
-}
+.marker:hover { transform: translateY(-12px) scale(1.15); }
 .marker:hover::after {
-  background: #10b981; /* Turns green on hover */
+  background: #10b981; 
   box-shadow: 0 0 20px 8px rgba(16, 185, 129, 0.6);
 }
 
-/* --- ULTRA-PREMIUM POPUP CARD --- */
+/* --- POPUP CARD --- */
 .popupCard {
   background: linear-gradient(145deg, rgba(24, 24, 27, 0.95), rgba(10, 10, 12, 0.98));
   backdrop-filter: blur(16px);
@@ -121,16 +268,12 @@
   color: #ffffff;
   font-size: 1.25rem;
   font-weight: 800;
-  line-height: 1.2;
 }
 
 .popupLocation {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.85rem;
   margin: 0 0 12px 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
 }
 
 .popupMeta {
@@ -153,56 +296,45 @@
   padding: 10px;
   border-radius: 8px;
   font-weight: 700;
-  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-.popupBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.5);
-  filter: brightness(1.1);
-}
-
-.popupBtn:active {
-  transform: translateY(1px);
-}
+.popupBtn:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
 /* --- ANIMATIONS --- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseOpacity { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+@keyframes beaconPulse { 0% { transform: scale(0.8); opacity: 0.8; } 50% { transform: scale(1.5); opacity: 0.3; } 100% { transform: scale(0.8); opacity: 0.8; } }
 
-@keyframes pulseOpacity {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
+/* GLOBAL OVERRIDES FOR MAPBOX */
+:global(.mapboxgl-popup-content) { background: transparent !important; padding: 0 !important; box-shadow: none !important; }
+:global(.mapboxgl-popup-tip) { border-top-color: rgba(24, 24, 27, 0.95) !important; }
+:global(.mapboxgl-popup-close-button) { color: white; font-size: 1.5rem; right: 12px; top: 8px; }
 
-@keyframes beaconPulse {
-  0% { transform: scale(0.8); opacity: 0.8; }
-  50% { transform: scale(1.5); opacity: 0.3; }
-  100% { transform: scale(0.8); opacity: 0.8; }
-}
+/* =========================================
+   📱 MOBILE OVERHAUL (Bottom Sheet Style)
+   ========================================= */
+@media (max-width: 900px) {
+  .dashboardContainer {
+    flex-direction: column; 
+    padding: 80px 10px 10px 10px;
+    height: calc(100vh - 80px); /* Keeps it locked on mobile too */
+  }
+  
+  .mapArea {
+    flex: none;
+    height: 45%; /* Uses percentage instead of vh so it respects the container */
+    border-radius: 20px;
+  }
 
-/* --- GLOBAL OVERRIDES FOR MAPBOX POPUP ARROW --- */
-:global(.mapboxgl-popup-content) {
-  background: transparent !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-}
-:global(.mapboxgl-popup-tip) {
-  border-top-color: rgba(24, 24, 27, 0.95) !important;
-}
-:global(.mapboxgl-popup-close-button) {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 1.5rem;
-  right: 12px;
-  top: 8px;
-  transition: color 0.2s;
-}
-:global(.mapboxgl-popup-close-button:hover) {
-  color: white;
-  background: transparent;
+  .sidebar {
+    width: 100%;
+    flex: 1; 
+  }
+
+  .sidebarHeader {
+    padding: 15px;
+  }
 }

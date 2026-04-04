@@ -1,4 +1,6 @@
+/* src/pages/HomePage.jsx */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import DashboardCard from '../components/DashboardCard/DashboardCard';
 import RecommendationSection from '../components/RecommendationSection/RecommendationSection';
@@ -7,8 +9,8 @@ import styles from './HomePage.module.css';
 
 const HomePage = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   
-  // State to manage the Smart Bar (null = hidden)
   const [activeFeature, setActiveFeature] = useState(null); 
 
   const getDisplayName = () => {
@@ -19,7 +21,6 @@ const HomePage = () => {
   };
 
   const toggleFeature = (feature) => {
-    // If clicking the same button, close it. Otherwise, open the new one.
     setActiveFeature(prev => prev === feature ? null : feature);
   };
 
@@ -47,51 +48,16 @@ const HomePage = () => {
               className={`${styles.toggleBtn} ${activeFeature === 'recommend' ? styles.activeBtn : ''}`}
               onClick={() => toggleFeature('recommend')}
             >
-              <span><svg
-  width="18"
-  height="18"
-  viewBox="0 0 24 24"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <path
-    d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"
-    stroke="currentColor"
-    strokeWidth="1.6"
-    strokeLinejoin="round"
-  />
-</svg>
-</span> For You
+              <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/></svg></span> For You
             </button>
             <button 
               className={`${styles.toggleBtn} ${activeFeature === 'predict' ? styles.activeBtn : ''}`}
               onClick={() => toggleFeature('predict')}
             >
-              <span><svg
-  width="18"
-  height="18"
-  viewBox="0 0 24 24"
-  fill="none"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <rect
-    x="7"
-    y="2"
-    width="10"
-    height="20"
-    rx="3"
-    stroke="currentColor"
-    strokeWidth="1.6"
-  />
-  <circle cx="12" cy="7" r="1.6" fill="currentColor" />
-  <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-  <circle cx="12" cy="17" r="1.6" fill="currentColor" />
-</svg>
-</span> Traffic Forecast
+              <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="7" y="2" width="10" height="20" rx="3" stroke="currentColor" strokeWidth="1.6"/><circle cx="12" cy="7" r="1.6" fill="currentColor" /><circle cx="12" cy="12" r="1.6" fill="currentColor" /><circle cx="12" cy="17" r="1.6" fill="currentColor" /></svg></span> Traffic Forecast
             </button>
           </div>
 
-          {/* Conditional Content Area */}
           <div className={styles.contentArea}>
             {activeFeature === 'recommend' && <RecommendationSection />}
             {activeFeature === 'predict' && <ParkingPredictor />}
@@ -108,16 +74,9 @@ const HomePage = () => {
           title="City Events" 
           desc="Festivals, Summits & Workshops"
           link="/events"
-          color="#3b82f6" /* Blue */
+          color="#3b82f6" 
           delay="0.1s"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-          } 
+          icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>} 
         />
 
         {/* Facilities */}
@@ -125,13 +84,9 @@ const HomePage = () => {
           title="Facilities" 
           desc="Book Gyms, Halls & Courts"
           link="/facilities"
-          color="#8b5cf6" /* Violet */
+          color="#8b5cf6" 
           delay="0.2s"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 21h18M5 21V7l8-4 8 4v14M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-5a1.5 1.5 0 0 0-1.5 1.5V21" />
-            </svg>
-          }
+          icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-5a1.5 1.5 0 0 0-1.5 1.5V21" /></svg>}
         />
 
         {/* Parking */}
@@ -139,15 +94,33 @@ const HomePage = () => {
           title="Smart Parking" 
           desc="Real-time Availability"
           link="/parking"
-          color="#10b981" /* Emerald */
+          color="#10b981" 
           delay="0.3s"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-              <path d="M9 14v-4h3a2 2 0 0 1 0 4h-3" />
-            </svg>
-          }
+          icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M9 14v-4h3a2 2 0 0 1 0 4h-3" /></svg>}
         />
+      </div>
+
+      {/* --- MOVED: CITY COMMAND CENTER TEASER BANNER --- */}
+      <div className={styles.mapTeaser} onClick={() => navigate('/map')}>
+        <div className={styles.mapTeaserBg}></div>
+        <div className={styles.mapTeaserContent}>
+          
+          {/* CUSTOM SVG ICON INJECTED HERE */}
+          <div className={styles.mapTeaserIcon}>
+            <svg width="60" height="60" viewBox="0 0 512 512" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M255.998,226.953c41.753,0,75.724-33.974,75.724-75.736c0-41.753-33.97-75.724-75.724-75.724 c-41.753,0-75.722,33.969-75.722,75.724C180.276,192.977,214.246,226.953,255.998,226.953z M255.998,117.925 c18.357,0,33.293,14.934,33.293,33.291c0,18.364-14.936,33.305-33.293,33.305s-33.291-14.941-33.291-33.305 C222.707,132.86,237.642,117.925,255.998,117.925z"/>
+              <path d="M473.053,194.757c0-11.717-9.499-21.215-21.216-21.215h-47.831C419.387,77.012,344.64,0,255.998,0 c-87.981,0-163.53,76.35-148.012,173.541H60.161c-11.717,0-21.216,9.499-21.216,21.215v296.028 c0,11.717,9.499,21.215,21.216,21.215h391.679h0.001h0.001c11.388,0,21.213-9.236,21.213-21.215 C473.053,477.597,473.053,207.852,473.053,194.757z M392.033,216.16c0.009-0.023,0.017-0.045,0.026-0.068 c0.014-0.04,0.031-0.081,0.045-0.12h38.517v105.341h-87.384C360.19,289.228,379.323,250.328,392.033,216.16z M255.998,42.431 c67.658,0,127.976,63.229,100.911,145.712c-19.504,59.443-68.939,147.93-100.911,201.766 c-31.877-53.684-81.409-142.34-100.911-201.766C127.96,105.455,188.5,42.431,255.998,42.431z M159.361,469.569H81.376V215.972 h38.519c6.24,17.162,18.992,47.189,39.466,87.262V469.569z M201.792,469.569v-88.371c20.309,35.423,36.022,60.593,36.219,60.905 c8.304,13.275,27.675,13.267,35.973,0c0.202-0.323,16.963-27.167,38.242-64.437l89.384,91.903H201.792z M430.624,438.541 l-72.749-74.797h72.749V438.541z"/>
+            </svg>
+          </div>
+
+          <div className={styles.mapTeaserText}>
+            <h2>Access City Command Center</h2>
+            <p>View live traffic, active events, and infrastructure on the interactive 3D map.</p>
+          </div>
+        </div>
+        <div className={styles.mapTeaserAction}>
+          Launch Map <span className={styles.arrow}>&rarr;</span>
+        </div>
       </div>
 
       {/* 4. ADMIN ZONE (Conditional) */}

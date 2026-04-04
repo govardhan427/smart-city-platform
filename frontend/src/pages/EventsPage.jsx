@@ -1,5 +1,6 @@
 /* src/pages/EventsPage.jsx */
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom'; // <--- NEW IMPORT
 import api from '../services/api';
 import EventBookingModal from '../components/events/EventBookingModal';
 import styles from './EventsPage.module.css';
@@ -9,13 +10,25 @@ const EventsPage = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  
+  const location = useLocation(); // <--- READ THE ROUTER STATE
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await api.get('/events/');
         // Safety: Ensure we always have an array
-        setEvents(response.data || []);
+        const fetchedEvents = response.data || [];
+        setEvents(fetchedEvents);
+
+        // --- AUTO-OPEN MODAL LOGIC ---
+        // If we arrived here from the City Map, open that specific event!
+        if (location.state && location.state.autoOpenEventId) {
+            const targetEvent = fetchedEvents.find(e => e.id === location.state.autoOpenEventId);
+            if (targetEvent) {
+                setSelectedEvent(targetEvent);
+            }
+        }
       } catch (error) {
         console.error("Failed to load events", error);
       } finally {
@@ -23,7 +36,7 @@ const EventsPage = () => {
       }
     };
     fetchEvents();
-  }, []);
+  }, [location.state]); // Re-run if the state changes
 
   // Helper to keep the grid looking neat
   const truncateText = (text, limit = 80) => {
@@ -110,7 +123,11 @@ const EventsPage = () => {
       {selectedEvent && (
         <EventBookingModal 
            event={selectedEvent} 
-           onClose={() => setSelectedEvent(null)} 
+           onClose={() => {
+              setSelectedEvent(null);
+              // Clean up the URL state so it doesn't reopen on page refresh
+              window.history.replaceState({}, document.title);
+           }} 
         />
       )}
 
