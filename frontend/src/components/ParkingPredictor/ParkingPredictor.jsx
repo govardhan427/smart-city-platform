@@ -27,6 +27,9 @@ const ParkingPredictor = () => {
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // --- NEW: Feedback State ---
+  const [feedbackStatus, setFeedbackStatus] = useState(null); // 'submitting', 'success', 'error'
 
   const handlePredict = async () => {
     if (!datetime) return;
@@ -47,6 +50,23 @@ const ParkingPredictor = () => {
   const handleReset = () => {
     setPrediction(null);
     setDatetime('');
+    setFeedbackStatus(null); // Reset feedback when checking a new time
+  };
+
+  // --- NEW: Feedback API Call ---
+  const handleFeedback = async (isAccurate) => {
+    setFeedbackStatus('submitting');
+    try {
+      // Sends true for 👍 and false for 👎
+      await api.post('/transport/feedback/', { 
+        is_accurate: isAccurate, 
+        forecast_datetime: datetime 
+      });
+      setFeedbackStatus('success');
+    } catch (err) {
+      console.error("Feedback failed", err);
+      setFeedbackStatus('error'); // Fails silently for the user but logs it
+    }
   };
 
   const getLevelClass = (level) => {
@@ -68,7 +88,7 @@ const ParkingPredictor = () => {
         </div>
       </div>
 
-      {/* INPUT FORM (Hidden when prediction exists) */}
+      {/* INPUT FORM */}
       {!prediction && (
         <div className={styles.formContainer}>
           <label className={styles.label}>Select Time</label>
@@ -91,7 +111,7 @@ const ParkingPredictor = () => {
         </div>
       )}
 
-      {/* RESULT VIEW (Replaces Form) */}
+      {/* RESULT VIEW */}
       {prediction && (
         <div className={`${styles.result} ${getLevelClass(prediction.level)}`}>
           
@@ -118,6 +138,32 @@ const ParkingPredictor = () => {
               style={{ width: `${prediction.predicted_occupancy}%` }}
             />
           </div>
+
+          {/* --- NEW: AI FEEDBACK LOOP --- */}
+          <div className={styles.feedbackSection}>
+            {feedbackStatus === 'success' ? (
+              <span className={styles.feedbackSuccess}>✨ Thanks for making our AI smarter!</span>
+            ) : (
+              <>
+                <span className={styles.feedbackText}>Was this accurate?</span>
+                <button 
+                  onClick={() => handleFeedback(true)} 
+                  className={styles.thumbBtn}
+                  disabled={feedbackStatus === 'submitting'}
+                >
+                  👍
+                </button>
+                <button 
+                  onClick={() => handleFeedback(false)} 
+                  className={styles.thumbBtn}
+                  disabled={feedbackStatus === 'submitting'}
+                >
+                  👎
+                </button>
+              </>
+            )}
+          </div>
+
         </div>
       )}
     </div>

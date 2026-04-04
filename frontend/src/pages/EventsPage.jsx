@@ -14,7 +14,8 @@ const EventsPage = () => {
     const fetchEvents = async () => {
       try {
         const response = await api.get('/events/');
-        setEvents(response.data);
+        // Safety: Ensure we always have an array
+        setEvents(response.data || []);
       } catch (error) {
         console.error("Failed to load events", error);
       } finally {
@@ -23,6 +24,12 @@ const EventsPage = () => {
     };
     fetchEvents();
   }, []);
+
+  // Helper to keep the grid looking neat
+  const truncateText = (text, limit = 80) => {
+    if (!text) return "Join us for this exciting city event!";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
 
   return (
     <div className={styles.container}>
@@ -43,6 +50,14 @@ const EventsPage = () => {
             ))
         )}
 
+        {/* EMPTY STATE */}
+        {!loading && events.length === 0 && (
+          <div className={styles.emptyState}>
+            <h3>No upcoming events found.</h3>
+            <p>Check back later for new city activities!</p>
+          </div>
+        )}
+
         {/* LOADED STATE */}
         {!loading && events.map((evt) => (
           <div 
@@ -50,34 +65,37 @@ const EventsPage = () => {
             className={styles.card}
             onClick={() => setSelectedEvent(evt)}
           >
-            <img 
-               src={evt.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80"} 
-               alt={evt.title} 
-               className={styles.cardImage}
-            />
-
-            <div className={`${styles.priceTag} ${evt.price == 0 ? styles.freeTag : ''}`}>
-               {evt.price > 0 ? `₹${evt.price}` : 'FREE'}
+            <div className={styles.imageContainer}>
+                <img 
+                   src={evt.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80"} 
+                   alt={evt.title} 
+                   className={styles.cardImage}
+                />
+                <div className={`${styles.priceTag} ${Number(evt.price) === 0 ? styles.freeTag : ''}`}>
+                   {Number(evt.price) > 0 ? `₹${evt.price}` : 'FREE'}
+                </div>
             </div>
 
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{evt.title}</h3>
                
-               {/* --- NEW: TINY RATING UNDER TITLE --- */}
-               {evt.average_rating && (
-                 <div style={{ color: '#fbbf24', fontSize: '0.85rem', marginBottom: '8px', fontWeight: 'bold' }}>
-                   ⭐ {evt.average_rating} / 5.0
+               {/* RATING DISPLAY */}
+               {evt.average_rating > 0 && (
+                 <div className={styles.ratingRow}>
+                    <span className={styles.star}>⭐</span>
+                    <span className={styles.ratingValue}>{Number(evt.average_rating).toFixed(1)}</span>
+                    <span className={styles.ratingMax}>/ 5.0</span>
                  </div>
                )}
                
                <div className={styles.cardDate}>
                   <span>📅</span> 
-                  {new Date(evt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                  {evt.date ? new Date(evt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'TBD'}
                   {evt.time && ` • ${evt.time.slice(0, 5)}`}
                </div>
 
                <p className={styles.cardDesc}>
-                 {evt.description || "Click to see more details about this event."}
+                 {truncateText(evt.description)}
                </p>
 
                <div className={styles.viewBtn}>

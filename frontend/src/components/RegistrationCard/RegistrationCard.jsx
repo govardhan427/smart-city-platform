@@ -3,11 +3,14 @@ import React from 'react';
 import styles from './RegistrationCard.module.css';
 
 const RegistrationCard = ({ registration, onOpenReview }) => {
-  // Extract can_review from our new backend logic
-  const { event, attended_at, id, can_review } = registration;
+  // 1. SAFE DESTRUCTURING
+  // We check for event_details (from your page) OR event (just in case)
+  const eventData = registration.event_details || registration.event || {};
+  const { attended_at, id, can_review } = registration;
 
-  // Format Full Date for Event
+  // 2. HELPER FUNCTIONS (Keep these as they are, they look good)
   const formatDateTime = (dateStr, timeStr) => {
+    if (!dateStr || !timeStr) return "TBD"; 
     try {
       const date = new Date(`${dateStr}T${timeStr}`);
       return date.toLocaleString('en-US', {
@@ -19,7 +22,6 @@ const RegistrationCard = ({ registration, onOpenReview }) => {
     }
   };
 
-  // Format Check-In Time
   const formatAttendedTime = (dateTimeStr) => {
      try {
       const date = new Date(dateTimeStr);
@@ -31,29 +33,26 @@ const RegistrationCard = ({ registration, onOpenReview }) => {
     }
   }
 
+  // 3. RENDER (Use eventData instead of event)
   return (
     <div className={`${styles.card} ${attended_at ? styles.checkedIn : styles.pending}`}>
       
-      {/* --- INFO SECTION --- */ }
       <div className={styles.cardBody}>
-        <h3 className={styles.cardTitle}>{event.title}</h3>
+        {/* Use eventData here */}
+        <h3 className={styles.cardTitle}>{eventData.title || "Untitled Event"}</h3>
         
         <div className={styles.cardMeta}>
-          <span className={styles.metaItem}>📅 {formatDateTime(event.date, event.time)}</span>
-          <span className={styles.metaItem}>📍 {event.location}</span>
+          <span className={styles.metaItem}>📅 {formatDateTime(eventData.date, eventData.time)}</span>
+          <span className={styles.metaItem}>📍 {eventData.location || "Online"}</span>
         </div>
 
-        {/* Digital ID Badge */}
         <div className={styles.qrInfo}>
           <span className={styles.qrLabel}>ACCESS ID:</span>
-          <span className={styles.qrId}>{id.substring(0, 8).toUpperCase()}...</span>
+          <span className={styles.qrId}>{id ? id.substring(0, 8).toUpperCase() : 'N/A'}...</span>
         </div>
       </div>
       
-      {/* --- STATUS BADGE & ACTIONS --- */}
       <div className={styles.statusBadge}>
-        
-        {/* Status Indicator */}
         {attended_at ? (
           <>
             <div className={styles.statusText}>
@@ -69,19 +68,18 @@ const RegistrationCard = ({ registration, onOpenReview }) => {
           </div>
         )}
 
-        {/* --- THE NEW REVIEW BUTTON --- */}
+        {/* --- THE NEW REVIEW BUTTON (Perfectly implemented!) --- */}
         {can_review && (
           <button 
             className={styles.reviewBtn}
             onClick={(e) => {
-              e.stopPropagation(); // Prevents card clicks if you ever make the card clickable
+              e.stopPropagation(); 
               onOpenReview();
             }}
           >
             ✨ Rate Experience
           </button>
         )}
-
       </div>
     </div>
   );

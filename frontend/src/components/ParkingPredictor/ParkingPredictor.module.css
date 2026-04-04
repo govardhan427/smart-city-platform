@@ -202,3 +202,56 @@
   from { opacity: 0; transform: scale(0.98); }
   to { opacity: 1; transform: scale(1); }
 }
+
+/* --- AI FEEDBACK LOOP STYLES (NEW) --- */
+.feedbackSection {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.feedbackText {
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+}
+
+.thumbBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+  filter: grayscale(100%);
+}
+
+.thumbBtn:hover {
+  opacity: 1;
+  filter: grayscale(0%);
+  transform: scale(1.2) translateY(-2px);
+}
+
+.thumbBtn:active {
+  transform: scale(0.9);
+}
+
+.thumbBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+.feedbackSuccess {
+  color: #34d399; /* Emerald 400 */
+  font-weight: 600;
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,8 +1,9 @@
+/* src/pages/FacilitiesPage.jsx */
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import FacilityBookingModal from '../components/facilities/FacilityBookingModal';
 import styles from './FacilitiesPage.module.css';
-import SkeletonCard from '../components/common/SkeletonCard'; // Import Skeleton
+import SkeletonCard from '../components/common/SkeletonCard';
 
 const FacilitiesPage = () => {
   const [facilities, setFacilities] = useState([]);
@@ -13,7 +14,7 @@ const FacilitiesPage = () => {
     const fetchFacilities = async () => {
       try {
         const response = await api.get('/facilities/');
-        setFacilities(response.data);
+        setFacilities(response.data || []); // Safety fallback
       } catch (error) {
         console.error("Failed to load facilities", error);
       } finally {
@@ -23,10 +24,16 @@ const FacilitiesPage = () => {
     fetchFacilities();
   }, []);
 
+  // Helper to keep the grid uniform
+  const truncateText = (text, limit = 75) => {
+    if (!text) return "Secure your spot at this premier city facility.";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
+
   return (
     <div className={styles.container}>
       
-      {/* HEADER (Visible during loading) */}
+      {/* HEADER */}
       <div className={styles.header}>
         <h1 className={styles.title}>Public Facilities</h1>
         <p className={styles.subtitle}>Book conference rooms, sports courts, and community halls.</p>
@@ -35,42 +42,59 @@ const FacilitiesPage = () => {
       {/* GRID */}
       <div className={styles.grid}>
         
-        {/* LOADING STATE: Show Skeletons */}
+        {/* LOADING STATE */}
         {loading && (
             [...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} />
             ))
         )}
 
-        {/* LOADED STATE: Show Real Data */}
+        {/* EMPTY STATE */}
+        {!loading && facilities.length === 0 && (
+          <div className={styles.emptyState}>
+            <h3>No facilities available for booking.</h3>
+            <p>Please check back later or contact city administration.</p>
+          </div>
+        )}
+
+        {/* LOADED STATE */}
         {!loading && facilities.map((fac) => (
           <div 
             key={fac.id} 
             className={styles.card}
             onClick={() => setSelectedFacility(fac)}
           >
-            {/* Image */}
-            <img 
-               src={fac.image_url || "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"} 
-               alt={fac.name} 
-               className={styles.cardImage}
-            />
-
-            {/* Price Badge */}
-            <div className={styles.priceTag}>
-               {fac.price > 0 ? `₹${fac.price}` : 'FREE'}
+            <div className={styles.imageContainer}>
+                <img 
+                   src={fac.image_url || "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"} 
+                   alt={fac.name} 
+                   className={styles.cardImage}
+                />
+                
+                <div className={`${styles.priceTag} ${Number(fac.price) === 0 ? styles.freeTag : ''}`}>
+                   {Number(fac.price) > 0 ? `₹${fac.price}` : 'FREE'}
+                </div>
             </div>
 
-            {/* Content Overlay */}
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{fac.name}</h3>
                
+               {/* NEW: RATING DISPLAY (Matches Events) */}
+               {fac.average_rating > 0 && (
+                 <div className={styles.ratingRow}>
+                    <span className={styles.star}>⭐</span>
+                    <span className={styles.ratingValue}>{Number(fac.average_rating).toFixed(1)}</span>
+                    <span className={styles.ratingMax}>/ 5.0</span>
+                 </div>
+               )}
+
                <div className={styles.cardMeta}>
-                  <span>🏢</span> Capacity: {fac.capacity}
+                  <span className={styles.metaIcon}>🏢</span> 
+                  <span className={styles.metaText}>Capacity: {fac.capacity} Persons</span>
                </div>
 
                <p className={styles.cardDesc}>
-                 {fac.description || "Click to check availability and book this facility."}
+                 {truncateText(fac.description)}
                </p>
 
                <div className={styles.viewBtn}>

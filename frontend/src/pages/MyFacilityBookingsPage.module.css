@@ -1,103 +1,235 @@
+/* src/pages/MyFacilityBookingsPage.module.css */
+
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 100px 20px 80px 20px;
+  animation: fadeIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* --- HEADER & NAVIGATION --- */
+.header {
+  margin-bottom: 45px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.backBtn:hover {
+  color: #a5b4fc; /* Indigo highlight */
+  transform: translateX(-4px);
 }
 
 .title {
-  font-size: 2rem;
-  margin-bottom: 2rem;
-  color: var(--text-color);
-  text-align: center;
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -1.5px;
+  margin: 0;
+  background: linear-gradient(to bottom, #fff, #a5b4fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.loading, .emptyState {
-  text-align: center;
-  color: var(--text-color-light);
-  margin-top: 3rem;
-  font-size: 1.2rem;
-}
-
+/* --- BOOKING CARD (GLASS STYLE) --- */
 .list {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 20px;
 }
 
-/* --- Booking Card --- */
 .bookingCard {
   display: flex;
   align-items: center;
-  background: var(--surface-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-sm);
-  padding: 1rem;
-  transition: transform 0.2s;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 24px;
+  gap: 24px;
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
 }
 
 .bookingCard:hover {
-  transform: translateX(5px);
-  box-shadow: var(--shadow-md);
+  transform: translateX(12px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(165, 180, 252, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .imageWrapper {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--border-radius);
+  width: 110px;
+  height: 110px;
+  border-radius: 16px;
   overflow: hidden;
-  margin-right: 1.5rem;
   flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s ease;
 }
 
+.bookingCard:hover .image {
+  transform: scale(1.1);
+}
+
+/* --- INFO SECTION --- */
 .info {
   flex-grow: 1;
 }
 
 .facilityName {
-  font-size: 1.2rem;
-  margin-bottom: 0.25rem;
-  color: var(--text-color);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
 }
 
 .location {
-  font-size: 0.9rem;
-  color: var(--text-color-light);
-  margin-bottom: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .dateTime {
   display: flex;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
 .dateTag, .timeTag {
+  background: rgba(165, 180, 252, 0.12);
+  color: #a5b4fc;
+  padding: 6px 14px;
+  border-radius: 10px;
   font-size: 0.85rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+  font-weight: 700;
+  border: 1px solid rgba(165, 180, 252, 0.2);
 }
 
-.dateTag {
-  background-color: #e3f2fd;
-  color: #0d47a1;
-}
-
-.timeTag {
-  background-color: #fff3e0;
-  color: #e65100;
+/* --- STATUS & BADGES --- */
+.statusArea {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .confirmedBadge {
-  background-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  padding: 8px 18px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* The glowing dot from the JSX */
+.dot {
+  width: 7px;
+  height: 7px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.bookingId {
+  font-family: 'JetBrains Mono', monospace; /* Professional tech look */
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.25);
+  letter-spacing: 1px;
+}
+
+/* --- EMPTY STATE --- */
+.emptyState {
+  text-align: center;
+  padding: 80px 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.emptyIcon { font-size: 3.5rem; margin-bottom: 20px; filter: grayscale(1); }
+.emptyState h3 { color: white; font-size: 1.6rem; margin-bottom: 10px; }
+.emptyState p { color: rgba(255, 255, 255, 0.4); margin-bottom: 25px; max-width: 300px; line-height: 1.5; }
+
+.bookNowBtn {
+  background: #3b82f6;
   color: white;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.bookNowBtn:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 650px) {
+  .title { font-size: 2.2rem; }
+  
+  .bookingCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+  
+  .imageWrapper {
+    width: 100%;
+    height: 160px;
+  }
+
+  .statusArea {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 15px;
+    margin-top: 5px;
+  }
 }

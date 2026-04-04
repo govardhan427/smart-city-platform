@@ -64,7 +64,7 @@ function App() {
         {/* HUD Elements */}
         <NewsTicker />
         
-        <main style={{ paddingBottom: '80px', position: 'relative', zIndex: 10 }}>
+        <main style={{ paddingBottom: '80px' }}>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />

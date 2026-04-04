@@ -18,114 +18,147 @@ const PaymentPage = () => {
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
 
-  // DEBUG: Open Console (F12) to see why Price might be missing
-  useEffect(() => {
-    console.log("💳 PAYMENT PAGE RECEIVED DATA:", state);
-  }, [state]);
-
-  // 1. SESSION CHECK (Prevents Crash on Refresh)
+  // 1. SESSION CHECK
   if (!state) {
     return (
-      <div className={styles.container} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '80vh', textAlign: 'center' }}>
-        <div className={styles.summarySection} style={{ maxWidth: '500px', padding: '40px', border: '1px solid #ff4d4d' }}>
-          <h1 style={{ color: '#ff4d4d', marginBottom: '15px' }}>⚠️ Session Expired</h1>
-          <p style={{ color: '#ccc', marginBottom: '30px' }}>
-             Payment details are lost on refresh. Please go back and select your booking again.
-          </p>
+      <div className={styles.container}>
+        <div className={styles.errorBox}>
+          <h1>⚠️ Session Expired</h1>
+          <p>Payment details are lost on refresh. Please restart your booking.</p>
           <Button onClick={() => navigate('/')} variant="danger">Return to Home</Button>
         </div>
       </div>
     );
   }
 
-  // 2. SAFE DESTRUCTURING
-  // We default extraData to {} so it never crashes if missing
   const { type, id, title, price, extraData = {} } = state; 
+  const displayPrice = price || 0;
 
-  // 3. PRICE FALLBACK (Fixes "Total Amount Not Getting")
-  // If price is missing, show 0.
-  const displayPrice = price ? price : 0;
+  // --- SMART INPUT HANDLERS ---
+  const handleCardNumber = (e) => {
+    const val = e.target.value.replace(/\D/g, ''); // Keep only numbers
+    setCardNumber(val.slice(0, 16)); // Limit to 16 digits
+  };
+
+  const handleExpiry = (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length >= 2) {
+      val = val.slice(0, 2) + '/' + val.slice(2, 4);
+    }
+    setExpiry(val.slice(0, 5));
+  };
+
+  const formatCardDisplay = (num) => {
+    const padded = num.padEnd(16, '•');
+    return padded.match(/.{1,4}/g).join(' ');
+  };
 
   const handlePayment = async (e) => {
     e.preventDefault();
+    if (cardNumber.length < 16) return toast.error("Invalid Card Number");
+    
     setLoading(true);
 
-    // SIMULATE PAYMENT DELAY
+    // Simulated Processing
     setTimeout(async () => {
       try {
+        let endpoint = '';
+        let payload = extraData;
+
         if (type === 'event') {
-          // Default to 1 ticket if missing, to prevent backend error
-          await api.post(`/events/${id}/register/`, { tickets: extraData?.tickets || 1 });
-        } 
-        else if (type === 'facility') {
-          await api.post(`/facilities/${id}/book/`, extraData);
+          endpoint = `/events/${id}/register/`;
+          payload = { tickets: extraData?.tickets || 1 };
+        } else if (type === 'facility') {
+          endpoint = `/facilities/${id}/book/`;
+        } else if (type === 'parking') {
+          endpoint = `/transport/parking/${id}/book/`;
         }
-        else if (type === 'parking') {
-          await api.post(`/transport/parking/${id}/book/`, extraData);
-        }
+
+        await api.post(endpoint, payload);
         
-        toast.success("💳 Payment Approved! Booking Confirmed.");
+        toast.success("💳 Transaction Approved! Your booking is confirmed.");
         navigate('/my-bookings'); 
         
       } catch (err) {
-        toast.error("Transaction failed. Please try again.");
-        console.error(err);
+        toast.error(err.response?.data?.error || "Transaction failed.");
       } finally {
         setLoading(false);
       }
     }, 2000); 
   };
 
-  const formatCardDisplay = (num) => {
-    return num.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
-  };
-
   return (
     <div className={styles.container}>
       <div className={styles.paymentWrapper}>
         
-        {/* LEFT COL: Order Summary */}
+        {/* LEFT COL: DIGITAL RECEIPT */}
         <div className={styles.summarySection}>
-          <h1 className={styles.pageTitle}>Secure Checkout</h1>
+          <h1 className={styles.pageTitle}>Checkout</h1>
           
-          <div className={styles.itemDetails}>
-            <div className={styles.itemLabel}>Item / Service</div>
-            <div className={styles.itemValue}>{title}</div>
+          <div className={styles.receiptCard}>
+            <div className={styles.receiptRow}>
+              <span className={styles.label}>Service</span>
+              <span className={styles.value}>{title}</span>
+            </div>
 
-            {/* Check if tickets exist using optional chaining */}
             {extraData?.tickets && (
-              <>
-                <div className={styles.itemLabel}>Quantity</div>
-                <div className={styles.itemValue}>{extraData.tickets} Ticket(s)</div>
-              </>
+              <div className={styles.receiptRow}>
+                <span className={styles.label}>Quantity</span>
+                <span className={styles.value}>{extraData.tickets} Ticket(s)</span>
+              </div>
             )}
             
-            {extraData?.vehicle_number && (
-              <>
-                <div className={styles.itemLabel}>Vehicle ID</div>
-                <div className={styles.itemValue}>{extraData.vehicle_number}</div>
-              </>
+            {extraData?.time_slot && (
+              <div className={styles.receiptRow}>
+                <span className={styles.label}>Reserved Slot</span>
+                <span className={styles.value}>{extraData.time_slot}</span>
+              </div>
             )}
+
+            <div className={styles.receiptDivider}></div>
+            
+            <div className={styles.totalRow}>
+              <span className={styles.totalLabel}>Total Due</span>
+              <span className={styles.totalAmount}>₹{displayPrice}</span>
+            </div>
           </div>
 
-          <div className={styles.totalContainer}>
-            <div className={styles.totalLabel}>Total Amount</div>
-            {/* Display the Safe Price */}
-            <div className={styles.totalPrice}>₹{displayPrice}</div>
+          <div className={styles.guarantee}>
+            <span className={styles.shieldIcon}>🛡️</span>
+            <div>
+              <strong>Secure Payment</strong>
+              <p>Your data is processed via 256-bit SSL encryption.</p>
+            </div>
           </div>
         </div>
 
-        {/* RIGHT COL: Form */}
+        {/* RIGHT COL: INTERACTIVE CARD FORM */}
         <div className={styles.formSection}>
           
-          <div className={styles.visualCard}>
-            <div className={styles.chip}></div>
+          {/* THE INTERACTIVE CARD VISUAL */}
+          <div className={`${styles.visualCard} ${loading ? styles.cardProcessing : ''}`}>
+            <div className={styles.cardHeader}>
+              <div className={styles.chip}></div>
+              <div className={styles.contactless}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v10h-2V7zm0 12h2v2h-2v-2z"/>
+                </svg>
+              </div>
+            </div>
+            
             <div className={styles.cardNumDisplay}>
               {formatCardDisplay(cardNumber)}
             </div>
+            
             <div className={styles.cardBottom}>
-              <span>{cardName || 'YOUR NAME'}</span>
-              <span>{expiry || 'MM/YY'}</span>
+              <div className={styles.cardInfoGroup}>
+                <label>Card Holder</label>
+                <div>{cardName || 'FULL NAME'}</div>
+              </div>
+              <div className={styles.cardInfoGroup}>
+                <label>Expires</label>
+                <div>{expiry || 'MM/YY'}</div>
+              </div>
             </div>
           </div>
 
@@ -134,14 +167,13 @@ const PaymentPage = () => {
               label="Card Number" 
               placeholder="0000 0000 0000 0000" 
               value={cardNumber} 
-              onChange={e => setCardNumber(e.target.value)} 
+              onChange={handleCardNumber} 
               required 
-              maxLength="16"
             />
             
             <Input 
               label="Cardholder Name" 
-              placeholder="AS ON CARD" 
+              placeholder="AS PRINTED ON CARD" 
               value={cardName} 
               onChange={e => setCardName(e.target.value.toUpperCase())} 
               required 
@@ -152,30 +184,22 @@ const PaymentPage = () => {
                 label="Expiry Date" 
                 placeholder="MM/YY" 
                 value={expiry} 
-                onChange={e => setExpiry(e.target.value)} 
+                onChange={handleExpiry} 
                 required 
-                maxLength="5"
               />
               <Input 
-                label="CVV / CVC" 
-                placeholder="123" 
+                label="CVV" 
+                placeholder="•••" 
                 type="password" 
                 value={cvv} 
-                onChange={e => setCvv(e.target.value)} 
+                onChange={e => setCvv(e.target.value.replace(/\D/g, '').slice(0,3))} 
                 required 
-                maxLength="3"
               />
             </div>
 
-            <div style={{marginTop: '20px'}}>
-              <Button type="submit" disabled={loading} variant="success">
-                {loading ? 'Processing Transaction...' : `Pay ₹${displayPrice}`}
-              </Button>
-            </div>
-
-            <div className={styles.secureBadge}>
-              <span className={styles.secureIcon}>🔒</span> 256-bit SSL Encrypted Connection
-            </div>
+            <Button type="submit" disabled={loading} variant="primary" className={styles.payBtn}>
+              {loading ? 'Validating...' : `Complete Payment • ₹${displayPrice}`}
+            </Button>
           </form>
         </div>
 

@@ -32,9 +32,10 @@ const FeedbackSection = ({ reviews }) => {
 
             {/* User Info & Verified Badge */}
             <div className={styles.userInfo}>
-              <div className={styles.avatar}>
-                {review.user_name.charAt(0).toUpperCase()}
-              </div>
+              {/* Replace the avatar line with this safety-first version */}
+                <div className={styles.avatar}>
+                {review.user_name ? review.user_name.charAt(0).toUpperCase() : '?'}
+                </div>
               <div>
                 <p className={styles.userName}>{review.user_name}</p>
                 <span className={styles.verifiedBadge}>

@@ -9,20 +9,22 @@
   /* Glass Base */
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 4px solid rgba(255, 255, 255, 0.2); /* Default accent */
+  border-left: 4px solid rgba(255, 255, 255, 0.2); 
   backdrop-filter: blur(20px);
-  border-radius: 16px;
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px; /* Slightly rounder for modern feel */
   padding: 24px;
   overflow: hidden;
   
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   min-height: 140px;
 }
 
 .card:hover {
-  transform: translateX(5px);
+  transform: translateX(8px); /* Subtle slide is better for lists */
   background: rgba(255, 255, 255, 0.06);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
 /* --- LEFT SIDE: INFO --- */
@@ -35,8 +37,8 @@
 
 .cardTitle {
   margin: 0;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.4rem;
+  font-weight: 800;
   color: white;
   letter-spacing: -0.5px;
 }
@@ -45,7 +47,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 15px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   font-size: 0.9rem;
   margin-top: 5px;
 }
@@ -56,158 +58,158 @@
   gap: 6px;
 }
 
-/* --- ID BADGE (The "Digital Code") --- */
+/* --- ID BADGE --- */
 .qrInfo {
   margin-top: 15px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 8px 12px;
-  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 14px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   width: fit-content;
 }
 
 .qrLabel {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
-  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 1.5px;
+  font-weight: 600;
 }
 
 .qrId {
-  font-family: 'Courier New', monospace; /* Tech feel */
-  color: #60a5fa; /* Electric Blue */
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  color: #60a5fa; 
   font-weight: 700;
   letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.3);
 }
 
-/* --- RIGHT SIDE: STATUS INDICATOR --- */
+/* --- RIGHT SIDE: STATUS --- */
 .statusBadge {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   text-align: right;
   margin-left: 20px;
-  padding-left: 20px;
+  padding-left: 24px;
   border-left: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 12px; /* Uniform gap between status and button */
 }
 
 .statusText {
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 5px;
+  letter-spacing: 1.5px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .statusTime {
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 500;
 }
 
-/* --- DYNAMIC STATUS STYLES --- */
-
-/* Pending (Amber) */
-.pending {
-  border-left-color: #f59e0b;
+/* --- INDICATOR LIGHTS --- */
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
 }
+
+/* Status States */
+.pending { border-left-color: #f59e0b; }
 .pending .statusText { color: #fbbf24; }
 .pending .indicator {
-  width: 10px; height: 10px;
   background: #f59e0b;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #f59e0b;
-  animation: blink 2s infinite;
+  box-shadow: 0 0 12px #f59e0b;
+  animation: blink 2s infinite ease-in-out;
 }
 
-/* Checked In (Green) */
-.checkedIn {
-  border-left-color: #10b981;
-  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.05));
+.checkedIn { 
+  border-left-color: #10b981; 
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.03));
 }
 .checkedIn .statusText { color: #34d399; }
 .checkedIn .indicator {
-  width: 10px; height: 10px;
   background: #10b981;
-  border-radius: 50%;
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 0 0 12px #10b981;
 }
 
-@keyframes blink {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
-}
-
-/* Mobile */
-@media (max-width: 600px) {
-  .card {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .statusBadge {
-    margin-left: 0;
-    padding-left: 0;
-    border-left: none;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    width: 100%;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-}
-
+/* --- ACTION BUTTON --- */
 .reviewBtn {
-  margin-top: 15px; /* Space between status and button */
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(109, 40, 217, 0.2));
-  border: 1px solid rgba(139, 92, 246, 0.5);
+  border: 1px solid rgba(139, 92, 246, 0.4);
   color: #c4b5fd;
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.1);
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
   white-space: nowrap;
 }
 
 .reviewBtn:hover {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(109, 40, 217, 0.4));
+  background: rgba(139, 92, 246, 0.3);
   border-color: #8b5cf6;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
 }
 
-/* Update your existing Mobile Media Query slightly to handle the new button */
-@media (max-width: 600px) {
+@keyframes blink {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* --- CONSOLIDATED MOBILE RESPONSIVENESS --- */
+@media (max-width: 650px) {
   .card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 20px;
+    gap: 20px;
   }
+
+  .cardTitle {
+    font-size: 1.2rem;
+  }
+
   .statusBadge {
     margin-left: 0;
     padding-left: 0;
     border-left: none;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 20px;
     width: 100%;
-    flex-direction: row;
+    
+    /* Layout: Status on left, Button on right */
+    flex-direction: row; 
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap; /* Allows button to drop to next line if screen is tiny */
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 15px;
+    text-align: left;
   }
+
+  .statusBadge div:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statusText {
+    margin-bottom: 4px;
+    flex-direction: row-reverse; /* Put dot after text on mobile for better flow */
+  }
+
   .reviewBtn {
-    margin-top: 0; /* Reset margin for row layout */
+    padding: 10px 18px; /* Bigger tap target for mobile */
   }
 }

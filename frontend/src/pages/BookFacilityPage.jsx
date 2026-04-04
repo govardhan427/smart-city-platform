@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import facilityService from '../services/facilityService';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
-import FeedbackSection from '../components/FeedbackSection/FeedbackSection'; // <-- IMPORTED FEEDBACK SECTION
+import FeedbackSection from '../components/FeedbackSection/FeedbackSection';
 import styles from './BookFacilityPage.module.css';
 import { toast } from 'react-toastify';
 
@@ -16,7 +16,6 @@ const BookFacilityPage = () => {
   const [loading, setLoading] = useState(true);
   const [bookingError, setBookingError] = useState(null);
   
-  // Form State
   const [date, setDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
 
@@ -33,7 +32,7 @@ const BookFacilityPage = () => {
         const response = await facilityService.getFacilityById(id);
         setFacility(response.data);
       } catch (error) {
-        console.error("Error", error);
+        console.error("Error loading facility:", error);
         toast.error("Could not load facility details.");
       } finally {
         setLoading(false);
@@ -59,12 +58,9 @@ const BookFacilityPage = () => {
       toast.success("✅ Booking Confirmed! Check your email.");
       navigate('/facilities'); 
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
-        setBookingError(err.response.data.error);
-        toast.error(err.response.data.error);
-      } else {
-        toast.error("Booking failed. Please try again.");
-      }
+      const errorMsg = err.response?.data?.error || "Booking failed. Please try again.";
+      setBookingError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -73,8 +69,14 @@ const BookFacilityPage = () => {
 
   return (
     <div className={styles.container}>
+      {/* Navigation Header */}
+      <div className={styles.navHeader}>
+        <button onClick={() => navigate(-1)} className={styles.backBtn}>
+          ← Back to Facilities
+        </button>
+      </div>
+
       <div className={styles.layout}>
-        
         {/* LEFT SIDE: Visuals & Info */}
         <div className={styles.infoSection}>
           <div className={styles.imageWrapper}>
@@ -89,17 +91,13 @@ const BookFacilityPage = () => {
           <div className={styles.details}>
             <h1 className={styles.title}>{facility.name}</h1>
             
-            {/* --- NEW: AVERAGE RATING PILL --- */}
-            {facility.average_rating && (
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '6px', 
-                background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', 
-                padding: '4px 12px', borderRadius: '20px', 
-                fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '10px',
-                border: '1px solid rgba(251, 191, 36, 0.3)'
-              }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                {facility.average_rating} / 5.0
+            {/* ENHANCED RATING PILL */}
+            {facility.average_rating > 0 && (
+              <div className={styles.ratingPill}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+                <span>{Number(facility.average_rating).toFixed(1)} / 5.0</span>
               </div>
             )}
 
@@ -114,7 +112,9 @@ const BookFacilityPage = () => {
                 </div>
                 <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>Base Rate</span>
-                    <span className={styles.metaValue}>{parseFloat(facility.price) > 0 ? `₹${facility.price}` : 'Free'}</span>
+                    <span className={styles.metaValue}>
+                      {parseFloat(facility.price) > 0 ? `₹${facility.price}` : 'Free'}
+                    </span>
                 </div>
             </div>
           </div>
@@ -142,17 +142,17 @@ const BookFacilityPage = () => {
                 <label className={styles.label}>Time Slot</label>
                 <div className={styles.selectWrapper}>
                     <select 
-                    className={styles.select}
-                    value={timeSlot}
-                    onChange={(e) => setTimeSlot(e.target.value)}
-                    required
+                      className={styles.select}
+                      value={timeSlot}
+                      onChange={(e) => setTimeSlot(e.target.value)}
+                      required
                     >
-                    <option value="">-- Select Time --</option>
-                    {TIME_SLOTS.map((slot) => (
-                        <option key={slot.value} value={slot.value}>
-                        {slot.label}
-                        </option>
-                    ))}
+                      <option value="">-- Select Time --</option>
+                      {TIME_SLOTS.map((slot) => (
+                          <option key={slot.value} value={slot.value}>
+                            {slot.label}
+                          </option>
+                      ))}
                     </select>
                     <div className={styles.selectArrow}>▼</div>
                 </div>
@@ -171,12 +171,9 @@ const BookFacilityPage = () => {
             </form>
           </div>
         </div>
-
       </div>
 
-      {/* --- NEW: FEEDBACK SECTION AT THE BOTTOM --- */}
       <FeedbackSection reviews={facility.reviews} />
-
     </div>
   );
 };

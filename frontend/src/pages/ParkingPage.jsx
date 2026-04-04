@@ -1,3 +1,4 @@
+/* src/pages/ParkingPage.jsx */
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import ParkingBookingModal from '../components/transport/ParkingBookingModal';
@@ -13,7 +14,8 @@ const ParkingPage = () => {
     const fetchParking = async () => {
       try {
         const response = await api.get('/transport/parking/');
-        setParkingLots(response.data);
+        // Safety: Always fallback to an empty array
+        setParkingLots(response.data || []);
       } catch (error) {
         console.error("Failed to load parking data", error);
       } finally {
@@ -23,54 +25,75 @@ const ParkingPage = () => {
     fetchParking();
   }, []);
 
+  // Helper to keep the grid uniform
+  const truncateText = (text, limit = 80) => {
+    if (!text) return "Secure underground parking with 24/7 surveillance and smart sensors.";
+    return text.length > limit ? text.substring(0, limit) + "..." : text;
+  };
+
   return (
     <div className={styles.container}>
       
-      {/* HEADER (Visible even during loading) */}
+      {/* HEADER */}
       <div className={styles.header}>
         <h1 className={styles.title}>Smart Parking</h1>
-        <p className={styles.subtitle}>Find available spots and reserve them instantly.</p>
+        <p className={styles.subtitle}>Find available spots and reserve them instantly via real-time sensors.</p>
       </div>
 
       {/* GRID */}
       <div className={styles.grid}>
         
-        {/* LOADING STATE: Show Skeletons */}
+        {/* LOADING STATE */}
         {loading && (
             [...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} />
             ))
         )}
 
-        {/* LOADED STATE: Show Real Data */}
+        {/* EMPTY STATE */}
+        {!loading && parkingLots.length === 0 && (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>🚗</div>
+            <h3>No parking lots found</h3>
+            <p>We couldn't find any available parking areas in your current zone.</p>
+          </div>
+        )}
+
+        {/* LOADED STATE */}
         {!loading && parkingLots.map((lot) => (
           <div 
             key={lot.id} 
             className={styles.card}
             onClick={() => setSelectedLot(lot)}
           >
-            {/* Image */}
-            <img 
-               src={lot.image_url || "https://images.unsplash.com/photo-1470224114660-3f6686c562eb?auto=format&fit=crop&q=80"} 
-               alt={lot.name} 
-               className={styles.cardImage}
-            />
+            <div className={styles.imageContainer}>
+                <img 
+                   src={lot.image_url || "https://images.unsplash.com/photo-1470224114660-3f6686c562eb?auto=format&fit=crop&q=80"} 
+                   alt={lot.name} 
+                   className={styles.cardImage}
+                />
 
-            {/* Price Badge */}
-            <div className={styles.priceTag}>
-               ₹{lot.rate_per_hour}/hr
+                <div className={styles.priceTag}>
+                   ₹{lot.rate_per_hour}/hr
+                </div>
             </div>
 
-            {/* Content Overlay */}
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{lot.name}</h3>
                
                <div className={styles.cardMeta}>
-                  <span>📍</span> {lot.location}
+                  <span className={styles.metaIcon}>📍</span> 
+                  <span className={styles.metaText}>{lot.location}</span>
+               </div>
+
+               {/* SHOW SPOTS LEFT (High Priority Info for Parking) */}
+               <div className={styles.availability}>
+                 <span className={styles.spotCount}>{lot.capacity} Total Spots</span>
+                 <span className={styles.statusDot}></span>
                </div>
 
                <p className={styles.cardDesc}>
-                 Capacity: {lot.capacity} spots. Secure underground parking with 24/7 surveillance.
+                 {truncateText(lot.description)}
                </p>
 
                <div className={styles.viewBtn}>
@@ -84,8 +107,8 @@ const ParkingPage = () => {
       {/* MODAL */}
       {selectedLot && (
         <ParkingBookingModal 
-           lot={selectedLot} 
-           onClose={() => setSelectedLot(null)} 
+            lot={selectedLot} 
+            onClose={() => setSelectedLot(null)} 
         />
       )}
 

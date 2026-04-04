@@ -141,3 +141,27 @@
   from { opacity: 0; transform: translateY(30px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/* Add this to your existing ReviewModal.module.css */
+
+.errorText {
+  color: #f87171; /* Soft Red */
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 15px;
+  background: rgba(248, 113, 113, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(248, 113, 113, 0.2);
+}
+
+/* Enhancing the star container focus */
+.starContainer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 25px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 15px;
+}

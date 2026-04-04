@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+/* src/pages/BookParkingPage.jsx */
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import transportService from '../services/transportService';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
-import styles from './BookParkingPage.module.css'; // New dedicated styles
+import styles from './BookParkingPage.module.css';
 import { toast } from 'react-toastify';
 
 const BookParkingPage = () => {
@@ -15,6 +16,13 @@ const BookParkingPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Get local date-time string for the "min" attribute
+  const minDateTime = useMemo(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+  }, []);
+
   const handleBook = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -22,18 +30,15 @@ const BookParkingPage = () => {
 
     try {
       await transportService.bookParking(id, {
-        vehicle_number: vehicle,
+        vehicle_number: vehicle.trim(),
         start_time: startTime
       });
       toast.success("🚗 Parking Slot Reserved Successfully!");
       navigate('/parking');
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
-        setError(err.response.data.error); 
-        toast.error(err.response.data.error);
-      } else {
-        toast.error("Booking failed. Please try again.");
-      }
+      const errorMsg = err.response?.data?.error || "Booking failed. Please try again.";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -45,18 +50,12 @@ const BookParkingPage = () => {
         
         {/* HEADER */}
         <div className={styles.header}>
-            <div className={styles.icon}>🅿️</div>
+            <div className={styles.iconCircle}>🅿️</div>
             <h2 className={styles.title}>Secure Parking</h2>
-            <p className={styles.subtitle}>Enter vehicle details to reserve your spot.</p>
+            <p className={styles.subtitle}>Reserve your smart-sensor parking spot.</p>
         </div>
 
         {error && <div className={styles.errorBox}>{error}</div>}
-        
-        {/* INFO TIP */}
-        <div className={styles.infoBox}>
-            <span>ℹ️</span>
-            <span>Billing starts from the estimated arrival time.</span>
-        </div>
         
         <form onSubmit={handleBook} className={styles.form}>
           <Input 
@@ -69,19 +68,37 @@ const BookParkingPage = () => {
           />
           
           <Input 
-            label="Arrival Time"
+            label="Estimated Arrival Time"
             id="startTime"
             type="datetime-local"
             value={startTime}
             onChange={(e) => setStartTime(e.target.value)}
             required
-            min={new Date().toISOString().slice(0, 16)} // Prevent past dates
+            min={minDateTime} 
           />
 
-          <div style={{marginTop: '10px'}}>
-            <Button type="submit" disabled={loading} variant="primary" style={{width: '100%'}}>
-              {loading ? 'Processing Reservation...' : 'Confirm Spot'}
+          <div className={styles.infoBox}>
+              <span className={styles.infoIcon}>ℹ️</span>
+              <p>Billing cycle activates at the selected arrival time.</p>
+          </div>
+
+          <div className={styles.actions}>
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              variant="primary" 
+              className={styles.submitBtn}
+            >
+              {loading ? 'Processing...' : 'Confirm Reservation'}
             </Button>
+            
+            <button 
+              type="button" 
+              className={styles.cancelBtn}
+              onClick={() => navigate('/parking')}
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>

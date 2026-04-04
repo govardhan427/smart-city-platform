@@ -199,7 +199,7 @@
     width: 90%;
     max-width: 400px;
     height: 70px;
-    z-index: 1000;
+    z-index: 100;
     
     /* Glass Effect */
     background: rgba(20, 20, 25, 0.9);
