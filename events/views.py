@@ -10,7 +10,7 @@ from facilities.models import Booking
 from transport.models import ParkingBooking
 from django.db.models import Q
 
-from .models import Event, Registration
+from .models import Event, Registration, EventReview
 from .serializers import EventSerializer, RegistrationSerializer, CheckInSerializer
 from .utils import generate_qr_code_bytes, send_registration_email
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
@@ -163,3 +163,31 @@ class CheckInView(APIView):
              return Response({"error": "Booking not found"}, status=404)
         except Exception as e:
             return Response({"error": str(e)}, status=500)
+
+class SubmitEventReviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, event_id):
+        user = request.user
+
+        # 1. VERIFIED ATTENDEE CHECK
+        if not Registration.objects.filter(user=user, event_id=event_id).exists():
+            return Response({"error": "You can only review events you registered for."}, status=status.HTTP_403_FORBIDDEN)
+
+        # 2. TIME BARRIER CHECK 
+        event = Event.objects.get(id=event_id)
+        if event.date >= timezone.now().date():
+            return Response({"error": "You cannot review an event that hasn't happened yet."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. SAVE REVIEW
+        rating = request.data.get('rating')
+        comment = request.data.get('comment', '')
+
+        if not rating or int(rating) < 1 or int(rating) > 5:
+            return Response({"error": "Valid rating between 1 and 5 is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        EventReview.objects.update_or_create(
+            user=user, event=event,
+            defaults={'rating': rating, 'comment': comment}
+        )
+        return Response({"message": "Review submitted successfully!"}, status=status.HTTP_201_CREATED)

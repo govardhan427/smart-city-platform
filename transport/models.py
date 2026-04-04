@@ -40,3 +40,11 @@ class ParkingBooking(models.Model):
 
     def __str__(self):
         return f"{self.parking_lot.name} - {self.vehicle_number}"
+class ParkingFeedback(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    is_accurate = models.BooleanField() # True = Thumbs Up, False = Thumbs Down
+    forecast_datetime = models.DateTimeField() # What time were they predicting for?
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Accurate: {self.is_accurate}"

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambient Background Demo</title>
+
+  <style>
+    /* ===== ROOT COLORS ===== */
+    :root {
+      --bg-dark: #020617;
+      --accent-primary: #3b82f6;
+      --accent-secondary: #8b5cf6;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-dark);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* --- 1. THE LIVING BACKGROUND (Blobs) --- */
+    .ambient-light {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+      background: var(--bg-dark);
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.6;
+      animation: float 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .blob-1 {
+      top: -10%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, var(--accent-primary), transparent 70%);
+    }
+
+    .blob-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, var(--accent-secondary), transparent 70%);
+      animation-delay: -5s;
+    }
+
+    .blob-3 {
+      top: 40%;
+      left: 40%;
+      width: 30vw;
+      height: 30vw;
+      background: radial-gradient(circle, #06b6d4, transparent 70%);
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, 20px) scale(1.1); }
+      100% { transform: translate(-20px, 40px) scale(0.9); }
+    }
+
+    .main-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 80px 20px;
+      flex: 1;
+    }
+
+    .animate-page {
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 32px;
+      backdrop-filter: blur(12px);
+      max-width: 500px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🌈 Ambient Background -->
+  <div class="ambient-light">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+    </main>
+  </div>
+
+</body>
+</html>

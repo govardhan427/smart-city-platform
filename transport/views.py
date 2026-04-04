@@ -3,12 +3,13 @@ from django.utils import timezone # <--- FIX 1: Import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.db import transaction
 from .models import ParkingLot, ParkingBooking
 from .serializers import ParkingLotSerializer, ParkingBookingSerializer
 from events.utils import generate_qr_code_bytes
 from .utils import send_parking_email
+from .models import ParkingFeedback
 
 class ParkingLotListView(generics.ListAPIView):
     queryset = ParkingLot.objects.all()
@@ -80,3 +81,20 @@ class ParkingLotCreateView(generics.CreateAPIView):
     queryset = ParkingLot.objects.all()
     serializer_class = ParkingLotSerializer
     permission_classes = [IsAdminUser]
+
+class SubmitParkingFeedbackView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        is_accurate = request.data.get('is_accurate')
+        forecast_datetime = request.data.get('forecast_datetime')
+
+        if is_accurate is None or not forecast_datetime:
+            return Response({"error": "is_accurate and forecast_datetime are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        ParkingFeedback.objects.create(
+            user=request.user,
+            is_accurate=bool(is_accurate),
+            forecast_datetime=forecast_datetime
+        )
+        return Response({"message": "Feedback received. Thank you for making our AI smarter!"}, status=status.HTTP_201_CREATED)

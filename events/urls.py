@@ -7,4 +7,5 @@ urlpatterns = [
     path('my-registrations/', views.MyRegistrationsView.as_view(), name='my-registrations'),
     path('<int:pk>/', views.EventDetailView.as_view(), name='event-detail'),
     path('<int:pk>/register/', views.EventRegisterView.as_view(), name='event-register'),
+    path('<int:event_id>/review/', views.SubmitEventReviewView.as_view(), name='submit-event-review'),
 ]

@@ -6,4 +6,6 @@ urlpatterns = [
     path('parking/<int:pk>/book/', views.BookParkingView.as_view(), name='parking-book'),
     path('my-parking/', views.MyParkingView.as_view(), name='my-parking'),
     path('parking/create/', views.ParkingLotCreateView.as_view(), name='parking-create'),
+    # Add this to your urlpatterns
+    path('feedback/', views.SubmitParkingFeedbackView.as_view(), name='submit-parking-feedback'),
 ]

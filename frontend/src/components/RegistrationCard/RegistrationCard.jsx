@@ -1,8 +1,10 @@
+/* src/components/common/RegistrationCard.jsx */
 import React from 'react';
 import styles from './RegistrationCard.module.css';
 
-const RegistrationCard = ({ registration }) => {
-  const { event, attended_at, id } = registration;
+const RegistrationCard = ({ registration, onOpenReview }) => {
+  // Extract can_review from our new backend logic
+  const { event, attended_at, id, can_review } = registration;
 
   // Format Full Date for Event
   const formatDateTime = (dateStr, timeStr) => {
@@ -48,8 +50,10 @@ const RegistrationCard = ({ registration }) => {
         </div>
       </div>
       
-      {/* --- STATUS BADGE --- */}
+      {/* --- STATUS BADGE & ACTIONS --- */}
       <div className={styles.statusBadge}>
+        
+        {/* Status Indicator */}
         {attended_at ? (
           <>
             <div className={styles.statusText}>
@@ -64,6 +68,20 @@ const RegistrationCard = ({ registration }) => {
             Pending <span className={styles.indicator}></span>
           </div>
         )}
+
+        {/* --- THE NEW REVIEW BUTTON --- */}
+        {can_review && (
+          <button 
+            className={styles.reviewBtn}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents card clicks if you ever make the card clickable
+              onOpenReview();
+            }}
+          >
+            ✨ Rate Experience
+          </button>
+        )}
+
       </div>
     </div>
   );

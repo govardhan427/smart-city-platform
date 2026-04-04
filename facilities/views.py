@@ -2,11 +2,12 @@ from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from django.db import transaction, IntegrityError # Import transaction handling
-from .models import Facility, Booking
+from .models import Facility, Booking, FacilityReview
 from .serializers import FacilitySerializer, BookingSerializer
 from .utils import send_booking_email, generate_qr_code_bytes
+from django.utils import timezone
 
 # 1. List all Facilities (Public)
 class FacilityListView(generics.ListAPIView):
@@ -94,3 +95,31 @@ class FacilityCreateView(generics.CreateAPIView):
     queryset = Facility.objects.all()
     serializer_class = FacilitySerializer
     permission_classes = [IsAdminUser]
+
+class SubmitFacilityReviewView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, facility_id):
+        user = request.user
+
+        # 1. VERIFIED ATTENDEE CHECK
+        if not Booking.objects.filter(user=user, facility_id=facility_id).exists():
+            return Response({"error": "You can only review facilities you have booked."}, status=status.HTTP_403_FORBIDDEN)
+
+        # 2. TIME BARRIER CHECK (Check if AT LEAST ONE booking is in the past)
+        past_booking = Booking.objects.filter(user=user, facility_id=facility_id, booking_date__lt=timezone.now().date()).exists()
+        if not past_booking:
+            return Response({"error": "You cannot review a facility before your booking date."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 3. SAVE REVIEW
+        rating = request.data.get('rating')
+        comment = request.data.get('comment', '')
+
+        if not rating or int(rating) < 1 or int(rating) > 5:
+            return Response({"error": "Valid rating between 1 and 5 is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        FacilityReview.objects.update_or_create(
+            user=user, facility_id=facility_id,
+            defaults={'rating': rating, 'comment': comment}
+        )
+        return Response({"message": "Review submitted successfully!"}, status=status.HTTP_201_CREATED)
