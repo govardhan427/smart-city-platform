@@ -1,8 +1,9 @@
+/* src/pages/EventsPage.jsx */
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 import EventBookingModal from '../components/events/EventBookingModal';
 import styles from './EventsPage.module.css';
-import SkeletonCard from '../components/common/SkeletonCard'; // Import Skeleton
+import SkeletonCard from '../components/common/SkeletonCard';
 
 const EventsPage = () => {
   const [events, setEvents] = useState([]);
@@ -26,7 +27,7 @@ const EventsPage = () => {
   return (
     <div className={styles.container}>
       
-      {/* HEADER (Visible during loading) */}
+      {/* HEADER */}
       <div className={styles.header}>
         <h1 className={styles.title}>City Events</h1>
         <p className={styles.subtitle}>Discover and book upcoming activities in the metro area.</p>
@@ -35,35 +36,39 @@ const EventsPage = () => {
       {/* GRID */}
       <div className={styles.grid}>
         
-        {/* LOADING STATE: Show Skeletons */}
+        {/* LOADING STATE */}
         {loading && (
             [...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} />
             ))
         )}
 
-        {/* LOADED STATE: Show Real Data */}
+        {/* LOADED STATE */}
         {!loading && events.map((evt) => (
           <div 
             key={evt.id} 
             className={styles.card}
             onClick={() => setSelectedEvent(evt)}
           >
-            {/* Background Image */}
             <img 
                src={evt.image_url || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80"} 
                alt={evt.title} 
                className={styles.cardImage}
             />
 
-            {/* Floating Price Badge */}
             <div className={`${styles.priceTag} ${evt.price == 0 ? styles.freeTag : ''}`}>
                {evt.price > 0 ? `₹${evt.price}` : 'FREE'}
             </div>
 
-            {/* Bottom Content Overlay */}
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{evt.title}</h3>
+               
+               {/* --- NEW: TINY RATING UNDER TITLE --- */}
+               {evt.average_rating && (
+                 <div style={{ color: '#fbbf24', fontSize: '0.85rem', marginBottom: '8px', fontWeight: 'bold' }}>
+                   ⭐ {evt.average_rating} / 5.0
+                 </div>
+               )}
                
                <div className={styles.cardDate}>
                   <span>📅</span> 
@@ -83,7 +88,7 @@ const EventsPage = () => {
         ))}
       </div>
 
-      {/* MODAL (Only renders if an event is selected) */}
+      {/* MODAL */}
       {selectedEvent && (
         <EventBookingModal 
            event={selectedEvent} 

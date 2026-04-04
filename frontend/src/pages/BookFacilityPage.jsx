@@ -1,8 +1,10 @@
+/* src/pages/BookFacilityPage.jsx */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import facilityService from '../services/facilityService';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
+import FeedbackSection from '../components/FeedbackSection/FeedbackSection'; // <-- IMPORTED FEEDBACK SECTION
 import styles from './BookFacilityPage.module.css';
 import { toast } from 'react-toastify';
 
@@ -86,6 +88,21 @@ const BookFacilityPage = () => {
           
           <div className={styles.details}>
             <h1 className={styles.title}>{facility.name}</h1>
+            
+            {/* --- NEW: AVERAGE RATING PILL --- */}
+            {facility.average_rating && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px', 
+                background: 'rgba(251, 191, 36, 0.15)', color: '#fbbf24', 
+                padding: '4px 12px', borderRadius: '20px', 
+                fontSize: '0.9rem', fontWeight: 'bold', marginBottom: '10px',
+                border: '1px solid rgba(251, 191, 36, 0.3)'
+              }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                {facility.average_rating} / 5.0
+              </div>
+            )}
+
             <p className={styles.location}>📍 {facility.location}</p>
             <div className={styles.divider}></div>
             <p className={styles.desc}>{facility.description}</p>
@@ -156,6 +173,10 @@ const BookFacilityPage = () => {
         </div>
 
       </div>
+
+      {/* --- NEW: FEEDBACK SECTION AT THE BOTTOM --- */}
+      <FeedbackSection reviews={facility.reviews} />
+
     </div>
   );
 };
