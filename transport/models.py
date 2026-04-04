@@ -13,6 +13,8 @@ class ParkingLot(models.Model):
     rate_per_hour = models.DecimalField(max_digits=6, decimal_places=2)
     image_url = models.URLField(blank=True)
     google_maps_url = models.URLField(blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # <-- NEW
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True) # <-- NEW
 
     def __str__(self):
         return self.name

@@ -1,0 +1,208 @@
+/* src/pages/CityMapPage.module.css */
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 100px 20px 40px 20px;
+  height: 95vh;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.header {
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin: 0;
+  /* Beautiful Sci-Fi Gradient Text */
+  background: linear-gradient(135deg, #ffffff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+  filter: drop-shadow(0 2px 10px rgba(165, 180, 252, 0.2));
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.05rem;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* --- THE MAP CANVAS --- */
+.mapWrapper {
+  flex-grow: 1;
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  /* Glowing glass border effect */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 30px rgba(59, 130, 246, 0.15); /* Soft blue ambient glow */
+  background: #09090b;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(9, 9, 11, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #60a5fa;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: pulseOpacity 2s infinite;
+}
+
+/* --- LIVE MARKERS --- */
+.marker {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(0);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.markerIcon {
+  font-size: 2.2rem;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.6));
+  z-index: 2;
+}
+
+/* Add a glowing beacon dot under the emoji */
+.marker::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background: #3b82f6;
+  border-radius: 50%;
+  margin-top: -8px;
+  box-shadow: 0 0 15px 5px rgba(59, 130, 246, 0.6);
+  animation: beaconPulse 2s infinite;
+  z-index: 1;
+}
+
+.marker:hover {
+  transform: translateY(-12px) scale(1.15);
+}
+.marker:hover::after {
+  background: #10b981; /* Turns green on hover */
+  box-shadow: 0 0 20px 8px rgba(16, 185, 129, 0.6);
+}
+
+/* --- ULTRA-PREMIUM POPUP CARD --- */
+.popupCard {
+  background: linear-gradient(145deg, rgba(24, 24, 27, 0.95), rgba(10, 10, 12, 0.98));
+  backdrop-filter: blur(16px);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 240px;
+}
+
+.popupTitle {
+  margin: 0 0 8px 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.popupLocation {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.popupMeta {
+  display: inline-block;
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 0 0 20px 0;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.popupBtn {
+  width: 100%;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.popupBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.5);
+  filter: brightness(1.1);
+}
+
+.popupBtn:active {
+  transform: translateY(1px);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseOpacity {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes beaconPulse {
+  0% { transform: scale(0.8); opacity: 0.8; }
+  50% { transform: scale(1.5); opacity: 0.3; }
+  100% { transform: scale(0.8); opacity: 0.8; }
+}
+
+/* --- GLOBAL OVERRIDES FOR MAPBOX POPUP ARROW --- */
+:global(.mapboxgl-popup-content) {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+:global(.mapboxgl-popup-tip) {
+  border-top-color: rgba(24, 24, 27, 0.95) !important;
+}
+:global(.mapboxgl-popup-close-button) {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  right: 12px;
+  top: 8px;
+  transition: color 0.2s;
+}
+:global(.mapboxgl-popup-close-button:hover) {
+  color: white;
+  background: transparent;
+}

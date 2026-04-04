@@ -1,8 +1,10 @@
+/* src/pages/AdminCreateEventPage.jsx */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
+import SmartLocationInput from '../components/common/SmartLocationInput'; // <--- 1. IMPORT SMART SEARCH
 import styles from './AdminCreateEventPage.module.css';
 import { toast } from 'react-toastify';
 
@@ -11,9 +13,10 @@ const AdminCreatePage = () => {
   const [resourceType, setResourceType] = useState('event');
   const [loading, setLoading] = useState(false);
   
-  // Unified Form State
+  // 2. ADD LATITUDE & LONGITUDE TO STATE
   const [formData, setFormData] = useState({
-    location: '', image_url: '', google_maps_url: '', price: '',
+    location: '', latitude: null, longitude: null, 
+    image_url: '', google_maps_url: '', price: '',
     title: '', description: '', date: '', time: '',
     name: '', capacity: '', rate_per_hour: ''
   });
@@ -22,12 +25,21 @@ const AdminCreatePage = () => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
+  // 3. HANDLER FOR SMART LOCATION SELECTION
+  const handleLocationSelect = (data) => {
+    setFormData({
+      ...formData,
+      location: data.location,
+      latitude: data.latitude,
+      longitude: data.longitude
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // ... (Keep existing submission logic) ...
       if (resourceType === 'event') {
         await api.post('/events/', { ...formData, price: formData.price || 0 });
       } 
@@ -53,30 +65,19 @@ const AdminCreatePage = () => {
   };
 
   const getIcon = (type) => {
-      if (type === 'event') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>;
-      if (type === 'facility') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 21h18M5 21V7l8-4 8 4v14M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-5a1.5 1.5 0 0 0-1.5 1.5V21" />
-            </svg>;
-      if (type === 'parking') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="2" y="5" width="20" height="14" rx="2" />
-              <path d="M9 14v-4h3a2 2 0 0 1 0 4h-3" />
-            </svg>;
-      return <svg fill="#d7d2d2ff" height="24px" width="24px" version="1.1" id="XMLID_264_" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 0.72 0.72" xml:space="preserve"><g id="announcement"><g><path d="M0.36 0.72H0.18v-0.21c-0.099 0 -0.18 -0.081 -0.18 -0.18s0.081 -0.18 0.18 -0.18h0.15c0.108 0 0.219 -0.102 0.219 -0.102L0.6 0v0.21c0.066 0 0.12 0.054 0.12 0.12s-0.054 0.12 -0.12 0.12v0.204l-0.051 -0.045S0.456 0.525 0.36 0.51zm-0.12 -0.06h0.06v-0.15H0.24zm0.12 -0.207c0.072 0.009 0.138 0.045 0.18 0.075V0.132c-0.042 0.03 -0.108 0.069 -0.18 0.078zM0.18 0.45h0.12V0.21H0.18c-0.066 0 -0.12 0.054 -0.12 0.12s0.054 0.12 0.12 0.12m0.42 -0.12v0.06c0.033 0 0.06 -0.027 0.06 -0.06s-0.027 -0.06 -0.06 -0.06z"/></g></g></svg>;
+      if (type === 'event') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>;
+      if (type === 'facility') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M17 21v-8.5a1.5 1.5 0 0 0-1.5-1.5h-5a1.5 1.5 0 0 0-1.5 1.5V21" /></svg>;
+      if (type === 'parking') return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M9 14v-4h3a2 2 0 0 1 0 4h-3" /></svg>;
+      return <svg fill="#d7d2d2ff" height="24px" width="24px" viewBox="0 0 0.72 0.72"><path d="M0.36 0.72H0.18v-0.21c-0.099 0 -0.18 -0.081 -0.18 -0.18s0.081 -0.18 0.18 -0.18h0.15c0.108 0 0.219 -0.102 0.219 -0.102L0.6 0v0.21c0.066 0 0.12 0.054 0.12 0.12s-0.054 0.12 -0.12 0.12v0.204l-0.051 -0.045S0.456 0.525 0.36 0.51zm-0.12 -0.06h0.06v-0.15H0.24zm0.12 -0.207c0.072 0.009 0.138 0.045 0.18 0.075V0.132c-0.042 0.03 -0.108 0.069 -0.18 0.078zM0.18 0.45h0.12V0.21H0.18c-0.066 0 -0.12 0.054 -0.12 0.12s0.054 0.12 0.12 0.12m0.42 -0.12v0.06c0.033 0 0.06 -0.027 0.06 -0.06s-0.027 -0.06 -0.06 -0.06z"/></svg>;
   };
 
   return (
     <div className={styles.container}>
       
-      {/* --- SIDEBAR (Becomes Top Nav on Mobile) --- */}
+      {/* --- SIDEBAR --- */}
       <div className={styles.sidebar}>
         <h1 className={styles.sidebarTitle}>Create Resource</h1>
         
-        {/* Added navGroup wrapper for mobile scrolling */}
         <div className={styles.navGroup}>
             {['event', 'facility', 'parking', 'announcement'].map(type => (
             <button
@@ -97,7 +98,6 @@ const AdminCreatePage = () => {
         
         <div className={styles.formHeader}>
             <div className={styles.formTitle}>
-                {/* Large Icon for Desktop Header */}
                 <span style={{fontSize: '1.5rem', background: 'rgba(255,255,255,0.1)', width: '40px', height: '40px', borderRadius: '10px', display: 'grid', placeItems: 'center'}}>
                     {getIcon(resourceType)}
                 </span>
@@ -106,7 +106,6 @@ const AdminCreatePage = () => {
         </div>
 
         <div className={styles.formGrid}>
-          {/* ... (Keep all existing form fields exactly as they were) ... */}
           
           {resourceType === 'event' && (
             <>
@@ -119,7 +118,15 @@ const AdminCreatePage = () => {
               </div>
               <Input label="Date" id="date" type="date" value={formData.date} onChange={handleChange} required />
               <Input label="Time" id="time" type="time" value={formData.time} onChange={handleChange} required />
-              <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
+              
+              {/* 4. REPLACED LOCATION INPUT */}
+              <div className={styles.fullWidth}>
+                <SmartLocationInput 
+                  defaultLocation={formData.location} 
+                  onLocationSelect={handleLocationSelect} 
+                />
+              </div>
+
               <Input label="Price (₹)" id="price" type="number" value={formData.price} onChange={handleChange} />
               <div className={styles.fullWidth}>
                  <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} />
@@ -138,9 +145,15 @@ const AdminCreatePage = () => {
                </div>
                <Input label="Capacity" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
                <Input label="Price (₹/Slot)" id="price" type="number" value={formData.price} onChange={handleChange} />
+               
+               {/* 4. REPLACED LOCATION INPUT */}
                <div className={styles.fullWidth}>
-                 <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
+                  <SmartLocationInput 
+                    defaultLocation={formData.location} 
+                    onLocationSelect={handleLocationSelect} 
+                  />
                </div>
+
                <div className={styles.fullWidth}>
                  <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} />
                </div>
@@ -154,9 +167,15 @@ const AdminCreatePage = () => {
                </div>
                <Input label="Total Capacity" id="capacity" type="number" value={formData.capacity} onChange={handleChange} required />
                <Input label="Rate (₹/Hour)" id="rate_per_hour" type="number" value={formData.rate_per_hour} onChange={handleChange} required />
+               
+               {/* 4. REPLACED LOCATION INPUT */}
                <div className={styles.fullWidth}>
-                 <Input label="Location" id="location" value={formData.location} onChange={handleChange} required />
+                  <SmartLocationInput 
+                    defaultLocation={formData.location} 
+                    onLocationSelect={handleLocationSelect} 
+                  />
                </div>
+
                <div className={styles.fullWidth}>
                  <Input label="Image URL" id="image_url" value={formData.image_url} onChange={handleChange} />
                </div>

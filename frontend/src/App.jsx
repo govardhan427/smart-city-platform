@@ -17,7 +17,7 @@ import RegisterPage from './pages/RegisterPage';
 import EventsPage from './pages/EventsPage';
 import FacilitiesPage from './pages/FacilitiesPage';
 import ParkingPage from './pages/ParkingPage';
-
+import CityMapPage from './pages/CityMapPage';
 // --- SECURE USER PAGES ---
 import ProfilePage from './pages/ProfilePage';
 import MyUnifiedBookingsPage from './pages/MyUnifiedBookingsPage';
@@ -73,7 +73,7 @@ function App() {
             <Route path="/events" element={<EventsPage />} />
             <Route path="/facilities" element={<FacilitiesPage />} />
             <Route path="/parking" element={<ParkingPage />} />
-            
+            <Route path="/map" element={<CityMapPage />} />
             {/* Protected User Routes */}
             <Route 
               path="/profile" 

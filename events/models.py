@@ -16,6 +16,8 @@ class Event(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) # 0.00 means Free
     image_url = models.URLField(blank=True, help_text="Link to event image")
     google_maps_url = models.URLField(blank=True, help_text="Google Maps Link")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # <-- NEW
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True) # <-- NEW
     def __str__(self):
         return self.title
 

@@ -17,6 +17,8 @@ class Facility(models.Model):
     image_url = models.URLField(blank=True, help_text="URL to an image of the facility")
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00) # Price per slot
     google_maps_url = models.URLField(blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)  # <-- NEW
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True) # <-- NEW
     def __str__(self):
         return self.name
 

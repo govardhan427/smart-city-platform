@@ -8,7 +8,7 @@ class ParkingLotSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ParkingLot
-        fields = ['id', 'name', 'location', 'rate_per_hour', 'total_capacity', 'available_spaces', 'is_full', 'image_url','google_maps_url']
+        fields = ['id', 'name', 'location', 'latitude', 'longitude', 'rate_per_hour', 'total_capacity', 'available_spaces', 'is_full', 'image_url','google_maps_url']
 
 class ParkingBookingSerializer(serializers.ModelSerializer):
     parking_details = ParkingLotSerializer(source='parking_lot', read_only=True)
