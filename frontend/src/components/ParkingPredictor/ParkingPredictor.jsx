@@ -1,5 +1,5 @@
 /* src/components/ParkingPredictor/ParkingPredictor.jsx */
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../services/api';
 import styles from './ParkingPredictor.module.css';
 
@@ -31,23 +31,24 @@ const CpuIcon = () => (
 const ParkingPredictor = () => {
   const [datetime, setDatetime] = useState('');
   const [prediction, setPrediction] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  // Feedback State
   const [feedbackStatus, setFeedbackStatus] = useState(null); 
 
-  // --- NEW: Smart Quick-Select Time Helpers ---
+  // --- NEW: Cold Start States ---
+  const [loading, setLoading] = useState(false);
+  const [isColdStart, setIsColdStart] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  // --- Smart Quick-Select Time Helpers ---
   const handleQuickSelect = (type) => {
     const now = new Date();
     if (type === 'hour') now.setHours(now.getHours() + 1);
-    if (type === 'tonight') now.setHours(20, 0, 0, 0); // 8:00 PM
+    if (type === 'tonight') now.setHours(20, 0, 0, 0); 
     if (type === 'tomorrow') {
       now.setDate(now.getDate() + 1);
-      now.setHours(9, 0, 0, 0); // 9:00 AM Tomorrow
+      now.setHours(9, 0, 0, 0); 
     }
 
-    // Format strictly for <input type="datetime-local">
     const offset = now.getTimezoneOffset() * 60000;
     const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
     
@@ -55,31 +56,59 @@ const ParkingPredictor = () => {
     setError('');
   };
 
-  const handlePredict = async () => {
-    if (!datetime) {
-      setError("Please select a time first.");
-      return;
-    }
-    
+  // Memoized fetch function for initial click and automatic retries
+  const executePrediction = useCallback(async (timeToPredict) => {
     setLoading(true);
     setError('');
     
     try {
-      const res = await api.post('/transport/predict/', { datetime: datetime });
+      const res = await api.post('/transport/predict/', { datetime: timeToPredict });
       setPrediction(res.data);
-    } catch (err) {
-      console.error("Prediction failed", err);
-      setError("Unable to connect to AI Engine. Please try again.");
-    } finally {
+      setIsColdStart(false); 
       setLoading(false);
+    } catch (err) {
+      if (err.response && err.response.status === 503) {
+        setIsColdStart(true);
+        setCountdown(30);
+      } else {
+        console.error("Prediction failed", err);
+        setError("Unable to connect to AI Engine. Please try again.");
+        setIsColdStart(false);
+        setLoading(false);
+      }
     }
+  }, []);
+
+  const handlePredict = () => {
+    if (!datetime) {
+      setError("Please select a time first.");
+      return;
+    }
+    executePrediction(datetime);
   };
+
+  // --- Countdown Timer Logic ---
+  useEffect(() => {
+    let timer;
+    if (isColdStart && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (isColdStart && countdown === 0) {
+      // Time is up! Auto-retry the prediction
+      setIsColdStart(false);
+      executePrediction(datetime);
+    }
+    return () => clearInterval(timer);
+  }, [isColdStart, countdown, datetime, executePrediction]);
 
   const handleReset = () => {
     setPrediction(null);
     setDatetime('');
     setFeedbackStatus(null); 
     setError('');
+    setIsColdStart(false);
+    setCountdown(0);
   };
 
   const handleFeedback = async (isAccurate) => {
@@ -118,12 +147,11 @@ const ParkingPredictor = () => {
       </div>
 
       {/* ERROR STATE */}
-      {error && <div className={styles.errorBanner}>{error}</div>}
+      {error && !loading && !isColdStart && <div className={styles.errorBanner}>{error}</div>}
 
       {/* INPUT FORM */}
-      {!prediction && !loading && (
+      {!prediction && !loading && !isColdStart && (
         <div className={styles.formContainer}>
-          
           <label className={styles.label}>Quick Select</label>
           <div className={styles.quickSelectGrid}>
             <button className={styles.quickPill} onClick={() => handleQuickSelect('hour')}>+1 Hour</button>
@@ -152,18 +180,28 @@ const ParkingPredictor = () => {
         </div>
       )}
 
-      {/* LOADING STATE */}
-      {loading && (
+      {/* LOADING / COLD START STATE */}
+      {(loading || isColdStart) && !prediction && (
         <div className={styles.loadingState}>
           <div className={styles.mlScanner}></div>
-          <div className={styles.loadingText}>
-            <CpuIcon /> Crunching Historical Data...
+          <div className={styles.loadingWrapper}>
+            <div className={styles.loadingText}>
+              <CpuIcon /> 
+              {isColdStart 
+                ? `Booting AI Engine... [${countdown}s]` 
+                : 'Crunching Historical Data...'}
+            </div>
+            {isColdStart && (
+              <p className={styles.coldStartSubtext}>
+                System is waking up from standby mode. Establishing secure connection...
+              </p>
+            )}
           </div>
         </div>
       )}
 
       {/* RESULT VIEW */}
-      {prediction && !loading && (
+      {prediction && !loading && !isColdStart && (
         <div className={`${styles.result} ${getLevelClass(prediction.level)}`}>
           
           <div className={styles.resultHeader}>

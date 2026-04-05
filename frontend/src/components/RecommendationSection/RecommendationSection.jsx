@@ -1,5 +1,5 @@
 /* src/components/RecommendationSection/RecommendationSection.jsx */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import styles from './RecommendationSection.module.css';
@@ -24,7 +24,11 @@ const ArrowRightIcon = () => (
 const RecommendationSection = () => {
   const [events, setEvents] = useState([]);
   const [facilities, setFacilities] = useState([]);
+  
+  // --- NEW: Cold Start States ---
   const [loading, setLoading] = useState(true);
+  const [isColdStart, setIsColdStart] = useState(false);
+  const [countdown, setCountdown] = useState(0);
 
   // --- DRAG SCROLL STATE ---
   const scrollRef = useRef(null);
@@ -32,24 +36,50 @@ const RecommendationSection = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [eventsRes, facilitiesRes] = await Promise.all([
-          api.get('/recommendations/events/'),
-          api.get('/recommendations/facilities/')
-        ]);
-        setEvents(eventsRes.data);
-        setFacilities(facilitiesRes.data);
-      } catch (err) {
+  // Memoized fetch function so we can call it on mount and after countdown
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [eventsRes, facilitiesRes] = await Promise.all([
+        api.get('/recommendations/events/'),
+        api.get('/recommendations/facilities/')
+      ]);
+      setEvents(eventsRes.data);
+      setFacilities(facilitiesRes.data);
+      setIsColdStart(false); // Reset if successful
+      setLoading(false);     // Only turn off loading if we succeed!
+    } catch (err) {
+      // 503 indicates the ML server is waking up
+      if (err.response && err.response.status === 503) {
+        setIsColdStart(true);
+        setCountdown(30); // Start 30-second timer
+        // Note: We leave `loading` as true so the UI stays on the loading screen
+      } else {
         console.error("AI Service Error:", err);
-      } finally {
-        setLoading(false);
+        setLoading(false); // Turn off loading if it's a permanent error
       }
-    };
-    fetchData();
+    }
   }, []);
+
+  // 1. Initial Fetch
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // 2. Countdown Timer Logic
+  useEffect(() => {
+    let timer;
+    if (isColdStart && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    } else if (isColdStart && countdown === 0) {
+      // Time is up! Retry the fetch automatically
+      setIsColdStart(false);
+      fetchData();
+    }
+    return () => clearInterval(timer);
+  }, [isColdStart, countdown, fetchData]);
 
   // --- DRAG EVENT HANDLERS ---
   const handleMouseDown = (e) => {
@@ -57,31 +87,34 @@ const RecommendationSection = () => {
     setStartX(e.pageX - scrollRef.current.offsetLeft);
     setScrollLeft(scrollRef.current.scrollLeft);
   };
-
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
+  const handleMouseLeave = () => setIsDragging(false);
+  const handleMouseUp = () => setIsDragging(false);
   const handleMouseMove = (e) => {
     if (!isDragging) return;
     e.preventDefault();
     const x = e.pageX - scrollRef.current.offsetLeft;
-    const walk = (x - startX) * 2; // Scroll speed multiplier
+    const walk = (x - startX) * 2;
     scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
-  // 1. Loading State
-  if (loading) {
+  // 1. Loading & Cold Start State
+  if (loading || isColdStart) {
     return (
       <div className={styles.container}>
         <div className={styles.loadingContainer}>
-          <div className={styles.loadingText}>
-            <div className={styles.spinner}></div>
-            Analyzing Taste Profile...
+          <div className={styles.loadingWrapper}>
+            <div className={styles.loadingText}>
+              <div className={styles.spinner}></div>
+              {isColdStart 
+                ? `Booting AI Engine... [${countdown}s]` 
+                : 'Analyzing Taste Profile...'}
+            </div>
+            
+            {isColdStart && (
+              <p className={styles.coldStartSubtext}>
+                System is waking up from standby mode. Establishing secure connection...
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -106,7 +139,6 @@ const RecommendationSection = () => {
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
-        
         {/* Render Events */}
         {events.map((event) => (
           <Link 

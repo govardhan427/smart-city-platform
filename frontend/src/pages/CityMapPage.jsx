@@ -58,8 +58,8 @@ const CityMapPage = () => {
     );
   };
 
+  // 1. DATA FETCHING EFFECT
   useEffect(() => {
-    // Extracted processing logic so we can run it on both fresh and cached data
     const processMapData = (rawEvents, rawFacilities, rawParking) => {
       const combined = [
         ...rawEvents.map(e => ({ ...e, type: 'event' })),
@@ -96,22 +96,18 @@ const CityMapPage = () => {
       try {
         const CACHE_KEY = 'smartCityMapData';
         const CACHE_TIME_KEY = 'smartCityMapTime';
-        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+        const CACHE_DURATION = 5 * 60 * 1000;
 
-        // 1. Check Session Storage for valid cache
         const cachedData = sessionStorage.getItem(CACHE_KEY);
         const cachedTime = sessionStorage.getItem(CACHE_TIME_KEY);
 
         if (cachedData && cachedTime && (Date.now() - Number(cachedTime) < CACHE_DURATION)) {
-          console.log("Loading map data from blazing-fast cache!");
           const parsed = JSON.parse(cachedData);
           processMapData(parsed.events, parsed.facilities, parsed.parking);
           setLoading(false);
-          return; // Exit early, skipping the API calls entirely!
+          return; 
         }
 
-        // 2. If no cache or expired, fetch fresh data
-        console.log("Fetching fresh map data from server...");
         const [eventsRes, facilitiesRes, parkingRes] = await Promise.all([
           api.get('/events/'),
           api.get('/facilities/'),
@@ -124,7 +120,6 @@ const CityMapPage = () => {
           parking: parkingRes.data || []
         };
 
-        // 3. Save fresh data to cache for next time
         sessionStorage.setItem(CACHE_KEY, JSON.stringify(freshData));
         sessionStorage.setItem(CACHE_TIME_KEY, Date.now().toString());
 
@@ -137,6 +132,64 @@ const CityMapPage = () => {
       }
     };
     fetchMapData();
+  }, []);
+
+  // 2. NEW: LIVE WEBSOCKET CONNECTION
+  useEffect(() => {
+    // Connect to Django Channels WebSocket. Use your actual local/prod URL here.
+    const wsUrl = import.meta.env.VITE_API_URL 
+      ? import.meta.env.VITE_API_URL.replace('http', 'ws') + '/ws/map/'
+      : 'ws://127.0.0.1:8000/ws/map/';
+      
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      console.log('🟢 Command Center Live Link Established');
+    };
+
+    ws.onmessage = (event) => {
+      const update = JSON.parse(event.data);
+
+      if (update.type === 'parking') {
+        console.log("Live Update Received:", update);
+
+        // Update the Map Markers State
+        setMapItems(prevItems => 
+          prevItems.map(item => 
+            (item.type === 'parking' && item.id === update.id) 
+              ? { ...item, available_spaces: update.available_spots } // Inject live capacity
+              : item
+          )
+        );
+
+        // Update the Sidebar Accordion instantly
+        setGroupedItems(prevGrouped => {
+          const newGrouped = { ...prevGrouped };
+          for (let state in newGrouped) {
+            newGrouped[state] = newGrouped[state].map(item => 
+              (item.type === 'parking' && item.id === update.id) 
+                ? { ...item, available_spaces: update.available_spots } 
+                : item
+            );
+          }
+          return newGrouped;
+        });
+
+        // Update the Popup if the user happens to have it open!
+        setSelectedMarker(prev => {
+          if (prev && prev.type === 'parking' && prev.id === update.id) {
+            return { ...prev, available_spaces: update.available_spots };
+          }
+          return prev;
+        });
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('🔴 Command Center Live Link Disconnected');
+    };
+
+    return () => ws.close(); 
   }, []);
 
   const toggleAccordion = (stateName) => {
@@ -204,11 +257,25 @@ const CityMapPage = () => {
                   </svg>
                   {selectedMarker.displayCity}, {selectedMarker.displayState}
                 </p>                
-                {selectedMarker.type === 'parking' && <p className={styles.popupMeta}>Rate: ₹{selectedMarker.rate_per_hour}/hr</p>}
+                
+                {/* UPGRADED POPUP INFO WITH LIVE DATA */}
+                {selectedMarker.type === 'parking' && (
+                  <div className={styles.popupMetaGroup}>
+                    <p className={styles.popupMeta}>Rate: ₹{selectedMarker.rate_per_hour}/hr</p>
+                    <p className={styles.popupMeta} style={{ fontWeight: 'bold', color: selectedMarker.available_spaces > 0 ? '#10b981' : '#ef4444' }}>
+                      {selectedMarker.available_spaces > 0 ? `🟢 ${selectedMarker.available_spaces} Spots Available` : '🔴 LOT FULL'}
+                    </p>
+                  </div>
+                )}
                 {selectedMarker.type === 'facility' && <p className={styles.popupMeta}>Capacity: {selectedMarker.capacity} people</p>}
 
-                <button className={styles.popupBtn} onClick={() => handleNavigate(selectedMarker)}>
-                  {selectedMarker.type === 'event' ? 'Find Tickets' : 'Book Now'}
+                <button 
+                  className={styles.popupBtn} 
+                  onClick={() => handleNavigate(selectedMarker)}
+                  disabled={selectedMarker.type === 'parking' && selectedMarker.available_spaces === 0}
+                  style={selectedMarker.type === 'parking' && selectedMarker.available_spaces === 0 ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
+                >
+                  {selectedMarker.type === 'event' ? 'Find Tickets' : (selectedMarker.available_spaces === 0 ? 'Unavailable' : 'Book Now')}
                 </button>
               </div>
             </Popup>
@@ -247,7 +314,15 @@ const CityMapPage = () => {
                                         <span className={styles.listIcon}>{getIcon(item.type)}</span>
                                         <div className={styles.listText}>
                                             <div className={styles.listCity}>{item.displayCity}</div>
-                                            <div className={styles.listType}>{item.title || item.name}</div>
+                                            <div className={styles.listType}>
+                                              {item.title || item.name}
+                                              {/* LIVE SIDEBAR INDICATOR FOR PARKING */}
+                                              {item.type === 'parking' && (
+                                                <span style={{ fontSize: '0.7rem', marginLeft: '8px', fontWeight: 'bold', color: item.available_spaces > 0 ? '#10b981' : '#ef4444' }}>
+                                                  ({item.available_spaces > 0 ? `${item.available_spaces} spots` : 'FULL'})
+                                                </span>
+                                              )}
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

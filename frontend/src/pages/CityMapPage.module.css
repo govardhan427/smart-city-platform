@@ -338,3 +338,15 @@
     padding: 15px;
   }
 }
+/* --- NEW: Wraps the multiple badges in the popup --- */
+.popupMetaGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Adjust the old popupMeta to work inside the new group */
+.popupMetaGroup .popupMeta {
+  margin-bottom: 0; /* Remove the old bottom margin so the group handles spacing */
+}
