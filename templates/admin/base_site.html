@@ -1,0 +1,108 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | Smart Access Command{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">Smart Access Hub Admin</a></h1>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* ==========================================
+       SMART CITY DARK MODE OVERRIDE
+       ========================================== */
+    :root {
+        /* Primary Colors */
+        --primary: #3b82f6;
+        --secondary: #2563eb;
+        --accent: #10b981;
+        --primary-fg: #fff;
+        
+        /* Body & Backgrounds */
+        --body-fg: #e4e4e7;
+        --body-bg: #09090b; /* Deep Dark Background */
+        --body-quiet-color: #a1a1aa;
+        --body-loud-color: #ffffff;
+        
+        /* Header */
+        --header-color: #ffffff;
+        --header-branding-color: #ffffff;
+        --header-bg: rgba(18, 18, 20, 0.85);
+        --header-link-color: #60a5fa;
+        
+        /* Breadcrumbs */
+        --breadcrumbs-fg: #a1a1aa;
+        --breadcrumbs-link-fg: #60a5fa;
+        --breadcrumbs-bg: rgba(255, 255, 255, 0.03);
+        
+        /* Links & Borders */
+        --link-fg: #60a5fa;
+        --link-hover-color: #93c5fd;
+        --link-selected-fg: #60a5fa;
+        --hairline-color: rgba(255, 255, 255, 0.08);
+        --border-color: rgba(255, 255, 255, 0.08);
+        
+        /* UI Elements */
+        --darkened-bg: rgba(255, 255, 255, 0.03);
+        --selected-bg: rgba(59, 130, 246, 0.15);
+        --selected-row: rgba(59, 130, 246, 0.08);
+        
+        /* Buttons */
+        --button-fg: #fff;
+        --button-bg: #3b82f6;
+        --button-hover-bg: #2563eb;
+        --default-button-bg: #10b981;
+        --default-button-hover-bg: #059669;
+        
+        /* Messages */
+        --message-success-bg: rgba(16, 185, 129, 0.1);
+        --message-warning-bg: rgba(245, 158, 11, 0.1);
+        --message-error-bg: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Glassmorphism Header */
+    #header {
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Module Cards */
+    .module {
+        background: rgba(18, 18, 20, 0.65) !important;
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .module h2, .module caption, #toolbar {
+        background: rgba(255,255,255,0.05) !important;
+        color: #a5b4fc !important;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    /* Inputs */
+    input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], select, textarea {
+        background: rgba(0,0,0,0.3) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: white !important;
+        border-radius: 6px;
+    }
+
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+    }
+
+    /* Fix the Dashboard sidebar */
+    #nav-sidebar {
+        background: var(--body-bg) !important;
+        border-right: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}

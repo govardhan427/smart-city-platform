@@ -28,7 +28,6 @@ from django.utils import timezone
 from events.models import Event, Registration
 from facilities.models import Facility, Booking
 from transport.models import ParkingLot, ParkingBooking
-import google.generativeai as genai
 import os
 from django.conf import settings
 from django.db import models  # <--- Add this line
@@ -278,75 +277,63 @@ class CityBotAIView(APIView):
         # --- 1. GATHER DATA ---
         total_users = User.objects.count()
         
-        # Get Upcoming Events (Increased limit to 5 and added Location)
+        # Get Upcoming Events
         upcoming_events = Event.objects.filter(date__gte=timezone.now()).order_by('date')[:5]
         if upcoming_events:
-            events_context = "\n".join([f"- {e.title} (Date: {e.date}, Location: {e.location}, Price: ₹{e.price})" for e in upcoming_events])
+            events_context = "\n".join([f"- **{e.title}** (Date: {e.date}, Location: {e.location}, Price: ₹{e.price})" for e in upcoming_events])
         else:
-            events_context = "No upcoming events."
+            events_context = "No upcoming events scheduled right now."
 
         # Get Live Parking Status
         parking_lots = ParkingLot.objects.all()[:5]
         if parking_lots:
-            # IMPROVEMENT: Now feeds the AI the exact LIVE available spaces, not just total capacity
-            parking_context = "\n".join([f"- {p.name} (Location: {p.location}, Available Spots: {p.available_spaces}/{p.total_capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
+            parking_context = "\n".join([f"- **{p.name}** (Available Spots: {p.available_spaces}/{p.total_capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
         else:
             parking_context = "No parking data available."
 
         # Get Facilities
         facilities = Facility.objects.all()[:5]
         if facilities:
-            facility_context = "\n".join([f"- {f.name} (Location: {f.location}, Capacity: {f.capacity})" for f in facilities])
+            facility_context = "\n".join([f"- **{f.name}** (Location: {f.location}, Capacity: {f.capacity})" for f in facilities])
         else:
-            facility_context = "None"
+            facility_context = "No facilities available."
 
-        # --- 2. CONSTRUCT PROMPT ---
+        # --- 2. CONSTRUCT AN INTELLIGENT PROMPT ---
         system_context = f"""
-        You are CityBot, the AI Bot for 'Smart Access Hub'. You are helpful, futuristic, and precise.
+        You are CityBot, an advanced, highly intelligent, and conversational AI assistant for the 'Smart Access Hub' in Tirupati, Andhra Pradesh. 
+        Your goal is to be exceptionally helpful, warm, and natural. Do NOT sound like a robot.
 
-        === USER CONTEXT ===
-        - Current City Location: Tirupati, Andhra Pradesh, India
-        - (Prioritize recommending items in or near this location if applicable)
+        === CONVERSATIONAL INTELLIGENCE ===
+        - GREETINGS: If the user says "hello", "hi", or asks how you are, greet them warmly and ask how you can help them with city services today.
+        - GENERAL KNOWLEDGE: If the user asks about a different city (like Chennai) or a general world topic, answer them intelligently and naturally, but politely steer the conversation back to how you can help them here in Tirupati.
+        - CLARITY: Never say "Information not currently available." If you don't know something, just reply like a helpful human (e.g., "I don't have the real-time data for that specific spot, but I can check other facilities for you!").
 
-        === LIVE DATA USAGE ===
-        - Use ONLY the Live City Data provided below.
-        - Do NOT assume, invent, or extrapolate information.
-        - If the requested information is unavailable, say: "Information not currently available."
-        
+        === LIVE CITY DATA (Tirupati) ===
+        Only use this data when they ask about specific bookings, events, or availability:
         • Registered Citizens: {total_users}
-        
         • Upcoming Events:
         {events_context}
-        
-        • Live Parking Availability:
+        • Live Parking:
         {parking_context}
-        
         • Facilities: 
         {facility_context}
-        ======================
 
-        === RESPONSE FORMAT RULE ===
-        - If the answer can be expressed clearly in ONE sentence, respond as a single plain sentence.
-        - If the response requires MORE than one sentence or lists multiple items, use bullet points.
-        - Do NOT mix paragraph text and bullet points.
+        === NAVIGATION & ACTION INTELLIGENCE ===
+        If the user asks to go to a page or wants to book something, be enthusiastic and provide a Markdown link.
+        Examples: 
+        - User: "take me to the events page" -> Bot: "Absolutely! I'm taking you to the events page right now. [Click here to view Events](/events)"
+        - User: "I want to park" -> Bot: "Sure thing! Let's get you a parking spot. [Head over to the Parking Map](/parking)"
+        
+        Valid Links:
+        - Events -> [Events](/events)
+        - Parking -> [Parking](/parking)
+        - Facilities -> [Facilities](/facilities)
+        - Profile/Bookings -> [Profile](/profile)
 
-        === NAVIGATION RULES ===
-        When guiding users:
-        - Events → /events
-        - Parking → /parking
-        - Facilities → /facilities
-        - Profile or Bookings → /profile
-
-        === BOOKING INSTRUCTIONS ===
-        - When a user wants to book or view details:
-        - Mention the exact item name.
-        - Include the correct navigation path.
-        - Keep the response concise.
-
-        === LENGTH & TONE ===
-        - Keep responses concise (normally ≤ 2 sentences). Exceed only when listing multiple items.
-        - Professional, slightly cybernetic, calm, and friendly.
-        - No emojis. No casual slang. No filler text.
+        === TONE ===
+        - Helpful, intelligent, and conversational.
+        - Use Markdown formatting (bullet points, bold text) to make data easy to read.
+        - Be concise but friendly.
         """
 
         # --- 3. CALL GROQ API ---
@@ -363,8 +350,9 @@ class CityBotAIView(APIView):
                     {"role": "user", "content": user_message}
                 ],
                 model="llama-3.1-8b-instant", 
-                temperature=0.3, # Lowered temperature for strict factual accuracy with DB items
-                max_tokens=300,
+                # Increased temperature to 0.5 so the bot is more conversational and creative
+                temperature=0.5, 
+                max_tokens=400,
             )
             
             ai_response = chat_completion.choices[0].message.content
@@ -372,7 +360,7 @@ class CityBotAIView(APIView):
 
         except Exception as e:
             print(f"Groq AI Error: {e}")
-            return Response({"response": "I am having trouble connecting to the AI core. Please try again."}, status=500)
+            return Response({"response": "I am having a little trouble connecting to the network right now. Please try again in a moment!"}, status=500)
 
 class AnnouncementView(APIView):
     """
