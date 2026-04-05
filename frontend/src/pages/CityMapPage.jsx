@@ -5,6 +5,7 @@ import Map, { Marker, Popup, NavigationControl } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import api from '../services/api';
 import styles from './CityMapPage.module.css';
+import Pusher from 'pusher-js';
 
 const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 
@@ -134,62 +135,53 @@ const CityMapPage = () => {
     fetchMapData();
   }, []);
 
-  // 2. NEW: LIVE WEBSOCKET CONNECTION
+  // 2. NEW: LIVE PUSHER CONNECTION
   useEffect(() => {
-    // Connect to Django Channels WebSocket. Use your actual local/prod URL here.
-    const wsUrl = import.meta.env.VITE_API_URL 
-      ? import.meta.env.VITE_API_URL.replace('http', 'ws') + '/ws/map/'
-      : 'ws://127.0.0.1:8000/ws/map/';
-      
-    const ws = new WebSocket(wsUrl);
+    // FIX: Using actual environment variables here!
+    const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
+      cluster: import.meta.env.VITE_PUSHER_CLUSTER
+    });
 
-    ws.onopen = () => {
-      console.log('🟢 Command Center Live Link Established');
-    };
+    const channel = pusher.subscribe('live_map');
 
-    ws.onmessage = (event) => {
-      const update = JSON.parse(event.data);
+    channel.bind('parking_update', function(update) {
+      console.log("Live Update Received from Pusher:", update);
 
-      if (update.type === 'parking') {
-        console.log("Live Update Received:", update);
+      // Update the Map Markers State
+      setMapItems(prevItems => 
+        prevItems.map(item => 
+          (item.type === 'parking' && item.id === update.id) 
+            ? { ...item, available_spaces: update.available_spots }
+            : item
+        )
+      );
 
-        // Update the Map Markers State
-        setMapItems(prevItems => 
-          prevItems.map(item => 
+      // Update the Sidebar Accordion instantly
+      setGroupedItems(prevGrouped => {
+        const newGrouped = { ...prevGrouped };
+        for (let state in newGrouped) {
+          newGrouped[state] = newGrouped[state].map(item => 
             (item.type === 'parking' && item.id === update.id) 
-              ? { ...item, available_spaces: update.available_spots } // Inject live capacity
+              ? { ...item, available_spaces: update.available_spots } 
               : item
-          )
-        );
+          );
+        }
+        return newGrouped;
+      });
 
-        // Update the Sidebar Accordion instantly
-        setGroupedItems(prevGrouped => {
-          const newGrouped = { ...prevGrouped };
-          for (let state in newGrouped) {
-            newGrouped[state] = newGrouped[state].map(item => 
-              (item.type === 'parking' && item.id === update.id) 
-                ? { ...item, available_spaces: update.available_spots } 
-                : item
-            );
-          }
-          return newGrouped;
-        });
+      // Update the Popup if the user has it open
+      setSelectedMarker(prev => {
+        if (prev && prev.type === 'parking' && prev.id === update.id) {
+          return { ...prev, available_spaces: update.available_spots };
+        }
+        return prev;
+      });
+    });
 
-        // Update the Popup if the user happens to have it open!
-        setSelectedMarker(prev => {
-          if (prev && prev.type === 'parking' && prev.id === update.id) {
-            return { ...prev, available_spaces: update.available_spots };
-          }
-          return prev;
-        });
-      }
+    return () => {
+      channel.unbind_all();
+      channel.unsubscribe();
     };
-
-    ws.onclose = () => {
-      console.log('🔴 Command Center Live Link Disconnected');
-    };
-
-    return () => ws.close(); 
   }, []);
 
   const toggleAccordion = (stateName) => {

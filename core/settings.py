@@ -53,7 +53,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -215,11 +214,8 @@ EMAIL_HOST_PASSWORD = os.environ.get('BREVO_API_KEY')
 # Sender Address
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'ccgovardhan4@gmail.com')
 
-ASGI_APPLICATION = 'core.asgi.application' # Change 'your_project_name' to your actual folder name
-
-# Uses local memory for development. For production (Render), you will use a real Redis URL.
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
-    },
-}
+# core/settings.py
+PUSHER_APP_ID = os.environ.get('PUSHER_APP_ID')
+PUSHER_KEY = os.environ.get('PUSHER_KEY')
+PUSHER_SECRET = os.environ.get('PUSHER_SECRET')
+PUSHER_CLUSTER = os.environ.get('PUSHER_CLUSTER')
