@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.conf import settings               # <--- Add this
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,3 +28,9 @@ urlpatterns = [
     path('api/analytics/', include('analytics.urls')),
     path('api/', include('ml_service.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # On Vercel (Production), this helps WhiteNoise find the files
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
