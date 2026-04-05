@@ -6,7 +6,6 @@ def send_welcome_email(user):
     """
     Sends a branded welcome email to new users.
     """
-    # Emojis removed from subject line (SVGs cannot be used in email subjects)
     subject = "Welcome to Smart Access Hub!"
     
     # Reuse your brand assets
@@ -18,6 +17,9 @@ def send_welcome_email(user):
 
     # Add your Vercel URL here!
     frontend_url = "https://smart-city-platform-six.vercel.app/login"
+
+    # Safely get the username or use 'there' as a fallback
+    display_name = user.username or "there"
 
     html_body = f"""
     <!DOCTYPE html>
@@ -38,7 +40,9 @@ def send_welcome_email(user):
                 <td style="background-color: #1a1a1a; border: 1px solid #27272a; border-radius: 16px; padding: 40px; text-align: center;">
                     <div style="margin-bottom: 12px;">{svg_rocket}</div>
                     <h2 style="margin: 0 0 20px 0;">Welcome Aboard!</h2>
-                    <p style="color: #a1a1aa; line-height: 1.6;">Hi {user.email}, your account has been successfully created. Explore the city's finest facilities and manage your access all from one place.</p>
+                    
+                    <p style="color: #a1a1aa; line-height: 1.6;">Hi {display_name}, your account has been successfully created. Explore the city's finest facilities and manage your access all from one place.</p>
+                    
                     <div style="margin: 30px 0;">
                         <a href="{frontend_url}" style="background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 12px 30px; border-radius: 50px; font-weight: bold;">Get Started</a>
                     </div>
@@ -53,7 +57,7 @@ def send_welcome_email(user):
     text_body = f"""
     Welcome to Smart Access Hub!
     
-    Hi {user.email}, your account has been successfully created. Explore the city's finest facilities and manage your access all from one place.
+    Hi {display_name}, your account has been successfully created. Explore the city's finest facilities and manage your access all from one place.
     
     Get Started here: {frontend_url}
     """

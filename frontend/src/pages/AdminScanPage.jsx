@@ -136,6 +136,7 @@ const AdminScanPage = () => {
               value={manualId}
               onChange={(e) => setManualId(e.target.value)}
               className={styles.manualInput}
+              autoFocus
             />
             <button 
               type="submit" 
