@@ -44,7 +44,7 @@ class BookingCreateView(APIView):
                     try:
                         send_booking_email(
                             user_email=request.user.email, 
-                            facility_name=facility.name, 
+                            facility=facility,
                             booking=booking, 
                             qr_code_bytes=qr_bytes
                         )

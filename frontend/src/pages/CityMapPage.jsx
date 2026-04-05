@@ -137,7 +137,6 @@ const CityMapPage = () => {
 
   // 2. NEW: LIVE PUSHER CONNECTION
   useEffect(() => {
-    // FIX: Using actual environment variables here!
     const pusher = new Pusher(import.meta.env.VITE_PUSHER_KEY, {
       cluster: import.meta.env.VITE_PUSHER_CLUSTER
     });
@@ -243,14 +242,43 @@ const CityMapPage = () => {
             >
               <div className={styles.popupCard}>
                 <h3 className={styles.popupTitle}>{selectedMarker.title || selectedMarker.name}</h3>
-                <p className={styles.popupLocation}>
-                  <svg viewBox="0 0 24 24" fill="none" style={{ width: '16px', height: '16px', marginRight: '6px', marginBottom: '-2px' }}>
-                    <path d="M9,6a3,3,0,0,1,3-3h0a3,3,0,0,1,3,3h0a3,3,0,0,1-3,3h0A3,3,0,0,1,9,6Zm3,3V21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
-                  </svg>
-                  {selectedMarker.displayCity}, {selectedMarker.displayState}
-                </p>                
                 
-                {/* UPGRADED POPUP INFO WITH LIVE DATA */}
+                {/* --- NEW: Location Area with Google Maps Deep Link --- */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <p className={styles.popupLocation} style={{ margin: 0 }}>
+                    <svg viewBox="0 0 24 24" fill="none" style={{ width: '16px', height: '16px', marginRight: '6px', marginBottom: '-2px' }}>
+                      <path d="M9,6a3,3,0,0,1,3-3h0a3,3,0,0,1,3,3h0a3,3,0,0,1-3,3h0A3,3,0,0,1,9,6Zm3,3V21" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"/>
+                    </svg>
+                    {selectedMarker.displayCity}, {selectedMarker.displayState}
+                  </p>
+                  <a 
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedMarker.latitude},${selectedMarker.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      fontSize: '0.75rem',
+                      color: '#60a5fa',
+                      textDecoration: 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      fontWeight: 'bold',
+                      background: 'rgba(59, 130, 246, 0.15)',
+                      padding: '4px 8px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.25)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(59, 130, 246, 0.15)'}
+                  >
+                  <svg fill="#ffffff" width="30px" height="30px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" d="M5.49550882,21.8682431 C4.6777361,22.3357383 3.72658785,21.5157506 4.06796534,20.6375537 L11.0650238,2.63755374 C11.3954683,1.78748209 12.5978053,1.78748209 12.9282498,2.63755374 L19.9253083,20.6375537 C20.2666858,21.5157506 19.3155375,22.3357383 18.4977648,21.8682431 L11.9966368,18.1517511 L5.49550882,21.8682431 Z M11.9966368,5.7590297 L6.95414707,18.7308829 L11.5007064,16.1317569 C11.8080098,15.956081 12.1852638,15.956081 12.4925673,16.1317569 L17.0391266,18.7308829 L11.9966368,5.7590297 Z"/>
+</svg>
+                  </a>
+                </div>
+                {/* ---------------------------------------------------- */}
+                
                 {selectedMarker.type === 'parking' && (
                   <div className={styles.popupMetaGroup}>
                     <p className={styles.popupMeta}>Rate: ₹{selectedMarker.rate_per_hour}/hr</p>

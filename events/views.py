@@ -4,7 +4,7 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from django.db import transaction # <--- Important Import
+from django.db import transaction 
 from core.permissions import IsEventManager
 from facilities.models import Booking
 from transport.models import ParkingBooking
@@ -33,7 +33,6 @@ class EventDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = EventSerializer
 
     def get_permissions(self):
-        # Allow anyone to view, but only admins to edit/delete
         if self.request.method in ['PUT', 'PATCH', 'DELETE']:
             return [IsAdminUser()]
         return [AllowAny()]
@@ -64,13 +63,13 @@ class EventRegisterView(APIView):
                 )
                 
                 # 3. Generate QR & Send Email
-                # If this fails, the registration above is rolled back
                 qr_code_bytes = generate_qr_code_bytes(f"event:{registration.id}")
                 
                 try:
+                    # --- UPDATED: Pass 'event' instead of 'event_title' ---
                     send_registration_email(
                         user_email=request.user.email,
-                        event_title=event.title,
+                        event=event, 
                         registration_id=registration.id,
                         qr_code_bytes=qr_code_bytes
                     )
@@ -84,8 +83,6 @@ class EventRegisterView(APIView):
 
         except Exception as e:
             print(f"Event Registration Error: {e}")
-            # If it was the "Email sending failed" error, we return 500
-            # If it was something else (DB error), we still return 500
             return Response(
                 {"error": f"Registration failed: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -104,16 +101,23 @@ class CheckInView(APIView):
     permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
-        qr_data = request.data.get('registration_id') 
+        qr_data = request.data.get('registration_id', '').strip()
         
-        if not qr_data or ":" not in qr_data:
-            return Response({"error": "Invalid QR Format"}, status=400)
+        if not qr_data:
+            return Response({"error": "No ID provided"}, status=400)
 
-        prefix, item_id = qr_data.split(":", 1)
+        # --- SMART SCAN PARSER ---
+        # If it has a colon, it's a camera scan (e.g., 'event:UUID')
+        # If no colon, it's a manual entry (e.g., 'UUID'), so we guess the prefix.
+        if ":" in qr_data:
+            prefix, item_id = qr_data.split(":", 1)
+        else:
+            prefix = None
+            item_id = qr_data
         
         try:
             # --- 1. EVENT ---
-            if prefix == 'event':
+            if prefix == 'event' or (not prefix and Registration.objects.filter(id=item_id).exists()):
                 obj = Registration.objects.get(id=item_id)
                 if obj.attended_at: 
                     return Response({"error": "Already Checked In"}, status=400)
@@ -122,47 +126,45 @@ class CheckInView(APIView):
                 return Response({"message": f"Welcome to {obj.event.title}!"})
 
             # --- 2. FACILITY ---
-            elif prefix == 'facility':
+            elif prefix == 'facility' or (not prefix and Booking.objects.filter(id=item_id).exists()):
                 obj = Booking.objects.get(id=item_id)
                 
-                # Check 1: Already Scanned?
                 if obj.is_checked_in:
                     return Response({"error": "Already Checked In"}, status=400)
                 
-                # Check 2: Wrong Date?
                 today = timezone.localdate()
                 if obj.booking_date != today:
                      return Response({"error": f"Invalid Date! Booking is for {obj.booking_date}"}, status=400)
 
-                # Mark as Checked In
                 obj.is_checked_in = True
                 obj.save()
                 return Response({"message": f"Checked in to {obj.facility.name}"})
 
             # --- 3. PARKING ---
-            elif prefix == 'parking':
+            elif prefix == 'parking' or (not prefix and ParkingBooking.objects.filter(id=item_id).exists()):
                 obj = ParkingBooking.objects.get(id=item_id)
 
-                # Check 1: Already Scanned?
                 if obj.is_checked_in:
                     return Response({"error": "Already Checked In (Vehicle Inside)"}, status=400)
                 
-                # Check 2: Expired/Cancelled?
                 if not obj.is_active: 
                     return Response({"error": "Booking Expired"}, status=400)
                 
-                # Mark as Checked In
                 obj.is_checked_in = True
                 obj.save()
                 return Response({"message": f"Access Granted: {obj.vehicle_number}"})
             
             else:
-                return Response({"error": "Unknown QR Type"}, status=400)
+                return Response({"error": "Invalid ID. Booking not found in any system."}, status=404)
 
         except (Registration.DoesNotExist, Booking.DoesNotExist, ParkingBooking.DoesNotExist):
              return Response({"error": "Booking not found"}, status=404)
         except Exception as e:
+            # Catch badly formatted manual UUID strings
+            if "is not a valid UUID" in str(e):
+                 return Response({"error": "Invalid ID format. Must be a valid booking code."}, status=400)
             return Response({"error": str(e)}, status=500)
+
 
 class SubmitEventReviewView(APIView):
     permission_classes = [IsAuthenticated]
@@ -170,16 +172,13 @@ class SubmitEventReviewView(APIView):
     def post(self, request, event_id):
         user = request.user
 
-        # 1. VERIFIED ATTENDEE CHECK
         if not Registration.objects.filter(user=user, event_id=event_id).exists():
             return Response({"error": "You can only review events you registered for."}, status=status.HTTP_403_FORBIDDEN)
 
-        # 2. TIME BARRIER CHECK 
         event = Event.objects.get(id=event_id)
         if event.date >= timezone.now().date():
             return Response({"error": "You cannot review an event that hasn't happened yet."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 3. SAVE REVIEW
         rating = request.data.get('rating')
         comment = request.data.get('comment', '')
 

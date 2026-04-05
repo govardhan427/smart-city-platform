@@ -1,3 +1,4 @@
+/* src/pages/AdminScanPage.jsx */
 import React, { useState, useEffect, useRef } from 'react';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import api from '../services/api';
@@ -7,6 +8,9 @@ const AdminScanPage = () => {
   const [loading, setLoading] = useState(false);
   const [scanStatus, setScanStatus] = useState(null); // 'success', 'error', 'warning'
   const [message, setMessage] = useState('');
+  
+  // --- NEW: State for manual ID entry ---
+  const [manualId, setManualId] = useState('');
   
   // Key to force re-render/reset of scanner
   const [scannerKey, setScannerKey] = useState(0); 
@@ -60,22 +64,26 @@ const AdminScanPage = () => {
   }, [scannerKey]);
 
   const handleCheckIn = async (qrData) => {
+    if (!qrData.trim()) return; // Prevent empty submissions
+    
     setLoading(true);
     setScanStatus(null);
     setMessage('');
 
     try {
+      // The backend doesn't care if qrData came from the camera or the keyboard!
       const response = await api.post('/events/check-in/', {
-        registration_id: qrData,
+        registration_id: qrData.trim(),
       });
       
       setScanStatus('success');
       setMessage(response.data.message || 'Access Granted: Welcome!');
+      setManualId(''); // Clear input on success
 
     } catch (err) {
       console.error(err);
       const errorResponse = err.response?.data;
-      const errorMsg = errorResponse?.error || errorResponse?.detail || 'Scan failed';
+      const errorMsg = errorResponse?.error || errorResponse?.detail || 'Scan failed. Invalid ID.';
       
       // Check for "Duplicate" or "Already Checked In"
       if (errorMsg.toLowerCase().includes('already') || errorMsg.toLowerCase().includes('duplicate')) {
@@ -90,19 +98,28 @@ const AdminScanPage = () => {
     }
   };
 
+  // --- NEW: Handler for manual form submission ---
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    if (scannerRef.current) {
+        scannerRef.current.clear().catch(console.error); // Stop camera if typing manually
+    }
+    handleCheckIn(manualId);
+  };
+
   const handleScanNext = () => {
     setScanStatus(null);
     setMessage('');
+    setManualId('');
     setScannerKey(prev => prev + 1); // Triggers re-mount of scanner
   };
 
   return (
     <div className={styles.scanContainer}>
       <h1 className={styles.title}>Access Scanner</h1>
-      <p className={styles.subtitle}>Align ticket QR code within the frame.</p>
+      <p className={styles.subtitle}>Align ticket QR code within the frame, or enter ID manually.</p>
 
       {/* --- CAMERA FEED --- */}
-      {/* Hide camera when we have a result */}
       <div 
         className={styles.scannerWrapper} 
         style={{ display: scanStatus ? 'none' : 'block' }} 
@@ -110,12 +127,32 @@ const AdminScanPage = () => {
         <div id="qr-reader-container"></div>
       </div>
       
+      {/* --- NEW: MANUAL ENTRY FALLBACK --- */}
+      {!scanStatus && !loading && (
+        <form onSubmit={handleManualSubmit} className={styles.manualEntryForm}>
+            <input 
+              type="text" 
+              placeholder="Or enter Access ID manually..." 
+              value={manualId}
+              onChange={(e) => setManualId(e.target.value)}
+              className={styles.manualInput}
+            />
+            <button 
+              type="submit" 
+              disabled={!manualId.trim()}
+              className={styles.manualBtn}
+            >
+              Verify
+            </button>
+        </form>
+      )}
+
       {/* --- RESULT FEEDBACK --- */}
       <div className={styles.feedbackContainer}>
         
         {loading && (
-          <div className={styles.feedbackLoading}>
-             Verifying ID...
+          <div className={styles.feedbackLoading} style={{ textAlign: 'center', marginTop: '20px', color: '#60a5fa' }}>
+              Verifying ID...
           </div>
         )}
 
@@ -141,7 +178,7 @@ const AdminScanPage = () => {
       
       {/* --- RESET BUTTON --- */}
       {(scanStatus) && (
-        <button className={styles.nextBtn} onClick={handleScanNext}>
+        <button className={styles.nextBtn} onClick={handleScanNext} style={{ marginTop: '20px' }}>
           Scan Next Ticket
         </button>
       )}

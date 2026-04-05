@@ -174,6 +174,11 @@
   text-transform: uppercase;
   font-weight: 800;
   margin-bottom: 5px;
+  display: block;
+}
+
+.inputGroup {
+  margin-bottom: 20px;
 }
 
 /* Parking Specific Input Styling */
@@ -186,13 +191,41 @@
   color: white;
   font-family: inherit;
   font-size: 1rem;
-  margin-bottom: 20px;
   transition: border-color 0.3s;
 }
 
 .glassInput:focus {
   outline: none;
   border-color: #3b82f6; /* Blue Focus */
+}
+
+/* --- NEW: STATE DROPDOWN STYLING --- */
+.glassSelect {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 14px;
+  color: white;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1em;
+}
+
+.glassSelect:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.glassSelect option {
+  background: #18181b; /* Solid dark background for dropdown options */
+  color: white;
 }
 
 .counter {
@@ -215,7 +248,8 @@
   align-items: center;
 }
 
-.ticketCount {
+/* Unified class for both ticket counts and hours */
+.ticketCount, .countText {
   font-size: 1.1rem;
   font-weight: 800;
   min-width: 25px;
