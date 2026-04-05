@@ -1,189 +1,253 @@
 /* src/components/RecommendationSection/RecommendationSection.module.css */
 
 .container {
-  margin-bottom: 40px;
-  animation: slideDown 0.4s ease-out;
+  margin: 10px 0 50px 0;
   width: 100%;
-  overflow: hidden; 
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
+/* --- HEADER --- */
 .header {
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* LEFT ALIGN TITLE */
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 20px;
-  color: #a5b4fc;
-  padding-left: 20px; /* Align with cards */
+  padding-left: 20px;
+}
+
+.icon {
+  color: #c084fc; /* Vibrant purple */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5));
+  animation: floatIcon 3s ease-in-out infinite;
 }
 
 .title {
-  font-size: 1.25rem;
-  text-align: left;
-  font-weight: 700;
-  color: white;
+  font-size: 1.4rem;
+  font-weight: 800;
   margin: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
 }
 
 /* --- HORIZONTAL SCROLL CONTAINER --- */
 .scrollContainer {
   display: flex;
-  gap: 16px;
+  gap: 20px;
   overflow-x: auto;
-  padding: 20px;
+  /* Extra padding so hover shadows don't get cut off */
+  padding: 10px 20px 30px 20px; 
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  cursor: grab; /* Shows hand cursor for desktop */
+  cursor: grab;
   
-  /* Hide Scrollbar */
+  /* Hide standard scrollbars */
   scrollbar-width: none;
   -ms-overflow-style: none;
 
-  /* THE BLUR EFFECT (Fade out edges) */
-  mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to right,
-    transparent 0%,
-    black 5%,
-    black 95%,
-    transparent 100%
-  );
-}
-
-.scrollContainer:active {
-  cursor: grabbing; /* Clenched hand while dragging */
-  scroll-snap-type: none; /* Disable snap while dragging for smoothness */
+  /* Premium Effect: Fades out the left and right edges */
+  mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
 }
 
 .scrollContainer::-webkit-scrollbar {
   display: none;
 }
 
-/* --- CARD STYLE --- */
+.scrollContainer:active {
+  cursor: grabbing;
+  scroll-snap-type: none; /* Smooth drag */
+}
+
+/* --- THE RECOMMENDATION CARDS --- */
 .card {
-  min-width: 260px;
-  max-width: 260px;
-  /* Removed min-height to fit content tightly since desc is gone */
-  background: rgba(255, 255, 255, 0.03);
+  min-width: 280px;
+  max-width: 280px;
+  background: rgba(18, 18, 20, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
-  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 24px;
   text-decoration: none;
   display: flex;
   flex-direction: column;
-  backdrop-filter: blur(10px);
-  scroll-snap-align: center;
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  scroll-snap-align: start;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  z-index: 1;
-  user-select: none; /* Prevents text selection while dragging */
+  overflow: hidden;
+  user-select: none; /* Stops text highlighting while dragging */
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Subtle background glow effect inside the card */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 100%;
+  background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 70%);
+  z-index: 0;
+  opacity: 0.5;
+  transition: opacity 0.4s;
 }
 
 .card:hover {
-  transform: translateY(-5px) scale(1.05);
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(139, 92, 246, 0.5);
-  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5);
-  z-index: 10;
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(167, 139, 250, 0.4);
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.2);
 }
 
+.card:hover::before {
+  opacity: 1;
+}
+
+/* Content needs to sit above the background glow */
+.cardTitle, .cardMeta, .action, .matchBadge {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- BADGE --- */
 .matchBadge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  align-self: flex-start;
   background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
+  color: #d8b4fe;
   border: 1px solid rgba(139, 92, 246, 0.3);
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 3px 6px;
-  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 50px;
   text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
 }
 
+/* --- TEXT --- */
 .cardTitle {
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: white;
-  margin: 0 0 12px 0; /* Increased margin slightly for balance */
-  padding-right: 40px;
-  line-height: 1.3;
+  margin: 0 0 15px 0;
+  line-height: 1.4;
+  /* Truncate to 2 lines if title is too long */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .cardMeta {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 10px;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 15px; /* Space before button */
+  margin-bottom: 25px;
 }
 
 .metaItem {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  font-weight: 500;
 }
 
-/* Description class removed entirely */
+.metaItem svg {
+  color: #a78bfa;
+}
 
+/* --- BOTTOM ACTION LINK --- */
 .action {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #8b5cf6;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #a78bfa;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   margin-top: auto;
+  transition: all 0.3s;
 }
 
+.action svg {
+  transition: transform 0.3s;
+}
+
+.card:hover .action {
+  color: white;
+}
+
+.card:hover .action svg {
+  transform: translateX(4px);
+  color: #c084fc;
+}
+
+/* Creates empty space at the end of the scroll container so the last card isn't cut off */
 .spacer {
-  min-width: 1px;
+  min-width: 10px;
 }
 
 /* --- LOADING STATE --- */
 .loadingContainer {
-  padding: 30px;
-  text-align: center;
+  padding: 40px;
+  display: flex;
+  justify-content: center;
   width: 100%;
 }
 
 .loadingText {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.95rem;
-  font-weight: 500;
+  color: #a78bfa;
+  font-size: 1rem;
+  font-weight: 600;
   letter-spacing: 1px;
-  animation: pulse 1.5s infinite;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  background: rgba(139, 92, 246, 0.1);
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
 }
 
 .spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #8b5cf6;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(167, 139, 250, 0.2);
+  border-top-color: #c084fc;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
+/* --- ANIMATIONS --- */
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 1; }
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+/* --- MOBILE --- */
+@media (max-width: 768px) {
+  .scrollContainer {
+    /* Slightly less intense edge masking on mobile */
+    mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
+  }
+  .card {
+    min-width: 250px; /* Slightly smaller cards on mobile */
+  }
 }

@@ -81,7 +81,7 @@ const RecommendationSection = () => {
         <div className={styles.loadingContainer}>
           <div className={styles.loadingText}>
             <div className={styles.spinner}></div>
-            Please wait...
+            Analyzing Taste Profile...
           </div>
         </div>
       </div>
@@ -109,28 +109,31 @@ const RecommendationSection = () => {
         
         {/* Render Events */}
         {events.map((event) => (
-          <Link to={`/events`} key={`evt-${event.id}`} className={styles.card}>
+          <Link 
+            to="/events" 
+            state={{ autoOpenEventId: event.id }} 
+            key={`evt-${event.id}`} 
+            className={styles.card}
+          >
             <span className={styles.matchBadge}>Event Match</span>
             <h4 className={styles.cardTitle}>{event.title}</h4>
             <div className={styles.cardMeta}>
-              <span className={styles.metaItem}><CalendarIcon /> {event.date}</span>
-              <span className={styles.metaItem}><MapPinIcon /> {event.location}</span>
+              <span className={styles.metaItem}><CalendarIcon /> {event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</span>
+              <span className={styles.metaItem}><MapPinIcon /> {event.location ? event.location.split(',')[0] : 'Various'}</span>
             </div>
-            {/* Description Removed */}
             <div className={styles.action}>View Details <ArrowRightIcon /></div>
           </Link>
         ))}
 
         {/* Render Facilities */}
         {facilities.map((fac) => (
-          <Link to={`/facilities`} key={`fac-${fac.id}`} className={styles.card}>
+          <Link to={`/facilities/${fac.id}/book`} key={`fac-${fac.id}`} className={styles.card}>
             <span className={styles.matchBadge}>Spot Match</span>
             <h4 className={styles.cardTitle}>{fac.name}</h4>
             <div className={styles.cardMeta}>
               <span className={styles.metaItem}><UsersIcon /> Cap: {fac.capacity}</span>
-              <span className={styles.metaItem}><MapPinIcon /> {fac.location}</span>
+              <span className={styles.metaItem}><MapPinIcon /> {fac.location ? fac.location.split(',')[0] : 'Various'}</span>
             </div>
-            {/* Description Removed */}
             <div className={styles.action}>Book Now <ArrowRightIcon /></div>
           </Link>
         ))}
