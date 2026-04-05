@@ -23,6 +23,7 @@ from operator import attrgetter
 from django.db.models import Sum, F, Count
 from django.db.models.functions import Coalesce
 from django.utils import timezone
+from django.core.cache import cache
 
 # Import models
 from events.models import Event, Registration
@@ -267,76 +268,84 @@ class ExportFinancialsCSV(APIView):
 
 class CityBotAIView(APIView):
     """
-    Advanced AI City Assistant
+    Advanced AI City Assistant - Elite Concierge with Memory
     """
     permission_classes = [AllowAny] 
 
     def post(self, request):
         user_message = request.data.get('message', '')
         
-        # --- 1. GATHER DATA ---
+        # --- THE FIX IS HERE (.strip() instead of .trim()) ---
+        if not user_message.strip():
+            return Response({"response": "How can I help you today?"})
+        
+        # --- 1. IDENTITY & MEMORY SETUP ---
+        if request.user.is_authenticated:
+            user_identity = request.user.username or request.user.email.split('@')[0]
+            cache_key = f"citybot_memory_user_{request.user.id}"
+        else:
+            user_identity = "Guest"
+            # Fallback to IP address for guest memory
+            ip = request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'guest'))
+            cache_key = f"citybot_memory_ip_{ip}"
+
+        # Retrieve the last few messages (short-term memory)
+        chat_history = cache.get(cache_key, [])
+        chat_history.append({"role": "user", "content": user_message})
+        
+        # Keep only the last 6 messages to prevent token limits and keep the bot focused
+        chat_history = chat_history[-6:]
+
+        # --- 2. GATHER REAL-TIME DATA ---
         total_users = User.objects.count()
         
-        # Get Upcoming Events
         upcoming_events = Event.objects.filter(date__gte=timezone.now()).order_by('date')[:5]
-        if upcoming_events:
-            events_context = "\n".join([f"- **{e.title}** (Date: {e.date}, Location: {e.location}, Price: ₹{e.price})" for e in upcoming_events])
-        else:
-            events_context = "No upcoming events scheduled right now."
+        events_context = "\n".join([f"- **{e.title}** (Date: {e.date}, Location: {e.location}, Price: ₹{e.price})" for e in upcoming_events]) if upcoming_events else "No upcoming events."
 
-        # Get Live Parking Status
         parking_lots = ParkingLot.objects.all()[:5]
-        if parking_lots:
-            parking_context = "\n".join([f"- **{p.name}** (Available Spots: {p.available_spaces}/{p.total_capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots])
-        else:
-            parking_context = "No parking data available."
+        parking_context = "\n".join([f"- **{p.name}** (Available: {p.available_spaces}/{p.total_capacity}, Rate: ₹{p.rate_per_hour}/hr)" for p in parking_lots]) if parking_lots else "No parking data."
 
-        # Get Facilities
         facilities = Facility.objects.all()[:5]
-        if facilities:
-            facility_context = "\n".join([f"- **{f.name}** (Location: {f.location}, Capacity: {f.capacity})" for f in facilities])
-        else:
-            facility_context = "No facilities available."
+        facility_context = "\n".join([f"- **{f.name}** (Location: {f.location}, Capacity: {f.capacity})" for f in facilities]) if facilities else "No facilities available."
 
-        # --- 2. CONSTRUCT AN INTELLIGENT PROMPT ---
+        # --- 3. THE ELITE SYSTEM PROMPT ---
         system_context = f"""
-        You are CityBot, an advanced, highly intelligent, and conversational AI assistant for the 'Smart Access Hub' in Tirupati, Andhra Pradesh. 
-        Your goal is to be exceptionally helpful, warm, and natural. Do NOT sound like a robot.
+        You are CityBot — an elite, hyper-intelligent AI concierge for the Smart Access Hub in Tirupati, India.
+        You are speaking to: {user_identity}.
 
-        === CONVERSATIONAL INTELLIGENCE ===
-        - GREETINGS: If the user says "hello", "hi", or asks how you are, greet them warmly and ask how you can help them with city services today.
-        - GENERAL KNOWLEDGE: If the user asks about a different city (like Chennai) or a general world topic, answer them intelligently and naturally, but politely steer the conversation back to how you can help them here in Tirupati.
-        - CLARITY: Never say "Information not currently available." If you don't know something, just reply like a helpful human (e.g., "I don't have the real-time data for that specific spot, but I can check other facilities for you!").
+        === PERSONALITY & TONE ===
+        - Speak like a smart, calm, premium human assistant. Never sound like a robot reading a script.
+        - Be warm, concise, and highly effective.
+        - If the user is confused, simplify. If they are returning, acknowledge it smoothly.
 
-        === LIVE CITY DATA (Tirupati) ===
-        Only use this data when they ask about specific bookings, events, or availability:
-        • Registered Citizens: {total_users}
-        • Upcoming Events:
+        === CORE RULES (STRICT COMPLIANCE) ===
+        1. NEVER dump raw data. Do not list events, parking, or facilities unless explicitly asked.
+        2. Keep answers short (1–3 sentences normally). 
+        3. SYNTHESIZE: If asked about events, say "We have a few events coming up, like the Youth Festival. Want me to show you the highlights?" instead of listing all of them at once.
+        4. MEMORY: You remember the last few messages in this conversation. Do not repeat yourself.
+
+        === LIVE CITY INTELLIGENCE ===
+        (Only use this data to answer specific questions)
+        • Total Citizens: {total_users}
+        • Events:
         {events_context}
-        • Live Parking:
+        • Parking:
         {parking_context}
         • Facilities: 
         {facility_context}
 
-        === NAVIGATION & ACTION INTELLIGENCE ===
-        If the user asks to go to a page or wants to book something, be enthusiastic and provide a Markdown link.
-        Examples: 
-        - User: "take me to the events page" -> Bot: "Absolutely! I'm taking you to the events page right now. [Click here to view Events](/events)"
-        - User: "I want to park" -> Bot: "Sure thing! Let's get you a parking spot. [Head over to the Parking Map](/parking)"
-        
-        Valid Links:
-        - Events -> [Events](/events)
-        - Parking -> [Parking](/parking)
-        - Facilities -> [Facilities](/facilities)
-        - Profile/Bookings -> [Profile](/profile)
-
-        === TONE ===
-        - Helpful, intelligent, and conversational.
-        - Use Markdown formatting (bullet points, bold text) to make data easy to read.
-        - Be concise but friendly.
+        === ACTION LINKS ===
+        If the user wants to take action, provide the exact Markdown link:
+        - Events → [View Events](/events)
+        - Parking → [Find Parking](/parking)
+        - Facilities → [Browse Facilities](/facilities)
+        - Bookings → [View Profile](/profile)
         """
 
-        # --- 3. CALL GROQ API ---
+        # Build the final message array: System prompt + History
+        messages = [{"role": "system", "content": system_context}] + chat_history
+
+        # --- 4. CALL GROQ API ---
         try:
             api_key = os.environ.get('GROQ_API_KEY')
             if not api_key:
@@ -345,22 +354,24 @@ class CityBotAIView(APIView):
             client = Groq(api_key=api_key)
             
             chat_completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": system_context},
-                    {"role": "user", "content": user_message}
-                ],
+                messages=messages,
                 model="llama-3.1-8b-instant", 
-                # Increased temperature to 0.5 so the bot is more conversational and creative
-                temperature=0.5, 
-                max_tokens=400,
+                temperature=0.6, # 0.6 is the sweet spot for natural but factual conversation
+                max_tokens=200,  # Strict limit to prevent long essays
             )
             
             ai_response = chat_completion.choices[0].message.content
+
+            # --- 5. SAVE ASSISTANT RESPONSE TO MEMORY ---
+            chat_history.append({"role": "assistant", "content": ai_response})
+            # Save to Django cache for 1 hour (3600 seconds)
+            cache.set(cache_key, chat_history, timeout=3600)
+
             return Response({"response": ai_response})
 
         except Exception as e:
             print(f"Groq AI Error: {e}")
-            return Response({"response": "I am having a little trouble connecting to the network right now. Please try again in a moment!"}, status=500)
+            return Response({"response": "I'm having a little trouble connecting to the network right now. Give me just a second and try again!"}, status=500)
 
 class AnnouncementView(APIView):
     """
