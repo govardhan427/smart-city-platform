@@ -323,6 +323,8 @@ class CityBotAIView(APIView):
         2. Keep answers short (1–3 sentences normally). 
         3. SYNTHESIZE: If asked about events, say "We have a few events coming up, like the Youth Festival. Want me to show you the highlights?" instead of listing all of them at once.
         4. MEMORY: You remember the last few messages in this conversation. Do not repeat yourself.
+        5. READ-ONLY MODE (NO BOOKING): You are a chat assistant. You CANNOT actually book tickets, reserve parking, or process payments. If a user asks you to book something, politely tell them to navigate to the Events, Facilities, or Parking pages on the platform to complete their booking securely. NEVER pretend to book things for them.
+        6. NO RAW LINKS: Do NOT output raw URLs or Markdown links (like [Link](/url)). Just politely direct the user to the correct page by name (e.g., "Head over to the Events page to grab your ticket!").
 
         === LIVE CITY INTELLIGENCE ===
         (Only use this data to answer specific questions)
@@ -333,13 +335,6 @@ class CityBotAIView(APIView):
         {parking_context}
         • Facilities: 
         {facility_context}
-
-        === ACTION LINKS ===
-        If the user wants to take action, provide the exact Markdown link:
-        - Events → [View Events](/events)
-        - Parking → [Find Parking](/parking)
-        - Facilities → [Browse Facilities](/facilities)
-        - Bookings → [View Profile](/profile)
         """
 
         # Build the final message array: System prompt + History
