@@ -9,6 +9,7 @@ import HeroIntro from './components/layout/HeroIntro';
 import IdleMonitor from './components/common/IdleMonitor';
 import CityBot from './components/common/CityBot';
 import NewsTicker from './components/common/NewsTicker';
+import ScrollToTop from './components/common/ScrollToTop';
 
 // --- PUBLIC PAGES ---
 import HomePage from './pages/HomePage';
@@ -65,6 +66,7 @@ function App() {
         <NewsTicker />
         
         <main style={{ paddingBottom: '80px' }}>
+          <ScrollToTop />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />

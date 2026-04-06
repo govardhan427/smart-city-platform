@@ -23,6 +23,7 @@
     "react-router-dom": "^7.9.4",
     "react-toastify": "^11.0.5",
     "recharts": "^3.5.1",
+    "use-supercluster": "^1.2.0",
     "vite-plugin-pwa": "^1.2.0"
   },
   "devDependencies": {

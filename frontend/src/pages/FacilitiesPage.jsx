@@ -1,5 +1,6 @@
 /* src/pages/FacilitiesPage.jsx */
 import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom'; // <-- ADDED ROUTER HOOKS
 import api from '../services/api';
 import FacilityBookingModal from '../components/facilities/FacilityBookingModal';
 import styles from './FacilitiesPage.module.css';
@@ -10,11 +11,15 @@ const FacilitiesPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFacility, setSelectedFacility] = useState(null);
 
+  const location = useLocation(); // <-- READ INVISIBLE STATE
+  const navigate = useNavigate(); // <-- FOR CLEARING STATE
+
+  // 1. FETCH DATA ONCE
   useEffect(() => {
     const fetchFacilities = async () => {
       try {
         const response = await api.get('/facilities/');
-        setFacilities(response.data || []); // Safety fallback
+        setFacilities(response.data || []); 
       } catch (error) {
         console.error("Failed to load facilities", error);
       } finally {
@@ -23,6 +28,16 @@ const FacilitiesPage = () => {
     };
     fetchFacilities();
   }, []);
+
+  // 2. AUTO-OPEN MODAL IF ARRIVING FROM MAP
+  useEffect(() => {
+    if (facilities.length > 0 && location.state?.autoOpenFacilityId) {
+        const targetFac = facilities.find(f => f.id === location.state.autoOpenFacilityId);
+        if (targetFac) {
+            setSelectedFacility(targetFac);
+        }
+    }
+  }, [facilities, location.state]);
 
   // Helper to keep the grid uniform
   const truncateText = (text, limit = 75) => {
@@ -41,15 +56,12 @@ const FacilitiesPage = () => {
 
       {/* GRID */}
       <div className={styles.grid}>
-        
-        {/* LOADING STATE */}
         {loading && (
             [...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} />
             ))
         )}
 
-        {/* EMPTY STATE */}
         {!loading && facilities.length === 0 && (
           <div className={styles.emptyState}>
             <h3>No facilities available for booking.</h3>
@@ -57,7 +69,6 @@ const FacilitiesPage = () => {
           </div>
         )}
 
-        {/* LOADED STATE */}
         {!loading && facilities.map((fac) => (
           <div 
             key={fac.id} 
@@ -79,7 +90,6 @@ const FacilitiesPage = () => {
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{fac.name}</h3>
                
-               {/* NEW: RATING DISPLAY (Matches Events) */}
                {fac.average_rating > 0 && (
                  <div className={styles.ratingRow}>
                     <span className={styles.star}>⭐</span>
@@ -109,7 +119,11 @@ const FacilitiesPage = () => {
       {selectedFacility && (
         <FacilityBookingModal 
            facility={selectedFacility} 
-           onClose={() => setSelectedFacility(null)} 
+           onClose={() => {
+              setSelectedFacility(null);
+              // PROPER CLEANUP: Clear router state on close
+              navigate(location.pathname, { replace: true, state: {} });
+           }} 
         />
       )}
 

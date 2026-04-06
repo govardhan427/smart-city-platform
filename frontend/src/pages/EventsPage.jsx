@@ -1,6 +1,6 @@
 /* src/pages/EventsPage.jsx */
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom'; // <--- NEW IMPORT
+import { useLocation, useNavigate } from 'react-router-dom'; // <-- ADDED useNavigate
 import api from '../services/api';
 import EventBookingModal from '../components/events/EventBookingModal';
 import styles from './EventsPage.module.css';
@@ -11,24 +11,15 @@ const EventsPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   
-  const location = useLocation(); // <--- READ THE ROUTER STATE
+  const location = useLocation(); 
+  const navigate = useNavigate(); // <-- ADDED navigate
 
+  // 1. ONLY FETCH DATA ONCE ON MOUNT
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await api.get('/events/');
-        // Safety: Ensure we always have an array
-        const fetchedEvents = response.data || [];
-        setEvents(fetchedEvents);
-
-        // --- AUTO-OPEN MODAL LOGIC ---
-        // If we arrived here from the City Map, open that specific event!
-        if (location.state && location.state.autoOpenEventId) {
-            const targetEvent = fetchedEvents.find(e => e.id === location.state.autoOpenEventId);
-            if (targetEvent) {
-                setSelectedEvent(targetEvent);
-            }
-        }
+        setEvents(response.data || []);
       } catch (error) {
         console.error("Failed to load events", error);
       } finally {
@@ -36,9 +27,19 @@ const EventsPage = () => {
       }
     };
     fetchEvents();
-  }, [location.state]); // Re-run if the state changes
+  }, []); // <-- Empty array: only fetches once!
 
-  // Helper to keep the grid looking neat
+  // 2. LISTEN FOR ROUTER STATE TO OPEN MODAL
+  useEffect(() => {
+    // Only try to open the modal AFTER events have loaded
+    if (events.length > 0 && location.state?.autoOpenEventId) {
+        const targetEvent = events.find(e => e.id === location.state.autoOpenEventId);
+        if (targetEvent) {
+            setSelectedEvent(targetEvent);
+        }
+    }
+  }, [events, location.state]); // <-- Reacts immediately when data loads or state changes
+
   const truncateText = (text, limit = 80) => {
     if (!text) return "Join us for this exciting city event!";
     return text.length > limit ? text.substring(0, limit) + "..." : text;
@@ -56,14 +57,12 @@ const EventsPage = () => {
       {/* GRID */}
       <div className={styles.grid}>
         
-        {/* LOADING STATE */}
         {loading && (
             [...Array(6)].map((_, i) => (
                 <SkeletonCard key={i} />
             ))
         )}
 
-        {/* EMPTY STATE */}
         {!loading && events.length === 0 && (
           <div className={styles.emptyState}>
             <h3>No upcoming events found.</h3>
@@ -71,7 +70,6 @@ const EventsPage = () => {
           </div>
         )}
 
-        {/* LOADED STATE */}
         {!loading && events.map((evt) => (
           <div 
             key={evt.id} 
@@ -92,7 +90,6 @@ const EventsPage = () => {
             <div className={styles.cardContent}>
                <h3 className={styles.cardTitle}>{evt.title}</h3>
                
-               {/* RATING DISPLAY */}
                {evt.average_rating > 0 && (
                  <div className={styles.ratingRow}>
                     <span className={styles.star}>⭐</span>
@@ -102,9 +99,9 @@ const EventsPage = () => {
                )}
                
                <div className={styles.cardDate}>
-                  <span>📅</span> 
-                  {evt.date ? new Date(evt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'TBD'}
-                  {evt.time && ` • ${evt.time.slice(0, 5)}`}
+                 <span>📅</span> 
+                 {evt.date ? new Date(evt.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'TBD'}
+                 {evt.time && ` • ${evt.time.slice(0, 5)}`}
                </div>
 
                <p className={styles.cardDesc}>
@@ -125,8 +122,8 @@ const EventsPage = () => {
            event={selectedEvent} 
            onClose={() => {
               setSelectedEvent(null);
-              // Clean up the URL state so it doesn't reopen on page refresh
-              window.history.replaceState({}, document.title);
+              // PROPER REACT ROUTER CLEANUP: Clears the hidden state
+              navigate(location.pathname, { replace: true, state: {} });
            }} 
         />
       )}

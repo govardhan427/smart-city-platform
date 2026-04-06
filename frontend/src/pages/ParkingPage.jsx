@@ -1,5 +1,6 @@
 /* src/pages/ParkingPage.jsx */
 import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom'; // <-- ADDED ROUTER HOOKS
 import api from '../services/api';
 import ParkingBookingModal from '../components/transport/ParkingBookingModal';
 import styles from './ParkingPage.module.css';
@@ -10,11 +11,14 @@ const ParkingPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedLot, setSelectedLot] = useState(null);
 
+  const location = useLocation(); // <-- READ INVISIBLE STATE
+  const navigate = useNavigate(); // <-- FOR CLEARING STATE
+
+  // 1. FETCH DATA ONCE
   useEffect(() => {
     const fetchParking = async () => {
       try {
         const response = await api.get('/transport/parking/');
-        // Safety: Always fallback to an empty array
         setParkingLots(response.data || []);
       } catch (error) {
         console.error("Failed to load parking data", error);
@@ -24,6 +28,16 @@ const ParkingPage = () => {
     };
     fetchParking();
   }, []);
+
+  // 2. AUTO-OPEN MODAL IF ARRIVING FROM MAP
+  useEffect(() => {
+    if (parkingLots.length > 0 && location.state?.autoOpenParkingId) {
+        const targetLot = parkingLots.find(lot => lot.id === location.state.autoOpenParkingId);
+        if (targetLot) {
+            setSelectedLot(targetLot);
+        }
+    }
+  }, [parkingLots, location.state]);
 
   // Helper to keep the grid uniform
   const truncateText = (text, limit = 80) => {
@@ -86,12 +100,13 @@ const ParkingPage = () => {
                   <span className={styles.metaText}>{lot.location}</span>
                </div>
 
-               {/* SHOW SPOTS LEFT (High Priority Info for Parking) */}
+               {/* SHOW SPOTS LEFT */}
                <div className={styles.availability}>
-                 <span className={styles.spotCount}>{lot.capacity} Total Spots</span>
-                 <span className={styles.statusDot}></span>
-               </div>
-
+                  <span className={styles.spotCount}>
+                    {lot.available_spaces} / {lot.total_capacity} Spots Available
+                  </span>
+                  <span className={styles.statusDot}></span>
+                </div>
                <p className={styles.cardDesc}>
                  {truncateText(lot.description)}
                </p>
@@ -108,7 +123,11 @@ const ParkingPage = () => {
       {selectedLot && (
         <ParkingBookingModal 
             lot={selectedLot} 
-            onClose={() => setSelectedLot(null)} 
+            onClose={() => {
+                setSelectedLot(null);
+                // PROPER CLEANUP: Clear router state on close
+                navigate(location.pathname, { replace: true, state: {} });
+            }} 
         />
       )}
 
