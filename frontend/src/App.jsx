@@ -19,6 +19,7 @@ import EventsPage from './pages/EventsPage';
 import FacilitiesPage from './pages/FacilitiesPage';
 import ParkingPage from './pages/ParkingPage';
 import CityMapPage from './pages/CityMapPage';
+import NotFoundPage from './pages/NotFoundPage';
 // --- SECURE USER PAGES ---
 import ProfilePage from './pages/ProfilePage';
 import MyUnifiedBookingsPage from './pages/MyUnifiedBookingsPage';
@@ -119,7 +120,7 @@ function App() {
               path="/admin/scan" 
               element={<AdminRoute><AdminScanPage /></AdminRoute>} 
             />
-          
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
         
