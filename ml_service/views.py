@@ -10,7 +10,6 @@ from facilities.models import Facility, Booking
 ML_SERVER_URL = "https://smart-city-ml.onrender.com"
 
 class ParkingPredictProxy(APIView):
-    # ... (Keep this exactly the same as you have it) ...
     permission_classes = [AllowAny] 
     def post(self, request):
         try:
@@ -39,8 +38,8 @@ class EventRecommendationProxy(APIView):
         
         # --- COLD START FIX: Trending Events ---
         if not recent_regs:
-            # Find the top 3 events with the most registrations
-            trending_events = Event.objects.annotate(reg_count=Count('registration')).order_by('-reg_count')[:3]
+            # FIX: Changed 'registration' to 'registrations'
+            trending_events = Event.objects.annotate(reg_count=Count('registrations')).order_by('-reg_count')[:3]
             
             # If database is completely empty of registrations, fallback to latest
             if not trending_events:
@@ -108,8 +107,8 @@ class EventRecommendationProxy(APIView):
             
         except Exception as e:
             print(f"Event Proxy Error: {e}")
-            # Fallback to Trending if ML fails
-            fallback = Event.objects.annotate(reg_count=Count('registration')).order_by('-reg_count')[:3]
+            # FIX: Changed 'registration' to 'registrations'
+            fallback = Event.objects.annotate(reg_count=Count('registrations')).order_by('-reg_count')[:3]
             data = [{"id": e.id, "title": e.title, "description": e.description} for e in fallback]
             return Response(data)
 
@@ -127,7 +126,8 @@ class FacilityRecommendationProxy(APIView):
         
         # --- COLD START FIX ---
         if not recent_bookings:
-            trending_facs = Facility.objects.annotate(book_count=Count('booking')).order_by('-book_count')[:3]
+            # FIX: Changed 'booking' to 'bookings'
+            trending_facs = Facility.objects.annotate(book_count=Count('bookings')).order_by('-book_count')[:3]
             if not trending_facs:
                 trending_facs = Facility.objects.all()[:3]
                 
@@ -183,6 +183,7 @@ class FacilityRecommendationProxy(APIView):
             
         except Exception as e:
             print(f"Facility Proxy Error: {e}")
-            fallback = Facility.objects.annotate(book_count=Count('booking')).order_by('-book_count')[:3]
+            # FIX: Changed 'booking' to 'bookings'
+            fallback = Facility.objects.annotate(book_count=Count('bookings')).order_by('-book_count')[:3]
             data = [{"id": f.id, "name": f.name, "description": f.description} for f in fallback]
             return Response(data)
