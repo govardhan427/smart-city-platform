@@ -9,7 +9,7 @@
   
   /* --- 1. Z-INDEX DOMINANCE --- 
      Higher than Navbar (100) to ensure the blur covers everything */
-  z-index: 2147483647 !important;
+  z-index: 1000 !important;
   
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(15px);
@@ -23,7 +23,7 @@
 }
 
 .modal {
-  z-index: 2147483647 !important;
+  z-index: 1000 !important;
   width: 100%;
   max-width: 950px;
   /* --- 3. HEIGHT FIX ---

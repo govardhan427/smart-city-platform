@@ -4,19 +4,19 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import FeedbackSection from '../FeedbackSection/FeedbackSection';
+import useAuth from '../../hooks/useAuth'; // <-- 1. IMPORT AUTH HOOK
 import styles from './FacilityBookingModal.module.css';
 
 const FacilityBookingModal = ({ facility, onClose }) => {
+  const { user } = useAuth(); // <-- 2. GET CURRENT USER
   const [bookingDate, setBookingDate] = useState('');
   const [timeSlot, setTimeSlot] = useState('');
   const [buying, setBuying] = useState(false);
-  const [isBooked, setIsBooked] = useState(false); // NEW: Success state
+  const [isBooked, setIsBooked] = useState(false);
   const navigate = useNavigate();
 
-  // Prevent past dates in the input
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-  // Universal Google Maps Routing Deep Link
   const mapsDeepLink = `https://www.google.com/maps/dir/?api=1&destination=${
     facility.latitude && facility.longitude 
       ? `${facility.latitude},${facility.longitude}` 
@@ -24,6 +24,14 @@ const FacilityBookingModal = ({ facility, onClose }) => {
   }`;
 
   const handleBook = async () => {
+    // --- 3. LOGIN REDIRECT LOGIC ---
+    if (!user) {
+        toast.info("Please log in to book this facility.", { theme: "dark" });
+        onClose(); // Close the modal
+        navigate('/login'); // Send them to login
+        return;
+    }
+
     if (!bookingDate || !timeSlot) {
       toast.warning("Please select a date and time slot.");
       return;
@@ -31,7 +39,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
 
     const price = Number(facility.price);
     
-    // Paid facilities redirect to payment portal
     if (price > 0) {
       onClose(); 
       navigate('/payment', { 
@@ -49,7 +56,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
       return;
     }
 
-    // Free facilities book immediately
     setBuying(true);
     try {
       await api.post(`/facilities/${facility.id}/book/`, { 
@@ -58,7 +64,7 @@ const FacilityBookingModal = ({ facility, onClose }) => {
       });
       
       toast.success(`Successfully booked ${facility.name}!`);
-      setIsBooked(true); // Trigger the success screen instead of closing
+      setIsBooked(true); 
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Booking failed.";
       toast.error(errorMessage);
@@ -72,7 +78,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button className={styles.closeBtn} onClick={onClose}>×</button>
 
-        {/* LEFT: IMAGE */}
         <div className={styles.imageSection}>
           <img 
               src={facility.image_url || "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80"} 
@@ -82,7 +87,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
           <div className={styles.imageOverlay}></div>
         </div>
 
-        {/* --- NEW: THE SUCCESS SCREEN (Triggers after booking) --- */}
         {isBooked ? (
           <div className={styles.contentSection} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '50px 20px', textAlign: 'center' }}>
             <div style={{ fontSize: '4rem', marginBottom: '16px', animation: 'bounce 1s ease infinite' }}>🎉</div>
@@ -102,7 +106,7 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 justifyContent: 'center', 
                 alignItems: 'center', 
                 gap: '10px', 
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Emerald Green
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 fontSize: '1.1rem', 
                 padding: '16px',
                 boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)',
@@ -124,13 +128,11 @@ const FacilityBookingModal = ({ facility, onClose }) => {
             </button>
           </div>
         ) : (
-          /* RIGHT: DETAILS & FORM (ORIGINAL) */
           <div className={styles.contentSection}>
             <div className={styles.scrollableArea}>
               <div className={styles.header}>
                 <h2 className={styles.modalTitle}>{facility.name}</h2>
                 
-                {/* Rating Pill */}
                 {facility.average_rating > 0 && (
                   <div className={styles.ratingPill}>
                     <span>⭐</span> {Number(facility.average_rating).toFixed(1)} / 5.0
@@ -138,7 +140,6 @@ const FacilityBookingModal = ({ facility, onClose }) => {
                 )}
 
                 <div className={styles.metaRow}>
-                  {/* --- NEW: INLINE DIRECTIONS LINK --- */}
                   <span className={styles.metaItem} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     📍 {facility.location}
                     <a 
@@ -170,11 +171,9 @@ const FacilityBookingModal = ({ facility, onClose }) => {
 
               <div className={styles.divider}></div>
               
-              {/* Citizen Reviews */}
               <FeedbackSection reviews={facility.reviews} />
             </div>
 
-            {/* FIXED BOOKING CONTROLS */}
             <div className={styles.bookingControls}>
               <div className={styles.inputGrid}>
                   <div className={styles.inputGroup}>

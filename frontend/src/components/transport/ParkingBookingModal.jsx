@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
+import useAuth from '../../hooks/useAuth'; // <-- 1. IMPORT AUTH HOOK
 import styles from './ParkingBookingModal.module.css';
 
 // Official Indian State/UT Codes
@@ -13,6 +14,7 @@ const STATE_CODES = [
 ];
 
 const ParkingBookingModal = ({ lot, onClose }) => {
+  const { user } = useAuth(); // <-- 2. GET CURRENT USER
   // Booking State
   const [hours, setHours] = useState(2);
   const [booking, setBooking] = useState(false);
@@ -83,6 +85,14 @@ const ParkingBookingModal = ({ lot, onClose }) => {
   };
 
   const handleBook = async () => {
+    // --- 3. LOGIN REDIRECT LOGIC ---
+    if (!user) {
+        toast.info("Please log in to reserve a parking spot.", { theme: "dark" });
+        onClose(); // Close the modal
+        navigate('/login'); // Send them to login
+        return;
+    }
+
     const finalVehicleNumber = getFinalPlateNumber();
 
     // Basic Validation

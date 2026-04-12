@@ -7,7 +7,7 @@
   height: 100vh;
   
   /* Z-INDEX dominance to cover Navbar (100) */
-  z-index: 5000 !important; 
+  z-index: 1000 !important; 
   
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(15px);

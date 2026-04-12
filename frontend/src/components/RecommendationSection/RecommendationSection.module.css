@@ -17,7 +17,7 @@
 }
 
 .icon {
-  color: #c084fc; /* Vibrant purple */
+  color: #c084fc; 
   display: flex;
   align-items: center;
   justify-content: center;
@@ -40,17 +40,12 @@
   display: flex;
   gap: 20px;
   overflow-x: auto;
-  /* Extra padding so hover shadows don't get cut off */
   padding: 10px 20px 30px 20px; 
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   cursor: grab;
-  
-  /* Hide standard scrollbars */
   scrollbar-width: none;
   -ms-overflow-style: none;
-
-  /* Premium Effect: Fades out the left and right edges */
   mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
 }
@@ -61,7 +56,7 @@
 
 .scrollContainer:active {
   cursor: grabbing;
-  scroll-snap-type: none; /* Smooth drag */
+  scroll-snap-type: none; 
 }
 
 /* --- THE RECOMMENDATION CARDS --- */
@@ -76,23 +71,27 @@
   border-radius: 20px;
   padding: 24px;
   text-decoration: none;
+  
+  /* 👇 FIX FOR THE CENTERING BUG 👇 */
   display: flex;
   flex-direction: column;
+  align-items: flex-start; /* Forces content to the left */
+  text-align: left; /* Overrides any inherited centering */
+  
   scroll-snap-align: start;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
-  user-select: none; /* Stops text highlighting while dragging */
+  user-select: none; 
   box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
-/* Subtle background glow effect inside the card */
 .card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 100%;
-  background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.1), transparent 70%);
+  background: radial-gradient(circle at top left, rgba(139, 92, 246, 0.12), transparent 70%); /* Shifted glow to top left to match alignment */
   z-index: 0;
   opacity: 0.5;
   transition: opacity 0.4s;
@@ -108,10 +107,10 @@
   opacity: 1;
 }
 
-/* Content needs to sit above the background glow */
 .cardTitle, .cardMeta, .action, .matchBadge {
   position: relative;
   z-index: 1;
+  width: 100%; /* Ensures children take full width for left alignment */
 }
 
 /* --- BADGE --- */
@@ -127,17 +126,17 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 15px;
+  display: inline-block; /* Forces badge to only be as wide as text */
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
 }
 
 /* --- TEXT --- */
 .cardTitle {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.25rem; /* Made slightly larger */
+  font-weight: 800;
   color: white;
   margin: 0 0 15px 0;
-  line-height: 1.4;
-  /* Truncate to 2 lines if title is too long */
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -148,8 +147,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem; /* Made slightly larger */
+  color: rgba(255, 255, 255, 0.65);
   margin-bottom: 25px;
 }
 
@@ -189,7 +188,6 @@
   color: #c084fc;
 }
 
-/* Creates empty space at the end of the scroll container so the last card isn't cut off */
 .spacer {
   min-width: 10px;
 }
@@ -243,12 +241,11 @@
 /* --- MOBILE --- */
 @media (max-width: 768px) {
   .scrollContainer {
-    /* Slightly less intense edge masking on mobile */
     mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
     -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
   }
   .card {
-    min-width: 250px; /* Slightly smaller cards on mobile */
+    min-width: 250px; 
   }
 }
 

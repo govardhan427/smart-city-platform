@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import FeedbackSection from '../FeedbackSection/FeedbackSection';
+import useAuth from '../../hooks/useAuth'; // <-- 1. IMPORT AUTH HOOK
 import styles from './EventBookingModal.module.css';
 
-// Move helper outside to avoid re-creation on render
 const formatDate = (dateString, timeString) => {
   if (!dateString) return "TBD";
   const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -16,19 +16,18 @@ const formatDate = (dateString, timeString) => {
 };
 
 const EventBookingModal = ({ event, onClose }) => {
+  const { user } = useAuth(); // <-- 2. GET CURRENT USER
   const [tickets, setTickets] = useState(1);
   const [buying, setBuying] = useState(false);
-  const [isBooked, setIsBooked] = useState(false); // NEW: Success state
+  const [isBooked, setIsBooked] = useState(false);
   const navigate = useNavigate();
 
-  // The official universal Google Maps Routing Deep Link
   const mapsDeepLink = `https://www.google.com/maps/dir/?api=1&destination=${
     event.latitude && event.longitude 
       ? `${event.latitude},${event.longitude}` 
       : encodeURIComponent(event.location)
   }`;
 
-  // Close modal on Escape key press
   useEffect(() => {
     const handleEsc = (e) => {
       if (e.key === 'Escape') onClose();
@@ -40,9 +39,16 @@ const EventBookingModal = ({ event, onClose }) => {
   const totalPrice = event.price ? (event.price * tickets) : 0;
 
   const handleBuy = async () => {
+    // --- 3. LOGIN REDIRECT LOGIC ---
+    if (!user) {
+        toast.info("Please log in to secure your tickets.", { theme: "dark" });
+        onClose(); // Close the modal
+        navigate('/login'); // Send them to login
+        return;
+    }
+
     if (tickets < 1) return;
 
-    // Paid events redirect to payment portal
     if (totalPrice > 0) {
         onClose(); 
         navigate('/payment', { 
@@ -57,12 +63,11 @@ const EventBookingModal = ({ event, onClose }) => {
         return; 
     }
 
-    // Free events book immediately
     setBuying(true);
     try {
       await api.post(`/events/${event.id}/register/`, { tickets });
       toast.success(`Successfully booked ${tickets} ticket(s)!`);
-      setIsBooked(true); // Trigger the success screen instead of closing
+      setIsBooked(true); 
     } catch (err) {
       const errorMessage = err.response?.data?.error || "Booking failed.";
       toast.error(errorMessage);
@@ -85,7 +90,6 @@ const EventBookingModal = ({ event, onClose }) => {
           <div className={styles.imageOverlay}></div>
         </div>
 
-        {/* --- NEW: THE SUCCESS SCREEN (Triggers after booking) --- */}
         {isBooked ? (
           <div className={styles.contentSection} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '50px 20px', textAlign: 'center' }}>
             <div style={{ fontSize: '4rem', marginBottom: '16px', animation: 'bounce 1s ease infinite' }}>🎉</div>
@@ -105,7 +109,7 @@ const EventBookingModal = ({ event, onClose }) => {
                 justifyContent: 'center', 
                 alignItems: 'center', 
                 gap: '10px', 
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Emerald Green
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                 fontSize: '1.1rem', 
                 padding: '16px',
                 boxShadow: '0 10px 20px rgba(16, 185, 129, 0.3)'
@@ -126,7 +130,6 @@ const EventBookingModal = ({ event, onClose }) => {
             </button>
           </div>
         ) : (
-          /* --- ORIGINAL CONTENT SCREEN --- */
           <div className={styles.contentSection}>
             <div className={styles.scrollableArea}>
               <div className={styles.header}>
@@ -144,7 +147,6 @@ const EventBookingModal = ({ event, onClose }) => {
                 <div className={styles.metaRow}>
                   <span className={styles.metaItem}>📅 {formatDate(event.date, event.time)}</span>
                   
-                  {/* --- NEW: INLINE DIRECTIONS LINK --- */}
                   <span className={styles.metaItem} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                     📍 {event.location}
                     <a 
@@ -177,7 +179,6 @@ const EventBookingModal = ({ event, onClose }) => {
               <FeedbackSection reviews={event.reviews} />
             </div>
 
-            {/* Fixed Booking Controls at the bottom */}
             <div className={styles.bookingControls}>
               <div className={styles.controlRow}>
                 <div>

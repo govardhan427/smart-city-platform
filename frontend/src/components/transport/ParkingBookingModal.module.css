@@ -7,7 +7,7 @@
   height: 100vh;
   
   /* --- 1. Z-INDEX DOMINANCE --- */
-  z-index: 2147483647 !important; 
+  z-index: 1000 !important; 
   
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(15px);

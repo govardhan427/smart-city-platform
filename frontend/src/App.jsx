@@ -139,7 +139,7 @@ function App() {
           pauseOnHover
           theme="dark"
           toastClassName="Toastify__toast--dark"
-          style={{ marginTop: "80px" }} // Pushes toasts below Navbar
+          style={{ marginTop: "80px", zIndex: 9999 }} 
         />
         
         {/* Floating AI Assistant */}

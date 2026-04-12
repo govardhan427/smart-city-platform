@@ -21,22 +21,26 @@ const ArrowRightIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
 );
 
+// Helper to make dates look pretty
+const formatCardDate = (dateString) => {
+  if (!dateString) return 'Upcoming';
+  const options = { month: 'short', day: 'numeric', year: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
+};
+
 const RecommendationSection = () => {
   const [events, setEvents] = useState([]);
   const [facilities, setFacilities] = useState([]);
   
-  // --- NEW: Cold Start States ---
   const [loading, setLoading] = useState(true);
   const [isColdStart, setIsColdStart] = useState(false);
   const [countdown, setCountdown] = useState(0);
 
-  // --- DRAG SCROLL STATE ---
   const scrollRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
-  // Memoized fetch function so we can call it on mount and after countdown
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -46,27 +50,23 @@ const RecommendationSection = () => {
       ]);
       setEvents(eventsRes.data);
       setFacilities(facilitiesRes.data);
-      setIsColdStart(false); // Reset if successful
-      setLoading(false);     // Only turn off loading if we succeed!
+      setIsColdStart(false); 
+      setLoading(false);     
     } catch (err) {
-      // 503 indicates the ML server is waking up
       if (err.response && err.response.status === 503) {
         setIsColdStart(true);
-        setCountdown(30); // Start 30-second timer
-        // Note: We leave `loading` as true so the UI stays on the loading screen
+        setCountdown(30); 
       } else {
         console.error("AI Service Error:", err);
-        setLoading(false); // Turn off loading if it's a permanent error
+        setLoading(false); 
       }
     }
   }, []);
 
-  // 1. Initial Fetch
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // 2. Countdown Timer Logic
   useEffect(() => {
     let timer;
     if (isColdStart && countdown > 0) {
@@ -74,14 +74,12 @@ const RecommendationSection = () => {
         setCountdown((prev) => prev - 1);
       }, 1000);
     } else if (isColdStart && countdown === 0) {
-      // Time is up! Retry the fetch automatically
       setIsColdStart(false);
       fetchData();
     }
     return () => clearInterval(timer);
   }, [isColdStart, countdown, fetchData]);
 
-  // --- DRAG EVENT HANDLERS ---
   const handleMouseDown = (e) => {
     setIsDragging(true);
     setStartX(e.pageX - scrollRef.current.offsetLeft);
@@ -97,7 +95,6 @@ const RecommendationSection = () => {
     scrollRef.current.scrollLeft = scrollLeft - walk;
   };
 
-  // 1. Loading & Cold Start State
   if (loading || isColdStart) {
     return (
       <div className={styles.container}>
@@ -109,7 +106,6 @@ const RecommendationSection = () => {
                 ? `Booting AI Engine... [${countdown}s]` 
                 : 'Analyzing Taste Profile...'}
             </div>
-            
             {isColdStart && (
               <p className={styles.coldStartSubtext}>
                 System is waking up from standby mode. Establishing secure connection...
@@ -121,7 +117,6 @@ const RecommendationSection = () => {
     );
   }
 
-  // 2. Empty State
   if (events.length === 0 && facilities.length === 0) return null;
 
   return (
@@ -139,7 +134,6 @@ const RecommendationSection = () => {
         onMouseUp={handleMouseUp}
         onMouseMove={handleMouseMove}
       >
-        {/* Render Events */}
         {events.map((event) => (
           <Link 
             to="/events" 
@@ -150,26 +144,24 @@ const RecommendationSection = () => {
             <span className={styles.matchBadge}>Event Match</span>
             <h4 className={styles.cardTitle}>{event.title}</h4>
             <div className={styles.cardMeta}>
-              <span className={styles.metaItem}><CalendarIcon /> {event.date ? new Date(event.date).toLocaleDateString() : 'TBD'}</span>
-              <span className={styles.metaItem}><MapPinIcon /> {event.location ? event.location.split(',')[0] : 'Various'}</span>
+              <span className={styles.metaItem}><CalendarIcon /> {formatCardDate(event.date)}</span>
+              <span className={styles.metaItem}><MapPinIcon /> {event.location ? event.location.split(',')[0] : 'Location TBA'}</span>
             </div>
             <div className={styles.action}>View Details <ArrowRightIcon /></div>
           </Link>
         ))}
 
-        {/* Render Facilities */}
         {facilities.map((fac) => (
           <Link to={`/facilities/${fac.id}/book`} key={`fac-${fac.id}`} className={styles.card}>
             <span className={styles.matchBadge}>Spot Match</span>
             <h4 className={styles.cardTitle}>{fac.name}</h4>
             <div className={styles.cardMeta}>
               <span className={styles.metaItem}><UsersIcon /> Cap: {fac.capacity}</span>
-              <span className={styles.metaItem}><MapPinIcon /> {fac.location ? fac.location.split(',')[0] : 'Various'}</span>
+              <span className={styles.metaItem}><MapPinIcon /> {fac.location ? fac.location.split(',')[0] : 'Location TBA'}</span>
             </div>
             <div className={styles.action}>Book Now <ArrowRightIcon /></div>
           </Link>
         ))}
-
         <div className={styles.spacer}></div>
       </div>
     </div>
